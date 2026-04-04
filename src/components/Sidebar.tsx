@@ -5,7 +5,6 @@ import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard,
   Receipt,
-  PlusCircle,
   Tags,
   BarChart3,
   Bot,
