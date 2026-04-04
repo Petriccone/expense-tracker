@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
-import LayoutShell from '@/components/LayoutShell';
+import ClientOnly from '@/components/ClientOnly';
 
 export const metadata: Metadata = {
   title: 'ExpenseTracker AI',
@@ -23,7 +23,7 @@ export default function RootLayout({
         />
       </head>
       <body className="bg-slate-50" suppressHydrationWarning>
-        <LayoutShell>{children}</LayoutShell>
+        <ClientOnly>{children}</ClientOnly>
       </body>
     </html>
   );
