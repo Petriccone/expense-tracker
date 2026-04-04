@@ -9,13 +9,14 @@ import {
   Upload,
   BarChart3,
   Bot,
+  Target,
 } from 'lucide-react';
 
 const navItems = [
   { href: '/', icon: LayoutDashboard, label: 'Home' },
   { href: '/transactions', icon: Receipt, label: 'Tx' },
   { href: '/add', icon: PlusCircle, label: 'Add' },
-  { href: '/import', icon: Upload, label: 'Import' },
+  { href: '/budget', icon: Target, label: 'Budget' },
   { href: '/ai', icon: Bot, label: 'AI' },
 ];
 

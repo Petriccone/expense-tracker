@@ -15,7 +15,7 @@ import { useTransactions, useCategories, useSettings } from '@/context/AppContex
 import { Transaction } from '@/types';
 
 export default function TransactionsPage() {
-  const { transactions, deleteTransaction } = useTransactions();
+  const { transactions, updateTransaction, deleteTransaction } = useTransactions();
   const { categories } = useCategories();
   const { settings } = useSettings();
 
@@ -266,7 +266,7 @@ export default function TransactionsPage() {
                   onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
                   className="select-field"
                 >
-                  {categories.map((cat) => (
+                  {categories.filter((cat) => cat.type === editForm.type).map((cat) => (
                     <option key={cat.id} value={cat.name}>{cat.icon} {cat.name}</option>
                   ))}
                 </select>
@@ -289,8 +289,12 @@ export default function TransactionsPage() {
                 </button>
                 <button
                   onClick={() => {
-                    const { updateTransaction } = useTransactions();
-                    // This would update - for demo we just close
+                    if (editForm.description && editForm.amount && editForm.category && editForm.date && editForm.type) {
+                      updateTransaction({
+                        ...editForm,
+                        id: editingId,
+                      } as Transaction);
+                    }
                     setEditingId(null);
                   }}
                   className="btn-primary flex-1"

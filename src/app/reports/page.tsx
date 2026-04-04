@@ -115,7 +115,13 @@ export default function ReportsPage() {
       t.amount.toString(),
     ]);
 
-    const csv = [headers, ...rows].map((row) => row.join(',')).join('\n');
+    const escapeCsvField = (field: string) => {
+      if (field.includes(',') || field.includes('"') || field.includes('\n')) {
+        return `"${field.replace(/"/g, '""')}"`;
+      }
+      return field;
+    };
+    const csv = [headers, ...rows].map((row) => row.map(escapeCsvField).join(',')).join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
