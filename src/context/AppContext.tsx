@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, useState, ReactNode } from 'react';
 import { Transaction, Category, Settings, AIInsight } from '@/types';
 
 interface AppState {
@@ -109,6 +109,7 @@ const STORAGE_KEY = 'expense-tracker-data';
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(appReducer, initialState);
+  const [loaded, setLoaded] = useState(false);
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -129,10 +130,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
         console.error('Failed to load from localStorage', e);
       }
     }
+    setLoaded(true);
   }, []);
 
-  // Save to localStorage on state change
+  // Save to localStorage on state change (only after initial load)
   useEffect(() => {
+    if (!loaded) return;
     localStorage.setItem(
       STORAGE_KEY,
       JSON.stringify({
@@ -141,7 +144,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         settings: state.settings,
       })
     );
-  }, [state.transactions, state.categories, state.settings]);
+  }, [state.transactions, state.categories, state.settings, loaded]);
 
   return (
     <AppContext.Provider value={{ state, dispatch }}>
