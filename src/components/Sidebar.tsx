@@ -37,7 +37,7 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="hidden md:flex flex-col w-60 bg-white border-r border-slate-200 fixed left-0 top-0 h-screen z-50">
+    <aside className="hidden md:fixed md:flex flex-col w-60 bg-white border-r border-slate-200 md:left-0 md:top-0 md:h-screen md:z-50">
       {/* Logo */}
       <div className="p-6 border-b border-slate-100">
         <Link href="/" className="flex items-center gap-3">
