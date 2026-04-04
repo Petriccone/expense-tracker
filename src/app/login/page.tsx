@@ -20,33 +20,47 @@ export default function LoginPage() {
     setLoading(true);
     setError('');
 
+    // Simulate a small delay
+    await new Promise((resolve) => setTimeout(resolve, 300));
+
     try {
-      const res = await fetch('/api/auth', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: isLogin ? 'login' : 'register',
+      if (isLogin) {
+        // Client-side login: check stored users
+        const storedUsers = JSON.parse(localStorage.getItem('expense-tracker-users') || '[]');
+        const user = storedUsers.find((u: { email: string }) => u.email === form.email);
+
+        if (!user || user.password !== form.password) {
+          setError('Invalid email or password');
+          return;
+        }
+
+        localStorage.setItem('auth_token', 'local_' + Date.now());
+        localStorage.setItem('user', JSON.stringify({ id: user.id, email: user.email, name: user.name }));
+      } else {
+        // Client-side register: store in localStorage
+        const storedUsers = JSON.parse(localStorage.getItem('expense-tracker-users') || '[]');
+
+        if (storedUsers.find((u: { email: string }) => u.email === form.email)) {
+          setError('Email already registered');
+          return;
+        }
+
+        const newUser = {
+          id: Date.now().toString(),
           email: form.email,
           password: form.password,
-          name: form.name,
-        }),
-      });
+          name: form.name || form.email.split('@')[0],
+        };
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.error || 'Something went wrong');
-        return;
+        storedUsers.push(newUser);
+        localStorage.setItem('expense-tracker-users', JSON.stringify(storedUsers));
+        localStorage.setItem('auth_token', 'local_' + Date.now());
+        localStorage.setItem('user', JSON.stringify({ id: newUser.id, email: newUser.email, name: newUser.name }));
       }
 
-      // Save token and user to localStorage
-      localStorage.setItem('auth_token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
-
-      // Redirect to dashboard
       router.push('/');
     } catch (err) {
-      setError('Failed to connect to server');
+      setError('Something went wrong');
     } finally {
       setLoading(false);
     }
@@ -150,7 +164,6 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Demo hint */}
         <p className="text-center text-purple-200 text-sm mt-6">
           Demo: Register a new account to get started
         </p>

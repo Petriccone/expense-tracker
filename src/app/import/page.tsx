@@ -6,6 +6,99 @@ import Link from 'next/link';
 import { useTransactions, useSettings } from '@/context/AppContext';
 import { Transaction } from '@/types';
 
+function parseCSVLine(line: string): string[] {
+  const result: string[] = [];
+  let current = '';
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (inQuotes) {
+      if (ch === '"' && line[i + 1] === '"') {
+        current += '"';
+        i++;
+      } else if (ch === '"') {
+        inQuotes = false;
+      } else {
+        current += ch;
+      }
+    } else if (ch === '"') {
+      inQuotes = true;
+    } else if (ch === ',' || ch === ';') {
+      result.push(current.trim());
+      current = '';
+    } else {
+      current += ch;
+    }
+  }
+  result.push(current.trim());
+  return result;
+}
+
+function guessCategory(description: string): string {
+  const desc = description.toLowerCase();
+  if (/food|restaurant|lunch|dinner|breakfast|coffee|pizza|burger|supermarket/.test(desc)) return 'Food & Dining';
+  if (/uber|taxi|bus|metro|train|fuel|gas|parking/.test(desc)) return 'Transport';
+  if (/rent|mortgage|electricity|water|internet|phone/.test(desc)) return 'Housing';
+  if (/movie|netflix|spotify|game|concert/.test(desc)) return 'Entertainment';
+  if (/shop|amazon|clothes|shoes/.test(desc)) return 'Shopping';
+  if (/doctor|hospital|pharmacy|medicine|gym/.test(desc)) return 'Health';
+  if (/book|course|school|university/.test(desc)) return 'Education';
+  if (/bill|subscription|insurance/.test(desc)) return 'Bills & Utilities';
+  if (/salary|payroll/.test(desc)) return 'Salary';
+  if (/freelance|client/.test(desc)) return 'Freelance';
+  return 'Other';
+}
+
+function parseAmount(val: string): number {
+  const cleaned = val.replace(/[^\d.,-]/g, '').replace(',', '.');
+  return Math.abs(parseFloat(cleaned) || 0);
+}
+
+function parseTransactionsFromCSV(text: string): Transaction[] {
+  const lines = text.split(/\r?\n/).filter((l) => l.trim());
+  if (lines.length < 2) return [];
+
+  const headers = parseCSVLine(lines[0]).map((h) => h.toLowerCase());
+
+  const dateIdx = headers.findIndex((h) => /^(date|data|dia)$/.test(h));
+  const descIdx = headers.findIndex((h) => /^(description|descri|nome|what)/.test(h));
+  const amountIdx = headers.findIndex((h) => /^(amount|valor|value|montante)$/.test(h));
+  const categoryIdx = headers.findIndex((h) => /^(category|categoria)$/.test(h));
+  const typeIdx = headers.findIndex((h) => /^(type|tipo)$/.test(h));
+
+  if (descIdx === -1 && amountIdx === -1) return [];
+
+  const transactions: Transaction[] = [];
+  for (let i = 1; i < lines.length; i++) {
+    const cols = parseCSVLine(lines[i]);
+    if (cols.length < 2) continue;
+
+    const description = descIdx >= 0 ? cols[descIdx] : cols[0];
+    const amountStr = amountIdx >= 0 ? cols[amountIdx] : cols[1];
+    const amount = parseAmount(amountStr || '0');
+    if (!description || amount === 0) continue;
+
+    const rawType = typeIdx >= 0 ? cols[typeIdx]?.toLowerCase() : '';
+    const type: 'income' | 'expense' = rawType.includes('income') || rawType.includes('receita')
+      ? 'income'
+      : amountStr?.startsWith('-') ? 'expense' : 'expense';
+
+    const category = categoryIdx >= 0 && cols[categoryIdx] ? cols[categoryIdx] : guessCategory(description);
+    const date = dateIdx >= 0 && cols[dateIdx] ? cols[dateIdx] : new Date().toISOString().split('T')[0];
+
+    transactions.push({
+      id: `import_${Date.now()}_${i}`,
+      type,
+      amount,
+      description,
+      category,
+      date,
+      createdAt: new Date().toISOString(),
+    });
+  }
+  return transactions;
+}
+
 export default function ImportPage() {
   const { addTransaction } = useTransactions();
   const { settings } = useSettings();
@@ -15,54 +108,29 @@ export default function ImportPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [preview, setPreview] = useState<Transaction[]>([]);
-  const [token, setToken] = useState('');
-  const [mounted, setMounted] = useState(false);
-
-  // Check for token on mount (client-side only)
-  useEffect(() => {
-    setMounted(true);
-    const storedToken = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : '';
-    if (storedToken) setToken(storedToken);
-  }, []);
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
-    const storedToken = localStorage.getItem('auth_token');
-    if (!storedToken) {
-      setError('You need to be logged in to import data');
-      return;
-    }
 
     setLoading(true);
     setError('');
     setSuccess(false);
     setPreview([]);
 
-    const formData = new FormData();
-    formData.append('file', file);
-
     try {
-      const res = await fetch('/api/import', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${storedToken}`,
-        },
-        body: formData,
-      });
+      const text = await file.text();
+      const transactions = parseTransactionsFromCSV(text);
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.error || 'Failed to import');
+      if (transactions.length === 0) {
+        setError('No transactions found in file. Check the format.');
         return;
       }
 
-      setPreview(data.transactions);
+      setPreview(transactions);
       setSuccess(true);
     } catch (err) {
-      setError('Failed to upload file');
+      setError('Failed to parse file');
     } finally {
       setLoading(false);
     }
@@ -76,29 +144,6 @@ export default function ImportPage() {
   };
 
   const currencySymbol = settings.currency === 'EUR' ? '€' : settings.currency === 'USD' ? '$' : 'R$';
-
-  if (!mounted) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
-      </div>
-    );
-  }
-
-  if (!token) {
-    return (
-      <div className="max-w-2xl mx-auto animate-fadeIn">
-        <div className="bg-white rounded-2xl p-8 shadow-sm text-center">
-          <AlertCircle className="w-12 h-12 text-amber-500 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold mb-2">Login Required</h2>
-          <p className="text-slate-500 mb-4">You need to be logged in to import data.</p>
-          <Link href="/login" className="btn-primary">
-            Go to Login
-          </Link>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="max-w-2xl mx-auto space-y-6 animate-fadeIn">
@@ -122,7 +167,7 @@ export default function ImportPage() {
           <input
             ref={fileInputRef}
             type="file"
-            accept=".xlsx,.xls,.csv"
+            accept=".csv"
             onChange={handleFileSelect}
             className="hidden"
           />
@@ -135,12 +180,8 @@ export default function ImportPage() {
           ) : (
             <>
               <FileSpreadsheet className="w-12 h-12 text-purple-600 mx-auto mb-4" />
-              <p className="text-lg font-medium text-slate-700">
-                Click to upload your spreadsheet
-              </p>
-              <p className="text-sm text-slate-500 mt-2">
-                Supports .xlsx, .xls, and .csv files
-              </p>
+              <p className="text-lg font-medium text-slate-700">Click to upload your spreadsheet</p>
+              <p className="text-sm text-slate-500 mt-2">Supports .csv files</p>
             </>
           )}
         </div>
@@ -175,7 +216,7 @@ export default function ImportPage() {
               <div key={i} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
                 <div>
                   <p className="font-medium text-slate-800">{t.description}</p>
-                  <p className="text-sm text-slate-500">{t.date} • {t.category}</p>
+                  <p className="text-sm text-slate-500">{t.date} - {t.category}</p>
                 </div>
                 <span className={t.type === 'income' ? 'text-green-600 font-medium' : 'text-red-600 font-medium'}>
                   {t.type === 'income' ? '+' : '-'}{currencySymbol}{t.amount.toFixed(2)}
@@ -193,10 +234,8 @@ export default function ImportPage() {
 
       {/* Instructions */}
       <div className="bg-white rounded-2xl p-6 shadow-sm">
-        <h2 className="text-lg font-semibold mb-4">Spreadsheet Format</h2>
-        <p className="text-slate-600 text-sm mb-4">
-          Your spreadsheet should have columns like:
-        </p>
+        <h2 className="text-lg font-semibold mb-4">CSV Format</h2>
+        <p className="text-slate-600 text-sm mb-4">Your CSV should have columns like:</p>
         <div className="bg-slate-50 rounded-xl p-4 text-sm font-mono">
           <div className="grid grid-cols-4 gap-2 text-slate-600 mb-2 font-semibold">
             <span>Date</span>
@@ -210,16 +249,7 @@ export default function ImportPage() {
             <span>45.50</span>
             <span>Food</span>
           </div>
-          <div className="grid grid-cols-4 gap-2 text-slate-500">
-            <span>2026-04-02</span>
-            <span>Uber</span>
-            <span>15.00</span>
-            <span>Transport</span>
-          </div>
         </div>
-        <p className="text-slate-500 text-xs mt-4">
-          The system will try to auto-detect your column names. Common variations like "Valor", "Montante", "Descrição" are supported.
-        </p>
       </div>
     </div>
   );
