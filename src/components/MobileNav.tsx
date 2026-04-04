@@ -5,9 +5,7 @@ import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard,
   Receipt,
-  PlusCircle,
   Upload,
-  BarChart3,
   Bot,
   Target,
 } from 'lucide-react';
