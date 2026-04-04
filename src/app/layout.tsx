@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
-import ClientOnly from '@/components/ClientOnly';
+import LayoutShell from '@/components/LayoutShell';
 
 export const metadata: Metadata = {
   title: 'ExpenseTracker AI',
@@ -13,7 +13,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -22,8 +22,8 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="bg-slate-50" suppressHydrationWarning>
-        <ClientOnly>{children}</ClientOnly>
+      <body>
+        <LayoutShell>{children}</LayoutShell>
       </body>
     </html>
   );

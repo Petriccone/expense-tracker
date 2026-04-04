@@ -2,18 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import {
-  LayoutDashboard,
-  Receipt,
-  Tags,
-  BarChart3,
-  Bot,
-  Settings,
-  Wallet,
-  Upload,
-  LogOut,
-  Target,
-} from 'lucide-react';
+import { LayoutDashboard, Receipt, Tags, BarChart3, Bot, Settings, Wallet, Upload, LogOut, Target } from 'lucide-react';
 
 const navItems = [
   { href: '/', icon: LayoutDashboard, label: 'Dashboard' },
@@ -30,35 +19,40 @@ export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
 
-  const handleLogout = () => {
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('user');
-    router.push('/login');
-  };
-
   return (
-    <aside
-      style={{
-        display: 'none',
-        position: 'fixed',
-        left: 0,
-        top: 0,
-        width: 240,
-        height: '100vh',
-        zIndex: 50,
-        flexDirection: 'column',
-        background: '#fff',
-        borderRight: '1px solid #e2e8f0',
-      }}
-      className="sidebar-desktop"
-    >
-      <style>{`@media(min-width:768px){.sidebar-desktop{display:flex!important}}`}</style>
+    <aside className="app-sidebar">
+      <style>{`
+        .app-sidebar {
+          display: none;
+        }
+        @media (min-width: 768px) {
+          .app-sidebar {
+            display: flex !important;
+            flex-direction: column;
+            position: fixed;
+            left: 0; top: 0;
+            width: 240px;
+            height: 100vh;
+            background: #fff;
+            border-right: 1px solid #e2e8f0;
+            z-index: 50;
+          }
+        }
+        .sidebar-link {
+          display: flex; align-items: center; gap: 12px;
+          padding: 10px 16px; border-radius: 12px;
+          text-decoration: none; font-size: 14px;
+          transition: background 0.15s;
+        }
+        .sidebar-link:hover { background: #f1f5f9; }
+        .sidebar-link.active { background: #f3f0ff; color: #6d28d9; font-weight: 600; }
+        .sidebar-link:not(.active) { color: #475569; }
+      `}</style>
 
-      {/* Logo */}
-      <div style={{ padding: '1.5rem', borderBottom: '1px solid #f1f5f9' }}>
-        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', textDecoration: 'none' }}>
-          <div style={{ width: 40, height: 40, background: 'linear-gradient(135deg, #7C3AED, #A78BFA)', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Wallet style={{ width: 20, height: 20, color: '#fff' }} />
+      <div style={{ padding: 24, borderBottom: '1px solid #f1f5f9' }}>
+        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none' }}>
+          <div style={{ width: 40, height: 40, background: 'linear-gradient(135deg,#7C3AED,#A78BFA)', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Wallet size={20} color="#fff" />
           </div>
           <div>
             <div style={{ fontWeight: 700, color: '#0f172a' }}>ExpenseAI</div>
@@ -67,53 +61,22 @@ export default function Sidebar() {
         </Link>
       </div>
 
-      {/* Nav */}
-      <nav style={{ flex: 1, padding: '1rem', display: 'flex', flexDirection: 'column', gap: 4 }}>
-        {navItems.map((item) => {
-          const isActive = pathname === item.href;
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 12,
-                padding: '0.75rem 1rem',
-                borderRadius: 12,
-                textDecoration: 'none',
-                transition: 'all 0.2s',
-                background: isActive ? '#f3f0ff' : 'transparent',
-                color: isActive ? '#6d28d9' : '#475569',
-                fontWeight: isActive ? 600 : 400,
-              }}
-            >
-              <item.icon style={{ width: 20, height: 20, color: isActive ? '#7c3aed' : undefined }} />
-              <span>{item.label}</span>
-            </Link>
-          );
-        })}
+      <nav style={{ flex: 1, padding: 16, display: 'flex', flexDirection: 'column', gap: 2 }}>
+        {navItems.map(({ href, icon: Icon, label }) => (
+          <Link key={href} href={href} className={`sidebar-link ${pathname === href ? 'active' : ''}`}>
+            <Icon size={20} />
+            <span>{label}</span>
+          </Link>
+        ))}
       </nav>
 
-      {/* Logout */}
-      <div style={{ padding: '1rem', borderTop: '1px solid #f1f5f9' }}>
+      <div style={{ padding: 16, borderTop: '1px solid #f1f5f9' }}>
         <button
-          onClick={handleLogout}
-          style={{
-            width: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 12,
-            padding: '0.75rem 1rem',
-            borderRadius: 12,
-            border: 'none',
-            background: 'transparent',
-            color: '#475569',
-            cursor: 'pointer',
-            fontSize: 14,
-          }}
+          onClick={() => { localStorage.removeItem('auth_token'); localStorage.removeItem('user'); router.push('/login'); }}
+          className="sidebar-link"
+          style={{ width: '100%', border: 'none', background: 'none', cursor: 'pointer', fontSize: 14 }}
         >
-          <LogOut style={{ width: 20, height: 20 }} />
+          <LogOut size={20} />
           <span>Logout</span>
         </button>
       </div>
