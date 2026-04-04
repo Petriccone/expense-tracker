@@ -19,11 +19,10 @@ import {
 const navItems = [
   { href: '/', icon: LayoutDashboard, label: 'Dashboard' },
   { href: '/transactions', icon: Receipt, label: 'Transactions' },
-  { href: '/add', icon: PlusCircle, label: 'Add' },
-  { href: '/import', icon: Upload, label: 'Import' },
   { href: '/categories', icon: Tags, label: 'Categories' },
-  { href: '/reports', icon: BarChart3, label: 'Reports' },
   { href: '/budget', icon: Target, label: 'Budget' },
+  { href: '/reports', icon: BarChart3, label: 'Reports' },
+  { href: '/import', icon: Upload, label: 'Import' },
   { href: '/ai', icon: Bot, label: 'AI Assistant' },
   { href: '/settings', icon: Settings, label: 'Settings' },
 ];
