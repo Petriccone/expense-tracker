@@ -13,6 +13,7 @@ import {
   Wallet,
   Upload,
   LogOut,
+  Target,
 } from 'lucide-react';
 
 const navItems = [
@@ -22,6 +23,7 @@ const navItems = [
   { href: '/import', icon: Upload, label: 'Import' },
   { href: '/categories', icon: Tags, label: 'Categories' },
   { href: '/reports', icon: BarChart3, label: 'Reports' },
+  { href: '/budget', icon: Target, label: 'Budget' },
   { href: '/ai', icon: Bot, label: 'AI Assistant' },
   { href: '/settings', icon: Settings, label: 'Settings' },
 ];

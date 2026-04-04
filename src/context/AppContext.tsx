@@ -1,13 +1,14 @@
 'use client';
 
 import React, { createContext, useContext, useReducer, useEffect, useState, ReactNode } from 'react';
-import { Transaction, Category, Settings, AIInsight } from '@/types';
+import { Transaction, Category, Settings, AIInsight, CategoryBudget } from '@/types';
 
 interface AppState {
   transactions: Transaction[];
   categories: Category[];
   settings: Settings;
   insights: AIInsight[];
+  categoryBudgets: CategoryBudget[];
 }
 
 type Action =
@@ -21,6 +22,8 @@ type Action =
   | { type: 'DELETE_CATEGORY'; payload: string }
   | { type: 'SET_SETTINGS'; payload: Settings }
   | { type: 'SET_INSIGHTS'; payload: AIInsight[] }
+  | { type: 'SET_CATEGORY_BUDGETS'; payload: CategoryBudget[] }
+  | { type: 'UPDATE_CATEGORY_BUDGET'; payload: CategoryBudget }
   | { type: 'LOAD_STATE'; payload: AppState };
 
 const defaultCategories: Category[] = [
@@ -51,6 +54,7 @@ const initialState: AppState = {
   categories: defaultCategories,
   settings: defaultSettings,
   insights: [],
+  categoryBudgets: [],
 };
 
 function appReducer(state: AppState, action: Action): AppState {
@@ -91,6 +95,20 @@ function appReducer(state: AppState, action: Action): AppState {
       return { ...state, settings: action.payload };
     case 'SET_INSIGHTS':
       return { ...state, insights: action.payload };
+    case 'SET_CATEGORY_BUDGETS':
+      return { ...state, categoryBudgets: action.payload };
+    case 'UPDATE_CATEGORY_BUDGET': {
+      const exists = state.categoryBudgets.find((b) => b.categoryId === action.payload.categoryId);
+      if (exists) {
+        return {
+          ...state,
+          categoryBudgets: state.categoryBudgets.map((b) =>
+            b.categoryId === action.payload.categoryId ? action.payload : b
+          ),
+        };
+      }
+      return { ...state, categoryBudgets: [...state.categoryBudgets, action.payload] };
+    }
     case 'LOAD_STATE':
       return action.payload;
     default:
@@ -124,6 +142,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
             ...parsed,
             categories: parsed.categories || defaultCategories,
             settings: { ...defaultSettings, ...parsed.settings },
+            categoryBudgets: parsed.categoryBudgets || [],
           },
         });
       } catch (e) {
@@ -142,9 +161,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
         transactions: state.transactions,
         categories: state.categories,
         settings: state.settings,
+        categoryBudgets: state.categoryBudgets,
       })
     );
-  }, [state.transactions, state.categories, state.settings, loaded]);
+  }, [state.transactions, state.categories, state.settings, state.categoryBudgets, loaded]);
 
   return (
     <AppContext.Provider value={{ state, dispatch }}>
@@ -194,5 +214,14 @@ export function useInsights() {
   return {
     insights: state.insights,
     setInsights: (i: AIInsight[]) => dispatch({ type: 'SET_INSIGHTS', payload: i }),
+  };
+}
+
+export function useCategoryBudgets() {
+  const { state, dispatch } = useApp();
+  return {
+    categoryBudgets: state.categoryBudgets,
+    setCategoryBudgets: (b: CategoryBudget[]) => dispatch({ type: 'SET_CATEGORY_BUDGETS', payload: b }),
+    updateCategoryBudget: (b: CategoryBudget) => dispatch({ type: 'UPDATE_CATEGORY_BUDGET', payload: b }),
   };
 }

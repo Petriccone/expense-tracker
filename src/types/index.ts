@@ -31,6 +31,11 @@ export interface AIInsight {
   createdAt: string;
 }
 
+export interface CategoryBudget {
+  categoryId: string;
+  limit: number;
+}
+
 export interface ChatMessage {
   id: string;
   role: 'user' | 'assistant';
