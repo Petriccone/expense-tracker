@@ -388,7 +388,7 @@ export default function BudgetPage() {
                 <XAxis dataKey="name" stroke="#64748B" fontSize={11} angle={-20} textAnchor="end" height={60} />
                 <YAxis stroke="#64748B" fontSize={12} />
                 <Tooltip
-                  formatter={(value: number, name: string) => [formatAmount(value), name === 'budget' ? 'Budget' : 'Spent']}
+                  formatter={(value) => formatAmount(Number(value))}
                   contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
                 />
                 <Bar dataKey="budget" fill="#E2E8F0" name="Budget" radius={[4, 4, 0, 0]} />
