@@ -2,8 +2,6 @@
 
 import { usePathname } from 'next/navigation';
 import { AppProvider } from '@/context/AppContext';
-import Sidebar from '@/components/Sidebar';
-import MobileNav from '@/components/MobileNav';
 
 const publicRoutes = ['/login', '/test'];
 
@@ -20,14 +18,17 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
 
   return (
     <AppProvider>
-      <div className="flex min-h-screen">
-        <Sidebar />
-        <main className="flex-1 ml-0 md:ml-60 pb-20 md:pb-0">
-          <div className="max-w-7xl mx-auto p-4 md:p-8">
-            {children}
-          </div>
-        </main>
-        <MobileNav />
+      <div style={{ padding: '1rem' }}>
+        <nav style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
+          <a href="/expense-tracker/" style={{ color: '#7C3AED', fontWeight: 'bold' }}>Home</a>
+          <a href="/expense-tracker/transactions/" style={{ color: '#7C3AED' }}>Transactions</a>
+          <a href="/expense-tracker/budget/" style={{ color: '#7C3AED' }}>Budget</a>
+          <a href="/expense-tracker/add/" style={{ color: '#7C3AED' }}>Add</a>
+          <a href="/expense-tracker/categories/" style={{ color: '#7C3AED' }}>Categories</a>
+          <a href="/expense-tracker/reports/" style={{ color: '#7C3AED' }}>Reports</a>
+          <a href="/expense-tracker/settings/" style={{ color: '#7C3AED' }}>Settings</a>
+        </nav>
+        {children}
       </div>
     </AppProvider>
   );
