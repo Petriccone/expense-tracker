@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useReducer, useEffect, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, useState, useCallback, ReactNode } from 'react';
 import { Transaction, Category, Settings, AIInsight, CategoryBudget } from '@/types';
 
 interface AppState {
@@ -183,45 +183,35 @@ export function useApp() {
 
 export function useTransactions() {
   const { state, dispatch } = useApp();
-  return {
-    transactions: state.transactions,
-    addTransaction: (t: Transaction) => dispatch({ type: 'ADD_TRANSACTION', payload: t }),
-    updateTransaction: (t: Transaction) => dispatch({ type: 'UPDATE_TRANSACTION', payload: t }),
-    deleteTransaction: (id: string) => dispatch({ type: 'DELETE_TRANSACTION', payload: id }),
-  };
+  const addTransaction = useCallback((t: Transaction) => dispatch({ type: 'ADD_TRANSACTION', payload: t }), [dispatch]);
+  const updateTransaction = useCallback((t: Transaction) => dispatch({ type: 'UPDATE_TRANSACTION', payload: t }), [dispatch]);
+  const deleteTransaction = useCallback((id: string) => dispatch({ type: 'DELETE_TRANSACTION', payload: id }), [dispatch]);
+  return { transactions: state.transactions, addTransaction, updateTransaction, deleteTransaction };
 }
 
 export function useCategories() {
   const { state, dispatch } = useApp();
-  return {
-    categories: state.categories,
-    addCategory: (c: Category) => dispatch({ type: 'ADD_CATEGORY', payload: c }),
-    updateCategory: (c: Category) => dispatch({ type: 'UPDATE_CATEGORY', payload: c }),
-    deleteCategory: (id: string) => dispatch({ type: 'DELETE_CATEGORY', payload: id }),
-  };
+  const addCategory = useCallback((c: Category) => dispatch({ type: 'ADD_CATEGORY', payload: c }), [dispatch]);
+  const updateCategory = useCallback((c: Category) => dispatch({ type: 'UPDATE_CATEGORY', payload: c }), [dispatch]);
+  const deleteCategory = useCallback((id: string) => dispatch({ type: 'DELETE_CATEGORY', payload: id }), [dispatch]);
+  return { categories: state.categories, addCategory, updateCategory, deleteCategory };
 }
 
 export function useSettings() {
   const { state, dispatch } = useApp();
-  return {
-    settings: state.settings,
-    setSettings: (s: Settings) => dispatch({ type: 'SET_SETTINGS', payload: s }),
-  };
+  const setSettings = useCallback((s: Settings) => dispatch({ type: 'SET_SETTINGS', payload: s }), [dispatch]);
+  return { settings: state.settings, setSettings };
 }
 
 export function useInsights() {
   const { state, dispatch } = useApp();
-  return {
-    insights: state.insights,
-    setInsights: (i: AIInsight[]) => dispatch({ type: 'SET_INSIGHTS', payload: i }),
-  };
+  const setInsights = useCallback((i: AIInsight[]) => dispatch({ type: 'SET_INSIGHTS', payload: i }), [dispatch]);
+  return { insights: state.insights, setInsights };
 }
 
 export function useCategoryBudgets() {
   const { state, dispatch } = useApp();
-  return {
-    categoryBudgets: state.categoryBudgets,
-    setCategoryBudgets: (b: CategoryBudget[]) => dispatch({ type: 'SET_CATEGORY_BUDGETS', payload: b }),
-    updateCategoryBudget: (b: CategoryBudget) => dispatch({ type: 'UPDATE_CATEGORY_BUDGET', payload: b }),
-  };
+  const setCategoryBudgets = useCallback((b: CategoryBudget[]) => dispatch({ type: 'SET_CATEGORY_BUDGETS', payload: b }), [dispatch]);
+  const updateCategoryBudget = useCallback((b: CategoryBudget) => dispatch({ type: 'UPDATE_CATEGORY_BUDGET', payload: b }), [dispatch]);
+  return { categoryBudgets: state.categoryBudgets, setCategoryBudgets, updateCategoryBudget };
 }
