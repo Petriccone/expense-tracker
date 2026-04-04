@@ -8,3 +8,4 @@ build
 .DS_Store
 tsconfig.tsbuildinfo
 out
+.netlify
