@@ -23,6 +23,7 @@ const mobileNavItems = [
   { href: '/budget', icon: Target, label: 'Budget' },
   { href: '/import', icon: Upload, label: 'Import' },
   { href: '/ai', icon: Bot, label: 'AI' },
+  { href: '/settings', icon: Settings, label: 'Settings' },
 ];
 
 function Sidebar() {
