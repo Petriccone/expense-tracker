@@ -39,16 +39,38 @@ export default function SettingsPage() {
   const [copied, setCopied] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<'checking' | 'connected' | 'not_connected' | 'unavailable'>('checking');
 
-  // Load or generate link token on mount
+  // Load or generate link token on mount (check both locations for backwards compat)
   useEffect(() => {
-    const stored = localStorage.getItem(LINK_TOKEN_KEY);
-    if (stored) {
-      setLinkToken(stored);
+    // First check dedicated key
+    let token = localStorage.getItem(LINK_TOKEN_KEY);
+
+    // Also check inside expense-tracker-data for persistence
+    if (!token) {
+      try {
+        const appData = JSON.parse(localStorage.getItem('expense-tracker-data') || '{}');
+        if (appData.linkToken) {
+          token = appData.linkToken;
+          localStorage.setItem(LINK_TOKEN_KEY, token);
+        }
+      } catch { /* ignore */ }
+    }
+
+    if (token) {
+      setLinkToken(token);
     } else {
-      const token = generateToken();
+      token = generateToken();
       localStorage.setItem(LINK_TOKEN_KEY, token);
       setLinkToken(token);
     }
+
+    // Always persist in app data too
+    try {
+      const appData = JSON.parse(localStorage.getItem('expense-tracker-data') || '{}');
+      if (appData.linkToken !== token) {
+        appData.linkToken = token;
+        localStorage.setItem('expense-tracker-data', JSON.stringify(appData));
+      }
+    } catch { /* ignore */ }
   }, []);
 
   // Check connection status

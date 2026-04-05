@@ -225,6 +225,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
         parsedCategories = parsed.categories || defaultCategories;
         parsedSettings = { ...defaultSettings, ...parsed.settings };
         parsedBudgets = parsed.categoryBudgets || [];
+        // Restore link token if saved
+        if (parsed.linkToken && !localStorage.getItem(LINK_TOKEN_KEY)) {
+          localStorage.setItem(LINK_TOKEN_KEY, parsed.linkToken);
+        }
       } catch (e) {
         console.error('Failed to load from localStorage', e);
       }
@@ -321,6 +325,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   // Save to localStorage on state change (only after initial load)
   useEffect(() => {
     if (!loaded) return;
+    const linkToken = localStorage.getItem(LINK_TOKEN_KEY) || '';
     localStorage.setItem(
       STORAGE_KEY,
       JSON.stringify({
@@ -328,6 +333,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         categories: state.categories,
         settings: state.settings,
         categoryBudgets: state.categoryBudgets,
+        linkToken,
       })
     );
   }, [state.transactions, state.categories, state.settings, state.categoryBudgets, loaded]);
