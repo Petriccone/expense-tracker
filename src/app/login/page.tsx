@@ -122,7 +122,7 @@ export default function LoginPage() {
               backdropFilter: 'blur(12px)',
             }}
           >
-            <Wallet className="w-9 h-9" style={{ color: '#a78bfa' }} />
+            <img src="/expense-tracker/icon.svg" alt="ExpenseAI" style={{ width: 48, height: 48, borderRadius: 12 }} />
           </div>
           <h1
             className="text-4xl font-bold mb-2"

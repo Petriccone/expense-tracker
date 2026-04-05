@@ -42,15 +42,10 @@ function Sidebar() {
         display: 'flex', alignItems: 'center', gap: 12, padding: '4px 12px 24px',
         borderBottom: '1px solid rgba(255, 255, 255, 0.06)', marginBottom: 16,
       }}>
-        <span style={{
-          background: 'linear-gradient(135deg, #7C3AED, #06B6D4)',
-          borderRadius: 14, width: 40, height: 40,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          color: '#fff', fontSize: 18,
+        <img src="/expense-tracker/icon.svg" alt="ExpenseAI" style={{
+          width: 40, height: 40, borderRadius: 14,
           boxShadow: '0 0 20px rgba(124, 58, 237, 0.3)',
-        }}>
-          💰
-        </span>
+        }} />
         <span style={{
           fontWeight: 700, fontSize: 20,
           background: 'linear-gradient(135deg, #7C3AED, #06B6D4)',
@@ -230,15 +225,10 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
           flexShrink: 0,
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span style={{
-              background: 'linear-gradient(135deg, #7C3AED, #06B6D4)',
-              borderRadius: 12, width: 34, height: 34,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              color: '#fff', fontSize: 15,
+            <img src="/expense-tracker/icon.svg" alt="ExpenseAI" style={{
+              width: 34, height: 34, borderRadius: 12,
               boxShadow: '0 0 16px rgba(124, 58, 237, 0.3)',
-            }}>
-              💰
-            </span>
+            }} />
             <span style={{
               fontWeight: 700, fontSize: 18,
               background: 'linear-gradient(135deg, #7C3AED, #06B6D4)',
