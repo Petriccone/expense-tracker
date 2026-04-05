@@ -66,6 +66,8 @@ function appReducer(state: AppState, action: Action): AppState {
     case 'SET_TRANSACTIONS':
       return { ...state, transactions: action.payload };
     case 'ADD_TRANSACTION':
+      // Prevent duplicates
+      if (state.transactions.some(t => t.id === action.payload.id)) return state;
       return { ...state, transactions: [action.payload, ...state.transactions] };
     case 'UPDATE_TRANSACTION':
       return {
@@ -206,6 +208,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(appReducer, initialState);
   const [loaded, setLoaded] = useState(false);
   const lastSyncRef = useRef<string | null>(null);
+  const syncedIdsRef = useRef<Set<string>>(new Set());
 
   // Load from localStorage on mount, seed Budget.xlsx data if no transactions
   useEffect(() => {
@@ -272,28 +275,25 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!loaded || !supabase) return;
 
+    // Initialize synced IDs from current state
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        (parsed.transactions || []).forEach((t: Transaction) => syncedIdsRef.current.add(t.id));
+      } catch { /* ignore */ }
+    }
+
     const syncFromSupabase = async () => {
       const linkToken = localStorage.getItem(LINK_TOKEN_KEY);
       if (!linkToken) return;
 
       try {
         const remoteTx = await fetchSupabaseTransactions(linkToken);
-        if (remoteTx.length > 0) {
-          const stored = localStorage.getItem(STORAGE_KEY);
-          const currentIds = new Set<string>();
-          if (stored) {
-            try {
-              const parsed = JSON.parse(stored);
-              (parsed.transactions || []).forEach((t: Transaction) => currentIds.add(t.id));
-            } catch {
-              // ignore
-            }
-          }
-
-          for (const tx of remoteTx) {
-            if (!currentIds.has(tx.id)) {
-              dispatch({ type: 'ADD_TRANSACTION', payload: tx });
-            }
+        for (const tx of remoteTx) {
+          if (!syncedIdsRef.current.has(tx.id)) {
+            syncedIdsRef.current.add(tx.id);
+            dispatch({ type: 'ADD_TRANSACTION', payload: tx });
           }
         }
       } catch (err) {
