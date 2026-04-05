@@ -360,7 +360,7 @@ export default function BudgetPage() {
                             </span>
                             <button
                               onClick={() => handleStartEdit(item.category.id)}
-                              className="p-1 rounded-lg transition-all md:opacity-0 md:group-hover:opacity-100"
+                              className="p-1 rounded-lg transition-all"
                               style={{ color: '#5a6478' }}
                               onMouseEnter={(e) => { e.currentTarget.style.color = '#a78bfa'; e.currentTarget.style.background = 'rgba(124, 58, 237, 0.1)'; }}
                               onMouseLeave={(e) => { e.currentTarget.style.color = '#5a6478'; e.currentTarget.style.background = 'transparent'; }}

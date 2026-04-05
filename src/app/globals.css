@@ -223,6 +223,8 @@ h1, h2, h3, h4, h5, h6 {
   background: rgba(255, 255, 255, 0.05);
 }
 .input-field::placeholder { color: var(--text-muted); }
+.input-field[type="date"] { color-scheme: dark; }
+.input-field[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.7); cursor: pointer; }
 
 .select-field {
   width: 100%;

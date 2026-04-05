@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import {
   Plus,
@@ -25,6 +26,11 @@ export default function TransactionsPage() {
   const [dateFilter, setDateFilter] = useState('all');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<Partial<Transaction>>({});
+  const [portalRoot, setPortalRoot] = useState<HTMLElement | null>(null);
+
+  useEffect(() => {
+    setPortalRoot(document.body);
+  }, []);
 
   const currencySymbol = settings.currency === 'EUR' ? '€' : settings.currency === 'USD' ? '$' : 'R$';
 
@@ -226,11 +232,12 @@ export default function TransactionsPage() {
         )}
       </div>
 
-      {/* Edit Modal */}
-      {editingId && editForm && (
+      {/* Edit Modal - rendered via portal to escape stacking context */}
+      {editingId && editForm && portalRoot && createPortal(
         <div
-          className="fixed inset-0 flex items-center justify-center z-50 p-4"
-          style={{ background: 'rgba(5, 10, 24, 0.8)', backdropFilter: 'blur(8px)' }}
+          className="fixed inset-0 flex items-center justify-center p-4"
+          style={{ background: 'rgba(5, 10, 24, 0.8)', backdropFilter: 'blur(8px)', zIndex: 9999 }}
+          onClick={(e) => { if (e.target === e.currentTarget) setEditingId(null); }}
         >
           <div
             className="glass-strong p-6 w-full max-w-md animate-slideUp"
@@ -300,6 +307,7 @@ export default function TransactionsPage() {
                   value={editForm.date || ''}
                   onChange={(e) => setEditForm({ ...editForm, date: e.target.value })}
                   className="input-field"
+                  style={{ colorScheme: 'dark' }}
                 />
               </div>
               <div className="flex gap-3 pt-4">
@@ -326,7 +334,8 @@ export default function TransactionsPage() {
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        portalRoot
       )}
     </div>
   );
