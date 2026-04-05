@@ -1,9 +1,16 @@
 'use client';
 
-import { useState } from 'react';
-import { Plus, Edit2, Trash2, X } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { Plus, Edit2, Trash2, X, Upload, ImageIcon } from 'lucide-react';
 import { useCategories } from '@/context/AppContext';
 import { Category } from '@/types';
+
+function CategoryIcon({ icon, size = 'text-2xl' }: { icon: string; size?: string }) {
+  if (icon.startsWith('data:image')) {
+    return <img src={icon} alt="" className="rounded-md object-cover" style={{ width: '1.5em', height: '1.5em' }} />;
+  }
+  return <span className={size}>{icon}</span>;
+}
 
 const EMOJI_OPTIONS = ['🍔', '🚗', '🏠', '🎬', '🛍️', '💊', '📚', '💡', '📦', '💰', '💻', '📈', '🎁', '💵', '✈️', '🏋️', '🎮', '🎵', '👗', '🍳'];
 const COLOR_OPTIONS = ['#EF4444', '#F59E0B', '#10B981', '#3B82F6', '#8B5CF6', '#EC4899', '#06B6D4', '#6366F1', '#64748B', '#84CC16'];
@@ -18,6 +25,25 @@ export default function CategoriesPage() {
     color: '#7C3AED',
     type: 'expense',
   });
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleIconUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) return;
+    if (file.size > 512 * 1024) {
+      alert('Image must be under 512KB');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      setForm({ ...form, icon: result });
+    };
+    reader.readAsDataURL(file);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
 
   const expenseCategories = categories.filter((c) => c.type === 'expense');
   const incomeCategories = categories.filter((c) => c.type === 'income');
@@ -123,7 +149,7 @@ export default function CategoriesPage() {
 
             <div>
               <label className="block text-sm font-medium mb-2" style={{ color: '#8892a8' }}>Icon</label>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2 items-center">
                 {EMOJI_OPTIONS.map((emoji) => (
                   <button
                     key={emoji}
@@ -144,7 +170,41 @@ export default function CategoriesPage() {
                     {emoji}
                   </button>
                 ))}
+                {/* Upload custom icon */}
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-10 h-10 rounded-lg transition-all flex items-center justify-center"
+                  style={{
+                    background: form.icon?.startsWith('data:image')
+                      ? 'linear-gradient(135deg, rgba(124, 58, 237, 0.2), rgba(6, 182, 212, 0.1))'
+                      : 'rgba(255, 255, 255, 0.03)',
+                    border: form.icon?.startsWith('data:image')
+                      ? '2px solid rgba(124, 58, 237, 0.4)'
+                      : '2px dashed rgba(255, 255, 255, 0.15)',
+                    cursor: 'pointer',
+                  }}
+                  title="Upload custom icon"
+                >
+                  {form.icon?.startsWith('data:image') ? (
+                    <img src={form.icon} alt="" className="w-7 h-7 rounded object-cover" />
+                  ) : (
+                    <Upload className="w-4 h-4" style={{ color: '#5a6478' }} />
+                  )}
+                </button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleIconUpload}
+                  className="hidden"
+                />
               </div>
+              {form.icon?.startsWith('data:image') && (
+                <p className="text-xs mt-2" style={{ color: '#5a6478' }}>
+                  Custom icon uploaded. Click ⬆ to change or select an emoji above.
+                </p>
+              )}
             </div>
 
             <div>
@@ -203,7 +263,7 @@ export default function CategoriesPage() {
               }}
             >
               <div className="flex items-center gap-2">
-                <span className="text-2xl">{cat.icon}</span>
+                <CategoryIcon icon={cat.icon} />
                 <span className="font-medium" style={{ color: '#e8edf5' }}>{cat.name}</span>
               </div>
               <div className="flex items-center gap-1">
@@ -256,7 +316,7 @@ export default function CategoriesPage() {
               }}
             >
               <div className="flex items-center gap-2">
-                <span className="text-2xl">{cat.icon}</span>
+                <CategoryIcon icon={cat.icon} />
                 <span className="font-medium" style={{ color: '#e8edf5' }}>{cat.name}</span>
               </div>
               <div className="flex items-center gap-1">
