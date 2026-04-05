@@ -1,0 +1,289 @@
+[
+  {
+    "id": "1",
+    "name": "Insurance",
+    "icon": "🛡️",
+    "color": "#6366F1",
+    "type": "expense"
+  },
+  {
+    "id": "2",
+    "name": "Deliveroo",
+    "icon": "🛵",
+    "color": "#00CCBC",
+    "type": "expense"
+  },
+  {
+    "id": "3",
+    "name": "Ultra Plan",
+    "icon": "📱",
+    "color": "#8B5CF6",
+    "type": "expense"
+  },
+  {
+    "id": "4",
+    "name": "Phone",
+    "icon": "📞",
+    "color": "#3B82F6",
+    "type": "expense"
+  },
+  {
+    "id": "5",
+    "name": "Shop",
+    "icon": "🛒",
+    "color": "#F59E0B",
+    "type": "expense"
+  },
+  {
+    "id": "6",
+    "name": "Elitricity",
+    "icon": "⚡",
+    "color": "#FBBF24",
+    "type": "expense"
+  },
+  {
+    "id": "7",
+    "name": "Youtube",
+    "icon": "▶️",
+    "color": "#FF0000",
+    "type": "expense"
+  },
+  {
+    "id": "8",
+    "name": "Loan",
+    "icon": "🏦",
+    "color": "#64748B",
+    "type": "expense"
+  },
+  {
+    "id": "9",
+    "name": "Apple",
+    "icon": "🍎",
+    "color": "#A3A3A3",
+    "type": "expense"
+  },
+  {
+    "id": "10",
+    "name": "Amazon",
+    "icon": "📦",
+    "color": "#FF9900",
+    "type": "expense"
+  },
+  {
+    "id": "11",
+    "name": "Spotify",
+    "icon": "🎵",
+    "color": "#1DB954",
+    "type": "expense"
+  },
+  {
+    "id": "12",
+    "name": "Wifi",
+    "icon": "📡",
+    "color": "#06B6D4",
+    "type": "expense"
+  },
+  {
+    "id": "13",
+    "name": "Leap Card",
+    "icon": "🚌",
+    "color": "#10B981",
+    "type": "expense"
+  },
+  {
+    "id": "14",
+    "name": "AI",
+    "icon": "🤖",
+    "color": "#7C3AED",
+    "type": "expense"
+  },
+  {
+    "id": "15",
+    "name": "Eyebrows",
+    "icon": "✨",
+    "color": "#EC4899",
+    "type": "expense"
+  },
+  {
+    "id": "16",
+    "name": "Netflix",
+    "icon": "🎬",
+    "color": "#E50914",
+    "type": "expense"
+  },
+  {
+    "id": "17",
+    "name": "Eye Lashes",
+    "icon": "👁️",
+    "color": "#F472B6",
+    "type": "expense"
+  },
+  {
+    "id": "18",
+    "name": "Hair Cut",
+    "icon": "💇",
+    "color": "#D946EF",
+    "type": "expense"
+  },
+  {
+    "id": "19",
+    "name": "Nail",
+    "icon": "💅",
+    "color": "#F43F5E",
+    "type": "expense"
+  },
+  {
+    "id": "20",
+    "name": "Toll",
+    "icon": "🛣️",
+    "color": "#78716C",
+    "type": "expense"
+  },
+  {
+    "id": "21",
+    "name": "Fuel",
+    "icon": "⛽",
+    "color": "#EF4444",
+    "type": "expense"
+  },
+  {
+    "id": "22",
+    "name": "Gym",
+    "icon": "🏋️",
+    "color": "#22C55E",
+    "type": "expense"
+  },
+  {
+    "id": "23",
+    "name": "Cleaner",
+    "icon": "🧹",
+    "color": "#14B8A6",
+    "type": "expense"
+  },
+  {
+    "id": "24",
+    "name": "Rental",
+    "icon": "🏠",
+    "color": "#8B5CF6",
+    "type": "expense"
+  },
+  {
+    "id": "25",
+    "name": "Pay Later",
+    "icon": "💳",
+    "color": "#6366F1",
+    "type": "expense"
+  },
+  {
+    "id": "26",
+    "name": "Credit Card",
+    "icon": "💳",
+    "color": "#1E40AF",
+    "type": "expense"
+  },
+  {
+    "id": "27",
+    "name": "Car Fix",
+    "icon": "🔧",
+    "color": "#78716C",
+    "type": "expense"
+  },
+  {
+    "id": "28",
+    "name": "Van Rental",
+    "icon": "🚐",
+    "color": "#64748B",
+    "type": "expense"
+  },
+  {
+    "id": "29",
+    "name": "Car Wash",
+    "icon": "🚿",
+    "color": "#38BDF8",
+    "type": "expense"
+  },
+  {
+    "id": "30",
+    "name": "Mounjaro",
+    "icon": "💊",
+    "color": "#10B981",
+    "type": "expense"
+  },
+  {
+    "id": "31",
+    "name": "NCT",
+    "icon": "🚗",
+    "color": "#78716C",
+    "type": "expense"
+  },
+  {
+    "id": "32",
+    "name": "Nu Bank",
+    "icon": "💜",
+    "color": "#820AD1",
+    "type": "expense"
+  },
+  {
+    "id": "33",
+    "name": "Joao",
+    "icon": "👤",
+    "color": "#64748B",
+    "type": "expense"
+  },
+  {
+    "id": "34",
+    "name": "TAX",
+    "icon": "📋",
+    "color": "#DC2626",
+    "type": "expense"
+  },
+  {
+    "id": "35",
+    "name": "Santaninha",
+    "icon": "🎁",
+    "color": "#F97316",
+    "type": "expense"
+  },
+  {
+    "id": "36",
+    "name": "AirTag",
+    "icon": "📍",
+    "color": "#A3A3A3",
+    "type": "expense"
+  },
+  {
+    "id": "37",
+    "name": "Consulta GP",
+    "icon": "🩺",
+    "color": "#10B981",
+    "type": "expense"
+  },
+  {
+    "id": "38",
+    "name": "Other",
+    "icon": "📦",
+    "color": "#64748B",
+    "type": "expense"
+  },
+  {
+    "id": "39",
+    "name": "Salary",
+    "icon": "💰",
+    "color": "#10B981",
+    "type": "income"
+  },
+  {
+    "id": "40",
+    "name": "Freelance",
+    "icon": "🛵",
+    "color": "#22C55E",
+    "type": "income"
+  },
+  {
+    "id": "41",
+    "name": "Other Income",
+    "icon": "💵",
+    "color": "#84CC16",
+    "type": "income"
+  }
+]
