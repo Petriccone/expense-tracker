@@ -268,19 +268,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  // Poll Supabase every 30 seconds for new Telegram transactions
+  // Poll Supabase for new Telegram transactions + sync on app focus
   useEffect(() => {
     if (!loaded || !supabase) return;
 
-    const interval = setInterval(async () => {
+    const syncFromSupabase = async () => {
       const linkToken = localStorage.getItem(LINK_TOKEN_KEY);
       if (!linkToken) return;
 
       try {
         const remoteTx = await fetchSupabaseTransactions(linkToken);
         if (remoteTx.length > 0) {
-          // We need to check against current state, dispatch new ones
-          // Using a functional approach: read current transaction ids from localStorage
           const stored = localStorage.getItem(STORAGE_KEY);
           const currentIds = new Set<string>();
           if (stored) {
@@ -301,11 +299,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
       } catch (err) {
         console.error('Supabase poll error:', err);
       }
-
       lastSyncRef.current = new Date().toISOString();
-    }, 30000);
+    };
 
-    return () => clearInterval(interval);
+    // Poll every 15 seconds
+    const interval = setInterval(syncFromSupabase, 15000);
+
+    // Also sync when app comes back to focus (user switches back to the app)
+    const handleFocus = () => syncFromSupabase();
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') syncFromSupabase();
+    });
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', handleFocus);
+    };
   }, [loaded]);
 
   // Save to localStorage on state change (only after initial load)
