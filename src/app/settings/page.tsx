@@ -167,17 +167,19 @@ export default function SettingsPage() {
           <label className="block text-sm font-medium mb-2" style={{ color: '#8892a8' }}>
             Monthly Expense Limit
           </label>
-          <div className="relative">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2" style={{ color: '#5a6478' }}>
-              {form.currency === 'EUR' ? '\u20ac' : form.currency === 'USD' ? '$' : 'R$'}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ color: '#8892a8', fontSize: 18, fontWeight: 600, minWidth: 24 }}>
+              {form.currency === 'EUR' ? '€' : form.currency === 'USD' ? '$' : 'R$'}
             </span>
             <input
               type="number"
               min="0"
               step="100"
-              value={form.monthlyBudget}
+              value={form.monthlyBudget || ''}
               onChange={(e) => setForm({ ...form, monthlyBudget: parseFloat(e.target.value) || 0 })}
-              className="input-field pl-10"
+              placeholder="0"
+              className="input-field"
+              style={{ flex: 1 }}
             />
           </div>
           <p className="text-sm mt-2" style={{ color: '#5a6478' }}>
