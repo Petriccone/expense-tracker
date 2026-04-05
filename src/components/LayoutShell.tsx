@@ -137,7 +137,7 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
   return (
     <AppProvider>
       <div style={{ display: 'flex', flexDirection: 'column', height: '100dvh', background: '#f8fafc' }}>
-        <header style={{ background: '#fff', borderBottom: '1px solid #e2e8f0', padding: '12px 16px', flexShrink: 0 }}>
+        <header style={{ background: '#fff', borderBottom: '1px solid #e2e8f0', padding: '12px 16px', paddingTop: 'max(12px, env(safe-area-inset-top))', flexShrink: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <span style={{ background: 'linear-gradient(135deg,#7C3AED,#A78BFA)', borderRadius: 10, width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 14 }}>💰</span>
             <span style={{ fontWeight: 700, fontSize: 17, color: '#0f172a' }}>ExpenseAI</span>

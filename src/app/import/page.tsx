@@ -236,19 +236,25 @@ export default function ImportPage() {
       <div className="bg-white rounded-2xl p-6 shadow-sm">
         <h2 className="text-lg font-semibold mb-4">CSV Format</h2>
         <p className="text-slate-600 text-sm mb-4">Your CSV should have columns like:</p>
-        <div className="bg-slate-50 rounded-xl p-4 text-sm font-mono">
-          <div className="grid grid-cols-4 gap-2 text-slate-600 mb-2 font-semibold">
-            <span>Date</span>
-            <span>Description</span>
-            <span>Amount</span>
-            <span>Category</span>
-          </div>
-          <div className="grid grid-cols-4 gap-2 text-slate-500">
-            <span>2026-04-03</span>
-            <span>Supermarket</span>
-            <span>45.50</span>
-            <span>Food</span>
-          </div>
+        <div className="bg-slate-50 rounded-xl p-4 text-xs font-mono overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="text-slate-600 font-semibold">
+                <td className="pr-3 pb-2">Date</td>
+                <td className="pr-3 pb-2">Description</td>
+                <td className="pr-3 pb-2">Amount</td>
+                <td className="pb-2">Category</td>
+              </tr>
+            </thead>
+            <tbody className="text-slate-500">
+              <tr>
+                <td className="pr-3">2026-04-03</td>
+                <td className="pr-3">Supermarket</td>
+                <td className="pr-3">45.50</td>
+                <td>Food</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
