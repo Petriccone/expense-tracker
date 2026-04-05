@@ -34,7 +34,7 @@ export default function AddTransactionPage() {
   // AI Auto-categorization (simulated for demo)
   const handleAIAutoCategorize = async () => {
     if (!form.description.trim()) {
-      alert('Please enter a description first');
+      alert('Por favor, insira uma descrição primeiro');
       return;
     }
 
@@ -82,7 +82,7 @@ export default function AddTransactionPage() {
     e.preventDefault();
 
     if (!form.amount || !form.description || !form.category) {
-      alert('Please fill in all required fields');
+      alert('Por favor, preencha todos os campos obrigatórios');
       return;
     }
 
@@ -115,8 +115,8 @@ export default function AddTransactionPage() {
           <ArrowLeft className="w-5 h-5" />
         </Link>
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold gradient-text">Add Transaction</h1>
-          <p style={{ color: 'var(--text-secondary)' }}>Record a new expense or income</p>
+          <h1 className="text-2xl md:text-3xl font-bold gradient-text">Adicionar Transação</h1>
+          <p style={{ color: 'var(--text-secondary)' }}>Registre uma nova despesa ou receita</p>
         </div>
       </div>
 
@@ -137,7 +137,7 @@ export default function AddTransactionPage() {
               cursor: 'pointer',
             }}
           >
-            Expense
+            Despesa
           </button>
           <button
             type="button"
@@ -153,13 +153,13 @@ export default function AddTransactionPage() {
               cursor: 'pointer',
             }}
           >
-            Income
+            Receita
           </button>
         </div>
 
         {/* Amount */}
         <div className="glass-card-static p-6">
-          <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>Amount</label>
+          <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>Valor</label>
           <div className="relative">
             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-2xl" style={{ color: 'var(--text-muted)' }}>
               {currencySymbol}
@@ -180,7 +180,7 @@ export default function AddTransactionPage() {
         {/* Description */}
         <div className="glass-card-static p-6">
           <div className="flex items-center justify-between mb-2">
-            <label className="block text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Description</label>
+            <label className="block text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Descrição</label>
             <button
               type="button"
               onClick={handleAIAutoCategorize}
@@ -193,12 +193,12 @@ export default function AddTransactionPage() {
               ) : (
                 <Sparkles className="w-4 h-4" style={{ filter: 'drop-shadow(0 0 4px rgba(124, 58, 237, 0.4))' }} />
               )}
-              AI Auto-Categorize
+              Categorizar com IA
             </button>
           </div>
           <input
             type="text"
-            placeholder="What was this for?"
+            placeholder="Para que foi esse gasto?"
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
             className="input-field"
@@ -207,21 +207,21 @@ export default function AddTransactionPage() {
           {aiSuggestedCategory && (
             <p className="text-sm mt-2 flex items-center gap-1" style={{ color: '#a78bfa' }}>
               <Sparkles className="w-4 h-4" />
-              AI suggested: {aiSuggestedCategory}
+              Sugestão da IA: {aiSuggestedCategory}
             </p>
           )}
         </div>
 
         {/* Category */}
         <div className="glass-card-static p-6">
-          <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>Category</label>
+          <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>Categoria</label>
           <select
             value={form.category}
             onChange={(e) => setForm({ ...form, category: e.target.value })}
             className="select-field"
             required
           >
-            <option value="">Select a category</option>
+            <option value="">Selecione uma categoria</option>
             {availableCategories.map((cat) => (
               <option key={cat.id} value={cat.name}>
                 {cat.icon} {cat.name}
@@ -232,7 +232,7 @@ export default function AddTransactionPage() {
 
         {/* Date */}
         <div className="glass-card-static p-6">
-          <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>Date</label>
+          <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>Data</label>
           <input
             type="date"
             value={form.date}
@@ -244,10 +244,10 @@ export default function AddTransactionPage() {
 
         {/* Notes */}
         <div className="glass-card-static p-6">
-          <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>Notes (optional)</label>
+          <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>Observações (opcional)</label>
           <textarea
             rows={3}
-            placeholder="Any additional details..."
+            placeholder="Detalhes adicionais..."
             value={form.notes}
             onChange={(e) => setForm({ ...form, notes: e.target.value })}
             className="input-field resize-none"
@@ -257,7 +257,7 @@ export default function AddTransactionPage() {
 
         {/* Submit */}
         <button type="submit" className="btn-primary w-full py-4 text-lg">
-          Add Transaction
+          Adicionar Transação
         </button>
       </form>
     </div>

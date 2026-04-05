@@ -43,7 +43,7 @@ export default function BudgetPage() {
     return `${currencySymbol}${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
-  const monthLabel = selectedMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  const monthLabel = selectedMonth.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
 
   const navigateMonth = (direction: number) => {
     setSelectedMonth((prev) => new Date(prev.getFullYear(), prev.getMonth() + direction, 1));
@@ -137,9 +137,9 @@ export default function BudgetPage() {
         <div>
           <h1 className="text-2xl md:text-3xl font-bold gradient-text flex items-center gap-2">
             <Target className="w-7 h-7" style={{ color: '#a78bfa', filter: 'drop-shadow(0 0 6px rgba(124, 58, 237, 0.4))' }} />
-            Budget Planning
+            Planejamento de Orçamento
           </h1>
-          <p style={{ color: 'var(--text-secondary)' }}>Set per-category spending limits and track your progress</p>
+          <p style={{ color: 'var(--text-secondary)' }}>Defina limites de gastos por categoria e acompanhe seu progresso</p>
         </div>
 
         {/* Month Navigator */}
@@ -179,7 +179,7 @@ export default function BudgetPage() {
               style={{ background: 'rgba(124, 58, 237, 0.12)', boxShadow: '0 0 12px rgba(124, 58, 237, 0.1)' }}>
               <PiggyBank className="w-5 h-5" style={{ color: '#a78bfa' }} />
             </div>
-            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Total Budget</p>
+            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Orçamento Total</p>
           </div>
           <p className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{formatAmount(settings.monthlyBudget)}</p>
         </div>
@@ -190,15 +190,15 @@ export default function BudgetPage() {
               style={{ background: 'rgba(6, 182, 212, 0.12)', boxShadow: '0 0 12px rgba(6, 182, 212, 0.1)' }}>
               <Target className="w-5 h-5" style={{ color: '#22d3ee' }} />
             </div>
-            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Allocated</p>
+            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Alocado</p>
           </div>
           <p className={`text-2xl font-bold ${overallStats.totalAllocated <= settings.monthlyBudget ? 'text-cyan-400' : 'text-amber-400'}`}>
             {formatAmount(overallStats.totalAllocated)}
           </p>
           <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
             {settings.monthlyBudget > 0
-              ? `${Math.round((overallStats.totalAllocated / settings.monthlyBudget) * 100)}% of total budget`
-              : 'No total budget set'}
+              ? `${Math.round((overallStats.totalAllocated / settings.monthlyBudget) * 100)}% do orçamento total`
+              : 'Nenhum orçamento total definido'}
           </p>
         </div>
 
@@ -208,13 +208,13 @@ export default function BudgetPage() {
               style={{ background: 'rgba(16, 185, 129, 0.12)', boxShadow: '0 0 12px rgba(16, 185, 129, 0.1)' }}>
               <TrendingUp className="w-5 h-5 text-green-400" />
             </div>
-            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Unallocated</p>
+            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Não Alocado</p>
           </div>
           <p className={`text-2xl font-bold ${overallStats.unallocated >= 0 ? 'text-green-400' : 'text-red-400'}`}>
             {formatAmount(overallStats.unallocated)}
           </p>
           <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
-            {overallStats.unallocated < 0 ? 'Over-allocated!' : 'Available to assign'}
+            {overallStats.unallocated < 0 ? 'Acima do alocado!' : 'Disponível para alocar'}
           </p>
         </div>
 
@@ -227,15 +227,15 @@ export default function BudgetPage() {
               }}>
               <AlertTriangle className={`w-5 h-5 ${overallStats.categoriesOverBudget > 0 ? 'text-red-400' : 'text-green-400'}`} />
             </div>
-            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Over Budget</p>
+            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Acima do Orçamento</p>
           </div>
           <p className={`text-2xl font-bold ${overallStats.categoriesOverBudget > 0 ? 'text-red-400' : 'text-green-400'}`}>
             {overallStats.categoriesOverBudget}
           </p>
           <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
             {overallStats.categoriesOverBudget > 0
-              ? `${overallStats.categoriesOverBudget} categor${overallStats.categoriesOverBudget === 1 ? 'y' : 'ies'} exceeded`
-              : 'All categories on track'}
+              ? `${overallStats.categoriesOverBudget} categoria${overallStats.categoriesOverBudget === 1 ? '' : 's'} excedida${overallStats.categoriesOverBudget === 1 ? '' : 's'}`
+              : 'Todas as categorias dentro do limite'}
           </p>
         </div>
       </div>
@@ -243,7 +243,7 @@ export default function BudgetPage() {
       {/* Allocation Progress Bar */}
       {overallStats.totalAllocated > 0 && (
         <div className="glass-card-static p-6">
-          <h2 className="text-sm font-semibold mb-3" style={{ color: 'var(--text-secondary)' }}>Budget Allocation</h2>
+          <h2 className="text-sm font-semibold mb-3" style={{ color: 'var(--text-secondary)' }}>Alocação do Orçamento</h2>
           <div className="h-4 rounded-full overflow-hidden flex" style={{ background: 'var(--bg-input)' }}>
             {budgetData
               .filter((d) => d.limit > 0)
@@ -281,7 +281,7 @@ export default function BudgetPage() {
 
       {/* Per-Category Budget List */}
       <div className="glass-card-static p-6">
-        <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Category Budgets</h2>
+        <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Orçamentos por Categoria</h2>
         <div className="space-y-4">
           {budgetData.map((item) => {
             const isEditing = editingCategoryId === item.category.id;
@@ -355,7 +355,7 @@ export default function BudgetPage() {
                                   <span className="font-medium" style={{ color: 'var(--text-primary)' }}>{formatAmount(item.limit)}</span>
                                 </>
                               ) : (
-                                <span style={{ color: 'var(--text-muted)' }}>{formatAmount(item.spent)} spent</span>
+                                <span style={{ color: 'var(--text-muted)' }}>{formatAmount(item.spent)} gasto</span>
                               )}
                             </span>
                             <button
@@ -400,8 +400,8 @@ export default function BudgetPage() {
                         <span className={`text-xs ${item.percentage > 100 ? 'text-red-400 font-medium' : ''}`}
                           style={{ color: item.percentage > 100 ? undefined : '#5a6478' }}>
                           {item.percentage > 100
-                            ? `${formatAmount(item.spent - item.limit)} over budget`
-                            : `${formatAmount(item.limit - item.spent)} remaining`}
+                            ? `${formatAmount(item.spent - item.limit)} acima do orçamento`
+                            : `${formatAmount(item.limit - item.spent)} restante`}
                         </span>
                         <span className={`text-xs font-medium ${item.percentage > 100 ? 'text-red-400' : item.percentage > 80 ? 'text-amber-400' : ''}`}
                           style={{ color: item.percentage <= 80 ? '#5a6478' : undefined }}>
@@ -420,7 +420,7 @@ export default function BudgetPage() {
       {/* Budget vs Actual Chart */}
       {chartData.length > 0 && (
         <div className="glass-card-static p-6">
-          <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Budget vs Actual</h2>
+          <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Orçamento vs Realizado</h2>
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData} barGap={4}>
@@ -439,8 +439,8 @@ export default function BudgetPage() {
                   itemStyle={{ color: 'var(--text-primary)' }}
                   labelStyle={{ color: 'var(--text-secondary)' }}
                 />
-                <Bar dataKey="budget" fill="var(--border-color)" name="Budget" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="spent" name="Spent" radius={[4, 4, 0, 0]}>
+                <Bar dataKey="budget" fill="var(--border-color)" name="Orçamento" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="spent" name="Gasto" radius={[4, 4, 0, 0]}>
                   {chartData.map((entry, index) => (
                     <Cell
                       key={`cell-${index}`}
@@ -461,10 +461,10 @@ export default function BudgetPage() {
           style={{ borderLeft: '3px solid #7C3AED' }}
         >
           <Target className="w-10 h-10 mx-auto mb-3" style={{ color: '#a78bfa', filter: 'drop-shadow(0 0 8px rgba(124, 58, 237, 0.3))' }} />
-          <h3 className="font-semibold mb-1 gradient-text">No budgets set yet</h3>
+          <h3 className="font-semibold mb-1 gradient-text">Nenhum orçamento definido ainda</h3>
           <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-            Click the edit icon next to any category above to set a monthly spending limit.
-            Your total monthly budget is {formatAmount(settings.monthlyBudget)} (configurable in Settings).
+            Clique no ícone de edição ao lado de qualquer categoria acima para definir um limite de gastos mensal.
+            Seu orçamento mensal total é {formatAmount(settings.monthlyBudget)} (configurável em Configurações).
           </p>
         </div>
       )}

@@ -129,7 +129,21 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-const STORAGE_KEY = 'expense-tracker-data';
+function getStorageKey(): string {
+  try {
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      const user = JSON.parse(userStr);
+      if (user && user.id) {
+        return 'expense-tracker-data-' + user.id;
+      }
+    }
+  } catch {
+    // ignore
+  }
+  return 'expense-tracker-data';
+}
+
 const LINK_TOKEN_KEY = 'telegram-link-token';
 const DEFAULT_LINK_TOKEN = 'nDV8UVVnOIHmrJNEIvIlfn6n2CzJL2VA';
 
@@ -213,7 +227,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   // Load from localStorage on mount, seed Budget.xlsx data if no transactions
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
+    const storageKey = getStorageKey();
+    const stored = localStorage.getItem(storageKey);
     let loadedTransactions: Transaction[] = [];
     let parsedSettings = defaultSettings;
     let parsedCategories = defaultCategories;
@@ -290,10 +305,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (!loaded || !supabase) return;
 
     // Initialize synced IDs from current state
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
+    const storedSync = localStorage.getItem(getStorageKey());
+    if (storedSync) {
       try {
-        const parsed = JSON.parse(stored);
+        const parsed = JSON.parse(storedSync);
         (parsed.transactions || []).forEach((t: Transaction) => syncedIdsRef.current.add(t.id));
       } catch { /* ignore */ }
     }
@@ -337,7 +352,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (!loaded) return;
     const linkToken = localStorage.getItem(LINK_TOKEN_KEY) || '';
     localStorage.setItem(
-      STORAGE_KEY,
+      getStorageKey(),
       JSON.stringify({
         transactions: state.transactions,
         categories: state.categories,

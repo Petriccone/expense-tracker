@@ -1,34 +1,34 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { usePathname } from 'next/navigation';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { AppProvider } from '@/context/AppContext';
-import { LayoutDashboard, Receipt, Tags, BarChart3, Bot, Settings, Upload, Target, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Receipt, Tags, BarChart3, Bot, Settings, Upload, Target, Menu, X, LogOut } from 'lucide-react';
 
 const sidebarItems = [
-  { href: '/', icon: LayoutDashboard, label: 'Home' },
-  { href: '/transactions', icon: Receipt, label: 'Transactions' },
-  { href: '/categories', icon: Tags, label: 'Categories' },
-  { href: '/budget', icon: Target, label: 'Budget' },
-  { href: '/reports', icon: BarChart3, label: 'Reports' },
-  { href: '/import', icon: Upload, label: 'Import' },
-  { href: '/ai', icon: Bot, label: 'AI' },
-  { href: '/settings', icon: Settings, label: 'Settings' },
+  { href: '/', icon: LayoutDashboard, label: 'Início' },
+  { href: '/transactions', icon: Receipt, label: 'Transações' },
+  { href: '/categories', icon: Tags, label: 'Categorias' },
+  { href: '/budget', icon: Target, label: 'Orçamento' },
+  { href: '/reports', icon: BarChart3, label: 'Relatórios' },
+  { href: '/import', icon: Upload, label: 'Importar' },
+  { href: '/ai', icon: Bot, label: 'IA' },
+  { href: '/settings', icon: Settings, label: 'Configurações' },
 ];
 
 const mobileNavItems = [
-  { href: '/', icon: LayoutDashboard, label: 'Home' },
+  { href: '/', icon: LayoutDashboard, label: 'Início' },
   { href: '/transactions', icon: Receipt, label: 'Tx' },
-  { href: '/budget', icon: Target, label: 'Budget' },
-  { href: '/import', icon: Upload, label: 'Import' },
-  { href: '/ai', icon: Bot, label: 'AI' },
+  { href: '/budget', icon: Target, label: 'Orçamento' },
+  { href: '/import', icon: Upload, label: 'Importar' },
+  { href: '/ai', icon: Bot, label: 'IA' },
 ];
 
 const mobileMenuItems = [
-  { href: '/categories', icon: Tags, label: 'Categories' },
-  { href: '/reports', icon: BarChart3, label: 'Reports' },
-  { href: '/settings', icon: Settings, label: 'Settings' },
+  { href: '/categories', icon: Tags, label: 'Categorias' },
+  { href: '/reports', icon: BarChart3, label: 'Relatórios' },
+  { href: '/settings', icon: Settings, label: 'Configurações' },
 ];
 
 function applyThemeClass(darkMode: boolean) {
@@ -41,7 +41,16 @@ function applyThemeClass(darkMode: boolean) {
 
 function getStoredDarkMode(): boolean {
   try {
-    const stored = localStorage.getItem('expense-tracker-data');
+    // Try user-specific storage key first
+    let storageKey = 'expense-tracker-data';
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      const user = JSON.parse(userStr);
+      if (user && user.id) {
+        storageKey = 'expense-tracker-data-' + user.id;
+      }
+    }
+    const stored = localStorage.getItem(storageKey);
     if (stored) {
       const parsed = JSON.parse(stored);
       if (parsed.settings && typeof parsed.settings.darkMode === 'boolean') {
@@ -56,6 +65,25 @@ function getStoredDarkMode(): boolean {
 
 function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const [userName, setUserName] = useState('');
+
+  useEffect(() => {
+    try {
+      const userStr = localStorage.getItem('user');
+      if (userStr) {
+        const user = JSON.parse(userStr);
+        setUserName(user.name || user.email || '');
+      }
+    } catch { /* ignore */ }
+  }, []);
+
+  const handleSair = () => {
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('user');
+    router.push('/login');
+  };
+
   return (
     <aside style={{
       width: 260, minHeight: '100vh',
@@ -114,14 +142,52 @@ function Sidebar() {
         })}
       </nav>
 
-      {/* Bottom accent line */}
+      {/* User info + logout */}
       <div style={{ marginTop: 'auto', padding: '16px 12px 0' }}>
         <div style={{
           height: 2,
           background: 'linear-gradient(90deg, #7C3AED, #06B6D4, transparent)',
           borderRadius: 1,
           opacity: 0.4,
+          marginBottom: 16,
         }} />
+        {userName && (
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 10,
+            padding: '8px 12px', marginBottom: 8,
+          }}>
+            <div style={{
+              width: 32, height: 32, borderRadius: '50%',
+              background: 'linear-gradient(135deg, rgba(124, 58, 237, 0.3), rgba(6, 182, 212, 0.2))',
+              border: '1px solid rgba(124, 58, 237, 0.3)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 14, fontWeight: 600, color: '#c4b5fd',
+            }}>
+              {userName.charAt(0).toUpperCase()}
+            </div>
+            <span style={{
+              fontSize: 13, fontWeight: 500,
+              color: 'var(--text-secondary)',
+              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+            }}>
+              {userName}
+            </span>
+          </div>
+        )}
+        <button
+          onClick={handleSair}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 10,
+            padding: '10px 14px', borderRadius: 12,
+            width: '100%', border: 'none', cursor: 'pointer',
+            background: 'rgba(239, 68, 68, 0.08)',
+            color: '#f87171', fontSize: 14, fontWeight: 500,
+            transition: 'all 0.2s',
+          }}
+        >
+          <LogOut size={18} />
+          Sair
+        </button>
       </div>
     </aside>
   );
@@ -189,7 +255,32 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
   const [ready, setReady] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
+  const [userName, setUserName] = useState('');
   const pathname = usePathname();
+  const router = useRouter();
+
+  // Auth check
+  useEffect(() => {
+    if (pathname === '/login') {
+      setAuthChecked(true);
+      return;
+    }
+    const token = localStorage.getItem('auth_token');
+    if (!token) {
+      router.push('/login');
+      return;
+    }
+    // Load user name for mobile header
+    try {
+      const userStr = localStorage.getItem('user');
+      if (userStr) {
+        const user = JSON.parse(userStr);
+        setUserName(user.name || user.email || '');
+      }
+    } catch { /* ignore */ }
+    setAuthChecked(true);
+  }, [pathname, router]);
 
   useEffect(() => {
     // Apply theme class before rendering
@@ -219,7 +310,7 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
     };
   }, []);
 
-  if (!ready) {
+  if (!ready || !authChecked) {
     return (
       <div style={{
         minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -258,6 +349,51 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
     );
   }
 
+  /* Mobile: pull-to-refresh state */
+  const [pullDistance, setPullDistance] = useState(0);
+  const [refreshing, setRefreshing] = useState(false);
+  const touchStartY = useRef(0);
+  const isPulling = useRef(false);
+  const mainRef = useRef<HTMLElement>(null);
+  const PULL_THRESHOLD = 80;
+
+  const onTouchStart = useCallback((e: React.TouchEvent) => {
+    if (refreshing) return;
+    const el = mainRef.current;
+    if (el && el.scrollTop <= 0) {
+      touchStartY.current = e.touches[0].clientY;
+      isPulling.current = true;
+    }
+  }, [refreshing]);
+
+  const onTouchMove = useCallback((e: React.TouchEvent) => {
+    if (!isPulling.current || refreshing) return;
+    const el = mainRef.current;
+    if (!el || el.scrollTop > 0) {
+      isPulling.current = false;
+      setPullDistance(0);
+      return;
+    }
+    const diff = e.touches[0].clientY - touchStartY.current;
+    if (diff > 0) {
+      // Dampen the pull distance for a natural feel
+      setPullDistance(Math.min(diff * 0.5, 120));
+    }
+  }, [refreshing]);
+
+  const onTouchEnd = useCallback(() => {
+    if (!isPulling.current) return;
+    isPulling.current = false;
+    if (pullDistance >= PULL_THRESHOLD && !refreshing) {
+      setRefreshing(true);
+      setPullDistance(PULL_THRESHOLD * 0.5);
+      // Small delay so the user sees the spinner before reload
+      setTimeout(() => window.location.reload(), 300);
+    } else {
+      setPullDistance(0);
+    }
+  }, [pullDistance, refreshing]);
+
   /* Mobile: flex column */
   return (
     <AppProvider>
@@ -291,16 +427,29 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
                 ExpensesAI
               </span>
             </div>
-            <button
-              onClick={() => setMenuOpen(!menuOpen)}
-              style={{
-                background: 'none', border: 'none', cursor: 'pointer',
-                color: 'var(--text-secondary)', padding: 6, borderRadius: 10,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}
-            >
-              {menuOpen ? <X size={22} /> : <Menu size={22} />}
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              {userName && (
+                <div style={{
+                  width: 30, height: 30, borderRadius: '50%',
+                  background: 'linear-gradient(135deg, rgba(124, 58, 237, 0.3), rgba(6, 182, 212, 0.2))',
+                  border: '1px solid rgba(124, 58, 237, 0.3)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 13, fontWeight: 600, color: '#c4b5fd',
+                }}>
+                  {userName.charAt(0).toUpperCase()}
+                </div>
+              )}
+              <button
+                onClick={() => setMenuOpen(!menuOpen)}
+                style={{
+                  background: 'none', border: 'none', cursor: 'pointer',
+                  color: 'var(--text-secondary)', padding: 6, borderRadius: 10,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}
+              >
+                {menuOpen ? <X size={22} /> : <Menu size={22} />}
+              </button>
+            </div>
           </div>
           {menuOpen && (
             <div style={{
@@ -329,13 +478,66 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
                   </Link>
                 );
               })}
+              <div style={{
+                height: 1,
+                background: 'var(--border-color)',
+                margin: '4px 14px',
+              }} />
+              <button
+                onClick={() => {
+                  setMenuOpen(false);
+                  localStorage.removeItem('auth_token');
+                  localStorage.removeItem('user');
+                  router.push('/login');
+                }}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 12,
+                  padding: '10px 14px', borderRadius: 12,
+                  width: '100%', border: 'none', cursor: 'pointer',
+                  background: 'transparent',
+                  color: '#f87171', fontSize: 14, fontWeight: 500,
+                }}
+              >
+                <LogOut size={18} />
+                Sair
+              </button>
             </div>
           )}
         </header>
-        <main style={{
-          flex: 1, overflowY: 'auto', WebkitOverflowScrolling: 'touch',
-          padding: 16, position: 'relative', zIndex: 1,
-        }}>
+        <main
+          ref={mainRef}
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}
+          style={{
+            flex: 1, overflowY: 'auto', WebkitOverflowScrolling: 'touch',
+            padding: 16, position: 'relative', zIndex: 1,
+          }}
+        >
+          {/* Pull-to-refresh indicator */}
+          {(pullDistance > 0 || refreshing) && (
+            <div style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              height: pullDistance,
+              transition: isPulling.current ? 'none' : 'height 0.25s ease-out',
+              overflow: 'hidden',
+              marginBottom: 8,
+            }}>
+              <div style={{
+                width: 28, height: 28,
+                border: '3px solid var(--border-color)',
+                borderTopColor: pullDistance >= PULL_THRESHOLD || refreshing ? '#7C3AED' : 'var(--border-color)',
+                borderRadius: '50%',
+                animation: refreshing ? 'spin 0.6s linear infinite' : 'none',
+                transform: refreshing ? 'none' : `rotate(${pullDistance * 3}deg)`,
+                opacity: Math.min(pullDistance / 40, 1),
+                transition: refreshing ? 'none' : 'opacity 0.1s',
+                boxShadow: pullDistance >= PULL_THRESHOLD || refreshing
+                  ? '0 0 12px rgba(124, 58, 237, 0.4)'
+                  : 'none',
+              }} />
+            </div>
+          )}
           {children}
         </main>
         <MobileBottomNav />

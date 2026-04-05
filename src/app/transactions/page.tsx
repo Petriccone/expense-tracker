@@ -11,6 +11,8 @@ import {
   Trash2,
   X,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import { useTransactions, useCategories, useSettings } from '@/context/AppContext';
 import { Transaction } from '@/types';
@@ -20,10 +22,19 @@ export default function TransactionsPage() {
   const { categories } = useCategories();
   const { settings } = useSettings();
 
+  const [selectedMonth, setSelectedMonth] = useState(() => {
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), 1);
+  });
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<'all' | 'income' | 'expense'>('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
-  const [dateFilter, setDateFilter] = useState('all');
+
+  const navigateMonth = (dir: number) => {
+    setSelectedMonth(prev => new Date(prev.getFullYear(), prev.getMonth() + dir, 1));
+  };
+
+  const monthLabel = selectedMonth.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<Partial<Transaction>>({});
   const [portalRoot, setPortalRoot] = useState<HTMLElement | null>(null);
@@ -40,6 +51,11 @@ export default function TransactionsPage() {
 
   const filteredTransactions = useMemo(() => {
     return transactions.filter((t) => {
+      // Month filter
+      const tDate = new Date(t.date);
+      if (tDate.getMonth() !== selectedMonth.getMonth() || tDate.getFullYear() !== selectedMonth.getFullYear()) {
+        return false;
+      }
       // Search
       if (search && !t.description.toLowerCase().includes(search.toLowerCase())) {
         return false;
@@ -52,31 +68,16 @@ export default function TransactionsPage() {
       if (categoryFilter !== 'all' && t.category !== categoryFilter) {
         return false;
       }
-      // Date filter
-      if (dateFilter !== 'all') {
-        const now = new Date();
-        const tDate = new Date(t.date);
-        if (dateFilter === 'today') {
-          if (tDate.toDateString() !== now.toDateString()) return false;
-        } else if (dateFilter === 'week') {
-          const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-          if (tDate < weekAgo) return false;
-        } else if (dateFilter === 'month') {
-          if (tDate.getMonth() !== now.getMonth() || tDate.getFullYear() !== now.getFullYear()) {
-            return false;
-          }
-        }
-      }
       return true;
     }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  }, [transactions, search, typeFilter, categoryFilter, dateFilter]);
+  }, [transactions, search, typeFilter, categoryFilter, selectedMonth]);
 
   const getCategoryInfo = (categoryName: string) => {
     return categories.find((c) => c.name === categoryName) || { icon: '📦', color: '#64748B' };
   };
 
   const handleDelete = (id: string) => {
-    if (confirm('Are you sure you want to delete this transaction?')) {
+    if (confirm('Tem certeza que deseja excluir esta transação?')) {
       deleteTransaction(id);
     }
   };
@@ -88,12 +89,12 @@ export default function TransactionsPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold gradient-text">Transactions</h1>
-          <p style={{ color: 'var(--text-secondary)' }}>{transactions.length} total transactions</p>
+          <h1 className="text-2xl md:text-3xl font-bold gradient-text">Transações</h1>
+          <p style={{ color: 'var(--text-secondary)' }}>{transactions.length} transações no total</p>
         </div>
         <Link href="/add" className="btn-primary flex items-center gap-2 justify-center w-fit">
           <Plus className="w-5 h-5" />
-          Add Transaction
+          Adicionar Transação
         </Link>
       </div>
 
@@ -105,7 +106,7 @@ export default function TransactionsPage() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: 'var(--text-muted)' }} />
             <input
               type="text"
-              placeholder="Search transactions..."
+              placeholder="Buscar transações..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="input-field pl-10"
@@ -118,9 +119,9 @@ export default function TransactionsPage() {
             onChange={(e) => setTypeFilter(e.target.value as any)}
             className="select-field md:w-40"
           >
-            <option value="all">All Types</option>
-            <option value="income">Income</option>
-            <option value="expense">Expense</option>
+            <option value="all">Todos os Tipos</option>
+            <option value="income">Receita</option>
+            <option value="expense">Despesa</option>
           </select>
 
           {/* Category Filter */}
@@ -129,23 +130,30 @@ export default function TransactionsPage() {
             onChange={(e) => setCategoryFilter(e.target.value)}
             className="select-field md:w-48"
           >
-            <option value="all">All Categories</option>
+            <option value="all">Todas as Categorias</option>
             {uniqueCategories.map((cat) => (
               <option key={cat} value={cat}>{cat}</option>
             ))}
           </select>
 
-          {/* Date Filter */}
-          <select
-            value={dateFilter}
-            onChange={(e) => setDateFilter(e.target.value)}
-            className="select-field md:w-40"
-          >
-            <option value="all">All Time</option>
-            <option value="today">Today</option>
-            <option value="week">This Week</option>
-            <option value="month">This Month</option>
-          </select>
+          {/* Month Navigator */}
+          <div className="glass-card-static flex items-center gap-1 px-2 py-1" style={{ borderRadius: 14 }}>
+            <button
+              onClick={() => navigateMonth(-1)}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 6, borderRadius: 8, color: 'var(--text-secondary)', display: 'flex' }}
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+            <span className="text-sm font-semibold min-w-[130px] text-center capitalize" style={{ color: 'var(--text-primary)' }}>
+              {monthLabel}
+            </span>
+            <button
+              onClick={() => navigateMonth(1)}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 6, borderRadius: 8, color: 'var(--text-secondary)', display: 'flex' }}
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -178,7 +186,7 @@ export default function TransactionsPage() {
                         <span>{transaction.category}</span>
                         <span>•</span>
                         <span>
-                          {new Date(transaction.date).toLocaleDateString('en-US', {
+                          {new Date(transaction.date).toLocaleDateString('pt-BR', {
                             month: 'short',
                             day: 'numeric',
                             year: 'numeric',
@@ -226,8 +234,8 @@ export default function TransactionsPage() {
           </div>
         ) : (
           <div className="text-center py-12" style={{ color: 'var(--text-muted)' }}>
-            <p className="text-lg">No transactions found</p>
-            <p className="text-sm mt-1">Try adjusting your filters</p>
+            <p className="text-lg">Nenhuma transação encontrada</p>
+            <p className="text-sm mt-1">Tente ajustar seus filtros</p>
           </div>
         )}
       </div>
@@ -246,7 +254,7 @@ export default function TransactionsPage() {
             }}
           >
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold" style={{ color: 'var(--text-primary)' }}>Edit Transaction</h2>
+              <h2 className="text-xl font-semibold" style={{ color: 'var(--text-primary)' }}>Editar Transação</h2>
               <button
                 onClick={() => setEditingId(null)}
                 className="p-2 rounded-lg transition-colors"
@@ -259,7 +267,7 @@ export default function TransactionsPage() {
             </div>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Description</label>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Descrição</label>
                 <input
                   type="text"
                   value={editForm.description || ''}
@@ -268,7 +276,7 @@ export default function TransactionsPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Amount</label>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Valor</label>
                 <input
                   type="number"
                   step="0.01"
@@ -278,18 +286,18 @@ export default function TransactionsPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Type</label>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Tipo</label>
                 <select
                   value={editForm.type || 'expense'}
                   onChange={(e) => setEditForm({ ...editForm, type: e.target.value as 'income' | 'expense' })}
                   className="select-field"
                 >
-                  <option value="expense">Expense</option>
-                  <option value="income">Income</option>
+                  <option value="expense">Despesa</option>
+                  <option value="income">Receita</option>
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Category</label>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Categoria</label>
                 <select
                   value={editForm.category || ''}
                   onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
@@ -301,7 +309,7 @@ export default function TransactionsPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Date</label>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Data</label>
                 <input
                   type="date"
                   value={editForm.date || ''}
@@ -315,7 +323,7 @@ export default function TransactionsPage() {
                   onClick={() => setEditingId(null)}
                   className="btn-secondary flex-1"
                 >
-                  Cancel
+                  Cancelar
                 </button>
                 <button
                   onClick={() => {
@@ -329,7 +337,7 @@ export default function TransactionsPage() {
                   }}
                   className="btn-primary flex-1"
                 >
-                  Save Changes
+                  Salvar Alterações
                 </button>
               </div>
             </div>
