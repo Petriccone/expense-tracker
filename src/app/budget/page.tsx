@@ -329,7 +329,7 @@ export default function BudgetPage() {
                             </span>
                             <button
                               onClick={() => handleStartEdit(item.category.id)}
-                              className="p-1 text-slate-300 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                              className="p-1 text-slate-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors md:opacity-0 md:group-hover:opacity-100"
                             >
                               <Edit2 className="w-3.5 h-3.5" />
                             </button>
@@ -351,7 +351,7 @@ export default function BudgetPage() {
                       </div>
                     ) : (
                       <div
-                        className="h-2 border border-dashed border-slate-200 rounded-full cursor-pointer hover:border-purple-300 transition-colors"
+                        className="h-4 border border-dashed border-slate-200 rounded-full cursor-pointer hover:border-purple-300 transition-colors"
                         onClick={() => handleStartEdit(item.category.id)}
                       />
                     )}
