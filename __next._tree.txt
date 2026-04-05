@@ -1,3 +1,3 @@
-:HL["/expense-tracker/_next/static/chunks/0h711hu~q1enq.css","style"]
+:HL["/expense-tracker/_next/static/chunks/0x3qnlu~rytxn.css","style"]
 :HL["https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap","style"]
-0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}},"staleTime":300,"buildId":"p4-9eKjp8gwK9lVwF0uow"}
+0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}},"staleTime":300,"buildId":"ET58isYmwnRPTdUCkW8-s"}
