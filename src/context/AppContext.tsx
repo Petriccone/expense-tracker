@@ -129,7 +129,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(appReducer, initialState);
   const [loaded, setLoaded] = useState(false);
 
-  // Load from localStorage on mount
+  // Load from localStorage on mount, or seed data if empty
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
@@ -148,8 +148,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
       } catch (e) {
         console.error('Failed to load from localStorage', e);
       }
+      setLoaded(true);
+    } else {
+      // Load seed data from Budget.xlsx export
+      const basePath = process.env.__NEXT_ROUTER_BASEPATH || '';
+      fetch(`${basePath}/seed-data.json`)
+        .then(r => r.ok ? r.json() : [])
+        .then(transactions => {
+          if (transactions.length > 0) {
+            dispatch({
+              type: 'LOAD_STATE',
+              payload: { ...initialState, transactions },
+            });
+          }
+        })
+        .catch(() => {})
+        .finally(() => setLoaded(true));
     }
-    setLoaded(true);
   }, []);
 
   // Save to localStorage on state change (only after initial load)
