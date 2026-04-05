@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { AppProvider } from '@/context/AppContext';
-import { LayoutDashboard, Receipt, Tags, BarChart3, Bot, Settings, Upload, Target, Menu, X, LogOut } from 'lucide-react';
+import { LayoutDashboard, Receipt, Tags, BarChart3, Bot, Settings, Upload, Target, Menu, X } from 'lucide-react';
 
 const sidebarItems = [
   { href: '/', icon: LayoutDashboard, label: 'Início' },
@@ -41,15 +41,7 @@ function applyThemeClass(darkMode: boolean) {
 
 function getStoredDarkMode(): boolean {
   try {
-    // Try user-specific storage key first
-    let storageKey = 'expense-tracker-data';
-    const userStr = localStorage.getItem('user');
-    if (userStr) {
-      const user = JSON.parse(userStr);
-      if (user && user.id) {
-        storageKey = 'expense-tracker-data-' + user.id;
-      }
-    }
+    const storageKey = 'expense-tracker-data';
     const stored = localStorage.getItem(storageKey);
     if (stored) {
       const parsed = JSON.parse(stored);
@@ -65,24 +57,6 @@ function getStoredDarkMode(): boolean {
 
 function Sidebar() {
   const pathname = usePathname();
-  const router = useRouter();
-  const [userName, setUserName] = useState('');
-
-  useEffect(() => {
-    try {
-      const userStr = localStorage.getItem('user');
-      if (userStr) {
-        const user = JSON.parse(userStr);
-        setUserName(user.name || user.email || '');
-      }
-    } catch { /* ignore */ }
-  }, []);
-
-  const handleSair = () => {
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('user');
-    router.push('/login');
-  };
 
   return (
     <aside style={{
@@ -142,52 +116,14 @@ function Sidebar() {
         })}
       </nav>
 
-      {/* User info + logout */}
+      {/* Bottom accent */}
       <div style={{ marginTop: 'auto', padding: '16px 12px 0' }}>
         <div style={{
           height: 2,
           background: 'linear-gradient(90deg, #7C3AED, #06B6D4, transparent)',
           borderRadius: 1,
           opacity: 0.4,
-          marginBottom: 16,
         }} />
-        {userName && (
-          <div style={{
-            display: 'flex', alignItems: 'center', gap: 10,
-            padding: '8px 12px', marginBottom: 8,
-          }}>
-            <div style={{
-              width: 32, height: 32, borderRadius: '50%',
-              background: 'linear-gradient(135deg, rgba(124, 58, 237, 0.3), rgba(6, 182, 212, 0.2))',
-              border: '1px solid rgba(124, 58, 237, 0.3)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 14, fontWeight: 600, color: '#c4b5fd',
-            }}>
-              {userName.charAt(0).toUpperCase()}
-            </div>
-            <span style={{
-              fontSize: 13, fontWeight: 500,
-              color: 'var(--text-secondary)',
-              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-            }}>
-              {userName}
-            </span>
-          </div>
-        )}
-        <button
-          onClick={handleSair}
-          style={{
-            display: 'flex', alignItems: 'center', gap: 10,
-            padding: '10px 14px', borderRadius: 12,
-            width: '100%', border: 'none', cursor: 'pointer',
-            background: 'rgba(239, 68, 68, 0.08)',
-            color: '#f87171', fontSize: 14, fontWeight: 500,
-            transition: 'all 0.2s',
-          }}
-        >
-          <LogOut size={18} />
-          Sair
-        </button>
       </div>
     </aside>
   );
@@ -255,22 +191,7 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
   const [ready, setReady] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [authChecked, setAuthChecked] = useState(false);
-  const [userName, setUserName] = useState('');
   const pathname = usePathname();
-  const router = useRouter();
-
-  // Load user info
-  useEffect(() => {
-    try {
-      const userStr = localStorage.getItem('user');
-      if (userStr) {
-        const user = JSON.parse(userStr);
-        setUserName(user.name || user.email || '');
-      }
-    } catch { /* ignore */ }
-    setAuthChecked(true);
-  }, []);
 
   useEffect(() => {
     // Apply theme class before rendering
@@ -300,7 +221,7 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
     };
   }, []);
 
-  if (!ready || !authChecked) {
+  if (!ready) {
     return (
       <div style={{
         minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -418,17 +339,6 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
               </span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              {userName && (
-                <div style={{
-                  width: 30, height: 30, borderRadius: '50%',
-                  background: 'linear-gradient(135deg, rgba(124, 58, 237, 0.3), rgba(6, 182, 212, 0.2))',
-                  border: '1px solid rgba(124, 58, 237, 0.3)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 13, fontWeight: 600, color: '#c4b5fd',
-                }}>
-                  {userName.charAt(0).toUpperCase()}
-                </div>
-              )}
               <button
                 onClick={() => setMenuOpen(!menuOpen)}
                 style={{
@@ -468,29 +378,6 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
                   </Link>
                 );
               })}
-              <div style={{
-                height: 1,
-                background: 'var(--border-color)',
-                margin: '4px 14px',
-              }} />
-              <button
-                onClick={() => {
-                  setMenuOpen(false);
-                  localStorage.removeItem('auth_token');
-                  localStorage.removeItem('user');
-                  router.push('/login');
-                }}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 12,
-                  padding: '10px 14px', borderRadius: 12,
-                  width: '100%', border: 'none', cursor: 'pointer',
-                  background: 'transparent',
-                  color: '#f87171', fontSize: 14, fontWeight: 500,
-                }}
-              >
-                <LogOut size={18} />
-                Sair
-              </button>
             </div>
           )}
         </header>

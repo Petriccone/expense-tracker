@@ -129,21 +129,7 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-function getStorageKey(): string {
-  try {
-    const userStr = localStorage.getItem('user');
-    if (userStr) {
-      const user = JSON.parse(userStr);
-      if (user && user.id) {
-        return 'expense-tracker-data-' + user.id;
-      }
-    }
-  } catch {
-    // ignore
-  }
-  return 'expense-tracker-data';
-}
-
+const STORAGE_KEY = 'expense-tracker-data';
 const LINK_TOKEN_KEY = 'telegram-link-token';
 const DEFAULT_LINK_TOKEN = 'nDV8UVVnOIHmrJNEIvIlfn6n2CzJL2VA';
 
@@ -227,7 +213,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   // Load from localStorage on mount, seed Budget.xlsx data if no transactions
   useEffect(() => {
-    const storageKey = getStorageKey();
+    const storageKey = STORAGE_KEY;
     const stored = localStorage.getItem(storageKey);
     let loadedTransactions: Transaction[] = [];
     let parsedSettings = defaultSettings;
@@ -305,7 +291,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (!loaded || !supabase) return;
 
     // Initialize synced IDs from current state
-    const storedSync = localStorage.getItem(getStorageKey());
+    const storedSync = localStorage.getItem(STORAGE_KEY);
     if (storedSync) {
       try {
         const parsed = JSON.parse(storedSync);
@@ -352,7 +338,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (!loaded) return;
     const linkToken = localStorage.getItem(LINK_TOKEN_KEY) || '';
     localStorage.setItem(
-      getStorageKey(),
+      STORAGE_KEY,
       JSON.stringify({
         transactions: state.transactions,
         categories: state.categories,
