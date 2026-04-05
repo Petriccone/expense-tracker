@@ -260,19 +260,8 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
   const pathname = usePathname();
   const router = useRouter();
 
-  // Auth check
+  // Load user info
   useEffect(() => {
-    if (pathname === '/login') {
-      setAuthChecked(true);
-      return;
-    }
-    const token = localStorage.getItem('auth_token');
-    if (!token) {
-      setAuthChecked(true);
-      router.push('/login');
-      return;
-    }
-    // Load user name for mobile header
     try {
       const userStr = localStorage.getItem('user');
       if (userStr) {
@@ -281,7 +270,7 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
       }
     } catch { /* ignore */ }
     setAuthChecked(true);
-  }, [pathname, router]);
+  }, []);
 
   useEffect(() => {
     // Apply theme class before rendering
