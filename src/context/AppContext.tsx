@@ -213,8 +213,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   // Load from localStorage on mount, seed Budget.xlsx data if no transactions
   useEffect(() => {
-    const storageKey = STORAGE_KEY;
-    const stored = localStorage.getItem(storageKey);
+    const stored = localStorage.getItem(STORAGE_KEY);
     let loadedTransactions: Transaction[] = [];
     let parsedSettings = defaultSettings;
     let parsedCategories = defaultCategories;
@@ -291,10 +290,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (!loaded || !supabase) return;
 
     // Initialize synced IDs from current state
-    const storedSync = localStorage.getItem(STORAGE_KEY);
-    if (storedSync) {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
       try {
-        const parsed = JSON.parse(storedSync);
+        const parsed = JSON.parse(stored);
         (parsed.transactions || []).forEach((t: Transaction) => syncedIdsRef.current.add(t.id));
       } catch { /* ignore */ }
     }

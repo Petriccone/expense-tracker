@@ -123,14 +123,14 @@ export default function ImportPage() {
       const transactions = parseTransactionsFromCSV(text);
 
       if (transactions.length === 0) {
-        setError('Nenhuma transação encontrada no arquivo. Verifique o formato.');
+        setError('No transactions found in file. Check the format.');
         return;
       }
 
       setPreview(transactions);
       setSuccess(true);
     } catch (err) {
-      setError('Falha ao processar o arquivo');
+      setError('Failed to parse file');
     } finally {
       setLoading(false);
     }
@@ -140,7 +140,7 @@ export default function ImportPage() {
     preview.forEach((t) => addTransaction(t));
     setPreview([]);
     setSuccess(false);
-    alert(`${preview.length} transações importadas com sucesso!`);
+    alert(`Successfully imported ${preview.length} transactions!`);
   };
 
   const currencySymbol = settings.currency === 'EUR' ? '€' : settings.currency === 'USD' ? '$' : 'R$';
@@ -159,8 +159,8 @@ export default function ImportPage() {
           <ArrowLeft className="w-5 h-5" />
         </Link>
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold gradient-text">Importar Dados</h1>
-          <p style={{ color: 'var(--text-secondary)' }}>Envie sua planilha de despesas</p>
+          <h1 className="text-2xl md:text-3xl font-bold gradient-text">Import Data</h1>
+          <p style={{ color: 'var(--text-secondary)' }}>Upload your expense spreadsheet</p>
         </div>
       </div>
 
@@ -190,13 +190,13 @@ export default function ImportPage() {
           {loading ? (
             <div className="py-8">
               <Loader2 className="w-12 h-12 mx-auto animate-spin" style={{ color: '#a78bfa' }} />
-              <p className="mt-4" style={{ color: 'var(--text-secondary)' }}>Processando seu arquivo...</p>
+              <p className="mt-4" style={{ color: 'var(--text-secondary)' }}>Processing your file...</p>
             </div>
           ) : (
             <>
               <FileSpreadsheet className="w-12 h-12 mx-auto mb-4" style={{ color: '#a78bfa', filter: 'drop-shadow(0 0 8px rgba(124, 58, 237, 0.3))' }} />
-              <p className="text-lg font-medium" style={{ color: 'var(--text-primary)' }}>Clique para enviar sua planilha</p>
-              <p className="text-sm mt-2" style={{ color: 'var(--text-muted)' }}>Suporta arquivos .csv</p>
+              <p className="text-lg font-medium" style={{ color: 'var(--text-primary)' }}>Click to upload your spreadsheet</p>
+              <p className="text-sm mt-2" style={{ color: 'var(--text-muted)' }}>Supports .csv files</p>
             </>
           )}
         </div>
@@ -225,7 +225,7 @@ export default function ImportPage() {
             }}
           >
             <Check className="w-4 h-4" />
-            {preview.length} transações encontradas para importar
+            Found {preview.length} transactions to import
           </div>
         )}
       </div>
@@ -234,9 +234,9 @@ export default function ImportPage() {
       {preview.length > 0 && (
         <div className="glass-card-static p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>Pré-visualização</h2>
+            <h2 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>Preview</h2>
             <button onClick={handleImport} className="btn-primary">
-              Importar Todas ({preview.length})
+              Import All ({preview.length})
             </button>
           </div>
 
@@ -258,7 +258,7 @@ export default function ImportPage() {
             ))}
             {preview.length > 10 && (
               <p className="text-center text-sm py-2" style={{ color: 'var(--text-muted)' }}>
-                ...e mais {preview.length - 10}
+                ...and {preview.length - 10} more
               </p>
             )}
           </div>
@@ -267,8 +267,8 @@ export default function ImportPage() {
 
       {/* Instructions */}
       <div className="glass-card-static p-6">
-        <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Formato CSV</h2>
-        <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>Seu CSV deve ter colunas como:</p>
+        <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>CSV Format</h2>
+        <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>Your CSV should have columns like:</p>
         <div
           className="rounded-xl p-4 text-xs font-mono overflow-x-auto"
           style={{ background: 'var(--bg-input)', border: '1px solid var(--border-color)' }}
@@ -276,18 +276,18 @@ export default function ImportPage() {
           <table className="w-full">
             <thead>
               <tr style={{ color: 'var(--text-secondary)' }} className="font-semibold">
-                <td className="pr-3 pb-2">Data</td>
-                <td className="pr-3 pb-2">Descrição</td>
-                <td className="pr-3 pb-2">Valor</td>
-                <td className="pb-2">Categoria</td>
+                <td className="pr-3 pb-2">Date</td>
+                <td className="pr-3 pb-2">Description</td>
+                <td className="pr-3 pb-2">Amount</td>
+                <td className="pb-2">Category</td>
               </tr>
             </thead>
             <tbody>
               <tr style={{ color: 'var(--text-muted)' }}>
                 <td className="pr-3">2026-04-03</td>
-                <td className="pr-3">Supermercado</td>
+                <td className="pr-3">Supermarket</td>
                 <td className="pr-3">45.50</td>
-                <td>Alimentação</td>
+                <td>Food</td>
               </tr>
             </tbody>
           </table>

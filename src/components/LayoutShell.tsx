@@ -1,34 +1,34 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { AppProvider } from '@/context/AppContext';
 import { LayoutDashboard, Receipt, Tags, BarChart3, Bot, Settings, Upload, Target, Menu, X } from 'lucide-react';
 
 const sidebarItems = [
-  { href: '/', icon: LayoutDashboard, label: 'Início' },
-  { href: '/transactions', icon: Receipt, label: 'Transações' },
-  { href: '/categories', icon: Tags, label: 'Categorias' },
-  { href: '/budget', icon: Target, label: 'Orçamento' },
-  { href: '/reports', icon: BarChart3, label: 'Relatórios' },
-  { href: '/import', icon: Upload, label: 'Importar' },
-  { href: '/ai', icon: Bot, label: 'IA' },
-  { href: '/settings', icon: Settings, label: 'Configurações' },
+  { href: '/', icon: LayoutDashboard, label: 'Home' },
+  { href: '/transactions', icon: Receipt, label: 'Transactions' },
+  { href: '/categories', icon: Tags, label: 'Categories' },
+  { href: '/budget', icon: Target, label: 'Budget' },
+  { href: '/reports', icon: BarChart3, label: 'Reports' },
+  { href: '/import', icon: Upload, label: 'Import' },
+  { href: '/ai', icon: Bot, label: 'AI' },
+  { href: '/settings', icon: Settings, label: 'Settings' },
 ];
 
 const mobileNavItems = [
-  { href: '/', icon: LayoutDashboard, label: 'Início' },
+  { href: '/', icon: LayoutDashboard, label: 'Home' },
   { href: '/transactions', icon: Receipt, label: 'Tx' },
-  { href: '/budget', icon: Target, label: 'Orçamento' },
-  { href: '/import', icon: Upload, label: 'Importar' },
-  { href: '/ai', icon: Bot, label: 'IA' },
+  { href: '/budget', icon: Target, label: 'Budget' },
+  { href: '/import', icon: Upload, label: 'Import' },
+  { href: '/ai', icon: Bot, label: 'AI' },
 ];
 
 const mobileMenuItems = [
-  { href: '/categories', icon: Tags, label: 'Categorias' },
-  { href: '/reports', icon: BarChart3, label: 'Relatórios' },
-  { href: '/settings', icon: Settings, label: 'Configurações' },
+  { href: '/categories', icon: Tags, label: 'Categories' },
+  { href: '/reports', icon: BarChart3, label: 'Reports' },
+  { href: '/settings', icon: Settings, label: 'Settings' },
 ];
 
 function applyThemeClass(darkMode: boolean) {
@@ -41,8 +41,7 @@ function applyThemeClass(darkMode: boolean) {
 
 function getStoredDarkMode(): boolean {
   try {
-    const storageKey = 'expense-tracker-data';
-    const stored = localStorage.getItem(storageKey);
+    const stored = localStorage.getItem('expense-tracker-data');
     if (stored) {
       const parsed = JSON.parse(stored);
       if (parsed.settings && typeof parsed.settings.darkMode === 'boolean') {
@@ -57,7 +56,6 @@ function getStoredDarkMode(): boolean {
 
 function Sidebar() {
   const pathname = usePathname();
-
   return (
     <aside style={{
       width: 260, minHeight: '100vh',
@@ -116,7 +114,7 @@ function Sidebar() {
         })}
       </nav>
 
-      {/* Bottom accent */}
+      {/* Bottom accent line */}
       <div style={{ marginTop: 'auto', padding: '16px 12px 0' }}>
         <div style={{
           height: 2,
@@ -260,51 +258,6 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
     );
   }
 
-  /* Mobile: pull-to-refresh state */
-  const [pullDistance, setPullDistance] = useState(0);
-  const [refreshing, setRefreshing] = useState(false);
-  const touchStartY = useRef(0);
-  const isPulling = useRef(false);
-  const mainRef = useRef<HTMLElement>(null);
-  const PULL_THRESHOLD = 80;
-
-  const onTouchStart = useCallback((e: React.TouchEvent) => {
-    if (refreshing) return;
-    const el = mainRef.current;
-    if (el && el.scrollTop <= 0) {
-      touchStartY.current = e.touches[0].clientY;
-      isPulling.current = true;
-    }
-  }, [refreshing]);
-
-  const onTouchMove = useCallback((e: React.TouchEvent) => {
-    if (!isPulling.current || refreshing) return;
-    const el = mainRef.current;
-    if (!el || el.scrollTop > 0) {
-      isPulling.current = false;
-      setPullDistance(0);
-      return;
-    }
-    const diff = e.touches[0].clientY - touchStartY.current;
-    if (diff > 0) {
-      // Dampen the pull distance for a natural feel
-      setPullDistance(Math.min(diff * 0.5, 120));
-    }
-  }, [refreshing]);
-
-  const onTouchEnd = useCallback(() => {
-    if (!isPulling.current) return;
-    isPulling.current = false;
-    if (pullDistance >= PULL_THRESHOLD && !refreshing) {
-      setRefreshing(true);
-      setPullDistance(PULL_THRESHOLD * 0.5);
-      // Small delay so the user sees the spinner before reload
-      setTimeout(() => window.location.reload(), 300);
-    } else {
-      setPullDistance(0);
-    }
-  }, [pullDistance, refreshing]);
-
   /* Mobile: flex column */
   return (
     <AppProvider>
@@ -338,18 +291,16 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
                 ExpensesAI
               </span>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <button
-                onClick={() => setMenuOpen(!menuOpen)}
-                style={{
-                  background: 'none', border: 'none', cursor: 'pointer',
-                  color: 'var(--text-secondary)', padding: 6, borderRadius: 10,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                }}
-              >
-                {menuOpen ? <X size={22} /> : <Menu size={22} />}
-              </button>
-            </div>
+            <button
+              onClick={() => setMenuOpen(!menuOpen)}
+              style={{
+                background: 'none', border: 'none', cursor: 'pointer',
+                color: 'var(--text-secondary)', padding: 6, borderRadius: 10,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}
+            >
+              {menuOpen ? <X size={22} /> : <Menu size={22} />}
+            </button>
           </div>
           {menuOpen && (
             <div style={{
@@ -381,40 +332,10 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
             </div>
           )}
         </header>
-        <main
-          ref={mainRef}
-          onTouchStart={onTouchStart}
-          onTouchMove={onTouchMove}
-          onTouchEnd={onTouchEnd}
-          style={{
-            flex: 1, overflowY: 'auto', WebkitOverflowScrolling: 'touch',
-            padding: 16, position: 'relative', zIndex: 1,
-          }}
-        >
-          {/* Pull-to-refresh indicator */}
-          {(pullDistance > 0 || refreshing) && (
-            <div style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              height: pullDistance,
-              transition: isPulling.current ? 'none' : 'height 0.25s ease-out',
-              overflow: 'hidden',
-              marginBottom: 8,
-            }}>
-              <div style={{
-                width: 28, height: 28,
-                border: '3px solid var(--border-color)',
-                borderTopColor: pullDistance >= PULL_THRESHOLD || refreshing ? '#7C3AED' : 'var(--border-color)',
-                borderRadius: '50%',
-                animation: refreshing ? 'spin 0.6s linear infinite' : 'none',
-                transform: refreshing ? 'none' : `rotate(${pullDistance * 3}deg)`,
-                opacity: Math.min(pullDistance / 40, 1),
-                transition: refreshing ? 'none' : 'opacity 0.1s',
-                boxShadow: pullDistance >= PULL_THRESHOLD || refreshing
-                  ? '0 0 12px rgba(124, 58, 237, 0.4)'
-                  : 'none',
-              }} />
-            </div>
-          )}
+        <main style={{
+          flex: 1, overflowY: 'auto', WebkitOverflowScrolling: 'touch',
+          padding: 16, position: 'relative', zIndex: 1,
+        }}>
           {children}
         </main>
         <MobileBottomNav />

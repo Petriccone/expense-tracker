@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { LogIn, UserPlus, Loader2, Wallet } from 'lucide-react';
-import bcrypt from 'bcryptjs';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -30,18 +29,8 @@ export default function LoginPage() {
         const storedUsers = JSON.parse(localStorage.getItem('expense-tracker-users') || '[]');
         const user = storedUsers.find((u: { email: string }) => u.email === form.email);
 
-        if (!user) {
-          setError('E-mail ou senha inválidos');
-          return;
-        }
-
-        // Support both hashed and legacy plain-text passwords
-        const isMatch = user.password.startsWith('$2')
-          ? await bcrypt.compare(form.password, user.password)
-          : user.password === form.password;
-
-        if (!isMatch) {
-          setError('E-mail ou senha inválidos');
+        if (!user || user.password !== form.password) {
+          setError('Invalid email or password');
           return;
         }
 
@@ -52,15 +41,14 @@ export default function LoginPage() {
         const storedUsers = JSON.parse(localStorage.getItem('expense-tracker-users') || '[]');
 
         if (storedUsers.find((u: { email: string }) => u.email === form.email)) {
-          setError('E-mail já cadastrado');
+          setError('Email already registered');
           return;
         }
 
-        const hashedPassword = await bcrypt.hash(form.password, 10);
         const newUser = {
           id: Date.now().toString(),
           email: form.email,
-          password: hashedPassword,
+          password: form.password,
           name: form.name || form.email.split('@')[0],
         };
 
@@ -72,7 +60,7 @@ export default function LoginPage() {
 
       router.push('/');
     } catch (err) {
-      setError('Algo deu errado');
+      setError('Something went wrong');
     } finally {
       setLoading(false);
     }
@@ -147,7 +135,7 @@ export default function LoginPage() {
           >
             ExpensesAI
           </h1>
-          <p style={{ color: 'var(--text-secondary)' }}>Controle inteligente de despesas</p>
+          <p style={{ color: 'var(--text-secondary)' }}>Smart expense tracking, powered by intelligence</p>
         </div>
 
         {/* Login Card */}
@@ -158,7 +146,7 @@ export default function LoginPage() {
           }}
         >
           <h2 className="text-2xl font-bold mb-6 text-center" style={{ color: 'var(--text-primary)' }}>
-            {isLogin ? 'Bem-vindo de volta!' : 'Criar conta'}
+            {isLogin ? 'Welcome back!' : 'Create account'}
           </h2>
 
           {error && (
@@ -177,12 +165,12 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {!isLogin && (
               <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Nome</label>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Name</label>
                 <input
                   type="text"
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  placeholder="Seu nome"
+                  placeholder="Your name"
                   className="input-field"
                   required={!isLogin}
                 />
@@ -190,19 +178,19 @@ export default function LoginPage() {
             )}
 
             <div>
-              <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>E-mail</label>
+              <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Email</label>
               <input
                 type="email"
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
-                placeholder="voce@exemplo.com"
+                placeholder="you@example.com"
                 className="input-field"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Senha</label>
+              <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Password</label>
               <input
                 type="password"
                 value={form.password}
@@ -225,12 +213,12 @@ export default function LoginPage() {
               ) : isLogin ? (
                 <>
                   <LogIn className="w-5 h-5" />
-                  Entrar
+                  Sign In
                 </>
               ) : (
                 <>
                   <UserPlus className="w-5 h-5" />
-                  Criar Conta
+                  Create Account
                 </>
               )}
             </button>
@@ -250,13 +238,13 @@ export default function LoginPage() {
                 cursor: 'pointer',
               }}
             >
-              {isLogin ? 'Não tem uma conta? Cadastre-se' : 'Já tem uma conta? Entre'}
+              {isLogin ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
             </button>
           </div>
         </div>
 
         <p className="text-center text-sm mt-6" style={{ color: 'var(--text-muted)' }}>
-          Demo: Cadastre uma nova conta para começar
+          Demo: Register a new account to get started
         </p>
       </div>
     </div>

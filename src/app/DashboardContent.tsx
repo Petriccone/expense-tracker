@@ -96,7 +96,7 @@ export default function DashboardContent() {
 
     for (let i = 5; i >= 0; i--) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const monthName = d.toLocaleDateString('pt-BR', { month: 'short' });
+      const monthName = d.toLocaleDateString('en-US', { month: 'short' });
       const monthTransactions = transactions.filter((t) => {
         const td = new Date(t.date);
         return td.getMonth() === d.getMonth() && td.getFullYear() === d.getFullYear();
@@ -143,8 +143,8 @@ export default function DashboardContent() {
       newInsights.push({
         id: '1',
         type: 'warning',
-        title: 'Alerta de Orçamento',
-        description: `Você usou ${Math.round((totalExpenses / settings.monthlyBudget) * 100)}% do seu orçamento mensal.`,
+        title: 'Budget Alert',
+        description: `You've used ${Math.round((totalExpenses / settings.monthlyBudget) * 100)}% of your monthly budget.`,
         createdAt: new Date().toISOString(),
       });
     }
@@ -160,8 +160,8 @@ export default function DashboardContent() {
       newInsights.push({
         id: '2',
         type: 'info',
-        title: 'Padrão de Gastos',
-        description: `${topCategory[0]} representa ${Math.round((topCategory[1] / totalExpenses) * 100)}% das suas despesas este mês.`,
+        title: 'Spending Pattern',
+        description: `${topCategory[0]} accounts for ${Math.round((topCategory[1] / totalExpenses) * 100)}% of your expenses this month.`,
         createdAt: new Date().toISOString(),
       });
     }
@@ -172,8 +172,8 @@ export default function DashboardContent() {
       newInsights.push({
         id: '3',
         type: 'tip',
-        title: 'Oportunidade de Economia',
-        description: `Considere economizar ${currencySymbol}${savings} este mês (20% do seu excedente) para emergências.`,
+        title: 'Savings Opportunity',
+        description: `Consider saving ${currencySymbol}${savings} this month (20% of your surplus) for emergencies.`,
         createdAt: new Date().toISOString(),
       });
     }
@@ -194,7 +194,7 @@ export default function DashboardContent() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold gradient-text">Painel</h1>
+          <h1 className="text-2xl md:text-3xl font-bold gradient-text">Dashboard</h1>
           <p style={{ color: 'var(--text-secondary)' }}>Visão geral das suas finanças.</p>
         </div>
         <div className="flex items-center gap-3">
@@ -221,7 +221,7 @@ export default function DashboardContent() {
             className="btn-primary flex items-center gap-2 justify-center"
           >
             <Plus className="w-5 h-5" />
-            <span className="hidden md:inline">Adicionar Transação</span>
+            <span className="hidden md:inline">Add Transaction</span>
           </Link>
         </div>
       </div>
@@ -245,7 +245,7 @@ export default function DashboardContent() {
               {Math.abs(stats.percentChange).toFixed(1)}%
             </span>
           </div>
-          <p style={{ color: 'var(--text-secondary)', fontSize: 14 }}>Saldo Mensal</p>
+          <p style={{ color: 'var(--text-secondary)', fontSize: 14 }}>Monthly Balance</p>
           <p className={`text-2xl font-bold ${stats.net >= 0 ? 'text-green-400' : 'text-red-400'}`}>
             {formatAmount(stats.net)}
           </p>
@@ -264,7 +264,7 @@ export default function DashboardContent() {
               <TrendingUp className="w-6 h-6 text-green-400" />
             </div>
           </div>
-          <p style={{ color: 'var(--text-secondary)', fontSize: 14 }}>Receita Mensal</p>
+          <p style={{ color: 'var(--text-secondary)', fontSize: 14 }}>Monthly Income</p>
           <p className="text-2xl font-bold text-green-400">{formatAmount(stats.income)}</p>
         </div>
 
@@ -281,7 +281,7 @@ export default function DashboardContent() {
               <TrendingDown className="w-6 h-6 text-red-400" />
             </div>
           </div>
-          <p style={{ color: 'var(--text-secondary)', fontSize: 14 }}>Despesas Mensais</p>
+          <p style={{ color: 'var(--text-secondary)', fontSize: 14 }}>Monthly Expenses</p>
           <p className="text-2xl font-bold text-red-400">{formatAmount(stats.expenses)}</p>
         </div>
       </div>
@@ -290,7 +290,7 @@ export default function DashboardContent() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Category Pie Chart */}
         <div className="glass-card-static p-6">
-          <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Gastos por Categoria</h2>
+          <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Spending by Category</h2>
           {categoryData.length > 0 ? (
             <div className="chart-container">
               <ResponsiveContainer width="100%" height="100%">
@@ -326,7 +326,7 @@ export default function DashboardContent() {
             </div>
           ) : (
             <div className="h-64 flex items-center justify-center" style={{ color: 'var(--text-muted)' }}>
-              Sem despesas este mês
+              No expenses this month
             </div>
           )}
           <div className="flex flex-wrap gap-2 mt-4">
@@ -350,7 +350,7 @@ export default function DashboardContent() {
 
         {/* Monthly Bar Chart */}
         <div className="glass-card-static p-6">
-          <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Tendência Mensal</h2>
+          <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Monthly Trend</h2>
           {monthlyData.some((m) => m.income > 0 || m.expense > 0) ? (
             <div className="chart-container">
               <ResponsiveContainer width="100%" height="100%">
@@ -370,14 +370,14 @@ export default function DashboardContent() {
                     itemStyle={{ color: 'var(--text-primary)' }}
                     labelStyle={{ color: 'var(--text-secondary)' }}
                   />
-                  <Bar dataKey="income" fill="#10B981" radius={[4, 4, 0, 0]} name="Receita" />
-                  <Bar dataKey="expense" fill="#EF4444" radius={[4, 4, 0, 0]} name="Despesa" />
+                  <Bar dataKey="income" fill="#10B981" radius={[4, 4, 0, 0]} name="Income" />
+                  <Bar dataKey="expense" fill="#EF4444" radius={[4, 4, 0, 0]} name="Expense" />
                 </BarChart>
               </ResponsiveContainer>
             </div>
           ) : (
             <div className="h-64 flex items-center justify-center" style={{ color: 'var(--text-muted)' }}>
-              Sem dados ainda
+              No data yet
             </div>
           )}
         </div>
@@ -391,7 +391,7 @@ export default function DashboardContent() {
         >
           <div className="flex items-center gap-2 mb-4">
             <Sparkles className="w-5 h-5" style={{ color: '#a78bfa', filter: 'drop-shadow(0 0 6px rgba(124, 58, 237, 0.4))' }} />
-            <h2 className="text-lg font-semibold gradient-text">Insights da IA</h2>
+            <h2 className="text-lg font-semibold gradient-text">AI Insights</h2>
           </div>
           <div className="space-y-3">
             {insights.map((insight) => (
@@ -429,13 +429,13 @@ export default function DashboardContent() {
       {/* Recent Transactions */}
       <div className="glass-card-static p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>Transações Recentes</h2>
+          <h2 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>Recent Transactions</h2>
           <Link
             href="/transactions"
             className="text-sm font-medium transition-colors"
             style={{ color: '#a78bfa' }}
           >
-            Ver Todas
+            View All
           </Link>
         </div>
         {recentTransactions.length > 0 ? (
@@ -467,7 +467,7 @@ export default function DashboardContent() {
                     <div>
                       <p className="font-medium" style={{ color: 'var(--text-primary)' }}>{transaction.description}</p>
                       <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-                        {new Date(transaction.date).toLocaleDateString('pt-BR', {
+                        {new Date(transaction.date).toLocaleDateString('en-US', {
                           month: 'short',
                           day: 'numeric',
                         })}
@@ -488,9 +488,9 @@ export default function DashboardContent() {
           </div>
         ) : (
           <div className="text-center py-8" style={{ color: 'var(--text-muted)' }}>
-            <p>Nenhuma transação ainda</p>
+            <p>No transactions yet</p>
             <Link href="/add" className="font-medium mt-2 inline-block" style={{ color: '#a78bfa' }}>
-              Adicione sua primeira transação
+              Add your first transaction
             </Link>
           </div>
         )}

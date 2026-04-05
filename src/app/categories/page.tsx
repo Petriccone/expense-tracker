@@ -33,7 +33,7 @@ export default function CategoriesPage() {
     if (!file) return;
     if (!file.type.startsWith('image/')) return;
     if (file.size > 512 * 1024) {
-      alert('A imagem deve ter menos de 512KB');
+      alert('Image must be under 512KB');
       return;
     }
     const reader = new FileReader();
@@ -73,7 +73,7 @@ export default function CategoriesPage() {
   };
 
   const handleDelete = (id: string) => {
-    if (confirm('Tem certeza que deseja excluir esta categoria?')) {
+    if (confirm('Are you sure you want to delete this category?')) {
       deleteCategory(id);
     }
   };
@@ -83,15 +83,15 @@ export default function CategoriesPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold gradient-text">Categorias</h1>
-          <p style={{ color: 'var(--text-secondary)' }}>Gerencie suas categorias de despesas e receitas</p>
+          <h1 className="text-2xl md:text-3xl font-bold gradient-text">Categories</h1>
+          <p style={{ color: 'var(--text-secondary)' }}>Manage your expense and income categories</p>
         </div>
         <button
           onClick={() => setIsAdding(true)}
           className="btn-primary flex items-center gap-2 justify-center w-fit"
         >
           <Plus className="w-5 h-5" />
-          Adicionar Categoria
+          Add Category
         </button>
       </div>
 
@@ -104,7 +104,7 @@ export default function CategoriesPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
-                {editingId ? 'Editar Categoria' : 'Nova Categoria'}
+                {editingId ? 'Edit Category' : 'New Category'}
               </h2>
               <button
                 type="button"
@@ -124,31 +124,31 @@ export default function CategoriesPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Nome</label>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Name</label>
                 <input
                   type="text"
                   value={form.name || ''}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  placeholder="Nome da categoria"
+                  placeholder="Category name"
                   className="input-field"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Tipo</label>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Type</label>
                 <select
                   value={form.type || 'expense'}
                   onChange={(e) => setForm({ ...form, type: e.target.value as 'income' | 'expense' })}
                   className="select-field"
                 >
-                  <option value="expense">Despesa</option>
-                  <option value="income">Receita</option>
+                  <option value="expense">Expense</option>
+                  <option value="income">Income</option>
                 </select>
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>Ícone</label>
+              <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>Icon</label>
               <div className="flex flex-wrap gap-2 items-center">
                 {EMOJI_OPTIONS.map((emoji) => (
                   <button
@@ -184,7 +184,7 @@ export default function CategoriesPage() {
                       : '2px dashed var(--dashed-border)',
                     cursor: 'pointer',
                   }}
-                  title="Enviar ícone personalizado"
+                  title="Upload custom icon"
                 >
                   {form.icon?.startsWith('data:image') ? (
                     <img src={form.icon} alt="" className="w-7 h-7 rounded object-cover" />
@@ -202,13 +202,13 @@ export default function CategoriesPage() {
               </div>
               {form.icon?.startsWith('data:image') && (
                 <p className="text-xs mt-2" style={{ color: 'var(--text-muted)' }}>
-                  Ícone personalizado enviado. Clique em ⬆ para alterar ou selecione um emoji acima.
+                  Custom icon uploaded. Click ⬆ to change or select an emoji above.
                 </p>
               )}
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>Cor</label>
+              <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>Color</label>
               <div className="flex flex-wrap gap-2">
                 {COLOR_OPTIONS.map((color) => (
                   <button
@@ -231,7 +231,7 @@ export default function CategoriesPage() {
 
             <div className="flex gap-3 pt-4">
               <button type="submit" className="btn-primary flex-1">
-                {editingId ? 'Salvar Alterações' : 'Adicionar Categoria'}
+                {editingId ? 'Save Changes' : 'Add Category'}
               </button>
             </div>
           </form>
@@ -242,7 +242,7 @@ export default function CategoriesPage() {
       <div className="glass-card-static p-6">
         <h2 className="text-lg font-semibold mb-4 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
           <span className="w-3 h-3 bg-red-500 rounded-full" style={{ boxShadow: '0 0 8px rgba(239, 68, 68, 0.4)' }} />
-          Categorias de Despesas
+          Expense Categories
         </h2>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
           {expenseCategories.map((cat) => (
@@ -295,7 +295,7 @@ export default function CategoriesPage() {
       <div className="glass-card-static p-6">
         <h2 className="text-lg font-semibold mb-4 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
           <span className="w-3 h-3 bg-green-500 rounded-full" style={{ boxShadow: '0 0 8px rgba(16, 185, 129, 0.4)' }} />
-          Categorias de Receitas
+          Income Categories
         </h2>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
           {incomeCategories.map((cat) => (

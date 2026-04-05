@@ -12,7 +12,7 @@ export default function AIPage() {
     {
       id: '1',
       role: 'assistant',
-      content: "Olá! Sou seu assistente financeiro com IA. Pergunte qualquer coisa sobre seus gastos, economias ou saúde financeira. Por exemplo:\n\n• Quanto gastei com alimentação este mês?\n• Qual é minha maior categoria de despesa?\n• Devo reduzir alguma categoria?\n• Quanto economizei este mês?",
+      content: "Hello! I'm your AI financial assistant. Ask me anything about your spending, savings, or financial health. For example:\n\n• How much did I spend on groceries this month?\n• What's my biggest expense category?\n• Should I cut back on any category?\n• How much have I saved this month?",
       createdAt: new Date().toISOString(),
     },
   ]);
@@ -58,10 +58,10 @@ export default function AIPage() {
     if (q.includes('grocery') || q.includes('food') || q.includes('restaurant') || q.includes('meal')) {
       const foodSpending = categoryTotals['Food & Dining'] || 0;
       if (foodSpending > 0) {
-        return `Você gastou **${formatAmount(foodSpending)}** com alimentação este mês. ` +
-          (foodSpending > 300 ? "É bastante! Considere cozinhar em casa com mais frequência para economizar." : "É um valor razoável para alimentação.");
+        return `You've spent **${formatAmount(foodSpending)}** on food & dining this month. ` +
+          (foodSpending > 300 ? "That's quite a bit! Consider cooking at home more often to save money." : "That's a reasonable amount for food.");
       }
-      return "Não encontrei despesas com alimentação nos seus registros este mês.";
+      return "I don't see any food-related expenses in your records this month.";
     }
 
     // Biggest expense
@@ -69,42 +69,42 @@ export default function AIPage() {
       if (sortedCategories.length > 0) {
         const [topCat, amount] = sortedCategories[0];
         const percentage = ((amount / expenses) * 100).toFixed(1);
-        return `Sua maior despesa este mês é **${topCat}** com **${formatAmount(amount)}** (${percentage}% do total de despesas).`;
+        return `Your biggest expense this month is **${topCat}** at **${formatAmount(amount)}** (${percentage}% of total expenses).`;
       }
-      return "Você não tem despesas registradas este mês.";
+      return "You don't have any expenses recorded this month.";
     }
 
     // Savings/net
     if (q.includes('saving') || q.includes('net') || q.includes('left') || q.includes('surplus')) {
       if (net > 0) {
-        return `Ótima notícia! Você tem um **saldo positivo** de **${formatAmount(net)}** este mês. ` +
-          `Isso representa ${((net / income) * 100).toFixed(1)}% da sua renda economizada! ` +
-          (net > 500 ? "Considere investir parte disso em poupança ou investimentos." : "Continue assim!");
+        return `Great news! You have a **positive net balance** of **${formatAmount(net)}** this month. ` +
+          `That's ${((net / income) * 100).toFixed(1)}% of your income saved! ` +
+          (net > 500 ? "Consider putting some of that into savings or investments." : "Keep it up!");
       } else if (net < 0) {
-        return `Seu saldo está **negativo** em **${formatAmount(Math.abs(net))}**. ` +
-          "Você está gastando mais do que ganha. Revise suas despesas e encontre áreas para cortar.";
+        return `Your net balance is **negative** at **${formatAmount(Math.abs(net))}**. ` +
+          "You're spending more than you earn. Review your expenses and find areas to cut back.";
       }
-      return "Você tem um orçamento equilibrado este mês - receita igual às despesas.";
+      return "You have a balanced budget this month - income equals expenses.";
     }
 
     // Total spending
     if (q.includes('total') && (q.includes('spend') || q.includes('expense'))) {
-      return `Suas despesas totais este mês são **${formatAmount(expenses)}** em ${sortedCategories.length} categorias.`;
+      return `Your total expenses this month are **${formatAmount(expenses)}** across ${sortedCategories.length} categories.`;
     }
 
     // Total income
     if (q.includes('total') && q.includes('income') && !q.includes('expense')) {
-      return `Sua receita total este mês é **${formatAmount(income)}**.`;
+      return `Your total income this month is **${formatAmount(income)}**.`;
     }
 
     // Monthly summary
     if (q.includes('summary') || q.includes('overview') || q.includes('month')) {
-      let response = `Aqui está seu resumo mensal:\n\n`;
-      response += `💰 **Receita:** ${formatAmount(income)}\n`;
-      response += `💸 **Despesas:** ${formatAmount(expenses)}\n`;
-      response += `${net >= 0 ? '✅' : '⚠️'} **Saldo:** ${formatAmount(net)}\n\n`;
+      let response = `Here's your monthly summary:\n\n`;
+      response += `💰 **Income:** ${formatAmount(income)}\n`;
+      response += `💸 **Expenses:** ${formatAmount(expenses)}\n`;
+      response += `${net >= 0 ? '✅' : '⚠️'} **Net:** ${formatAmount(net)}\n\n`;
       if (sortedCategories.length > 0) {
-        response += `**Maiores despesas:**\n`;
+        response += `**Top expenses:**\n`;
         sortedCategories.slice(0, 3).forEach(([cat, amount], i) => {
           response += `${i + 1}. ${cat}: ${formatAmount(amount)}\n`;
         });
@@ -116,42 +116,42 @@ export default function AIPage() {
     if (q.includes('budget')) {
       if (expenses > settings.monthlyBudget) {
         const overBy = expenses - settings.monthlyBudget;
-        return `⚠️ Você ultrapassou seu orçamento mensal de ${formatAmount(settings.monthlyBudget)} em **${formatAmount(overBy)}**. ` +
-          "Considere reduzir despesas não essenciais.";
+        return `⚠️ You've exceeded your monthly budget of ${formatAmount(settings.monthlyBudget)} by **${formatAmount(overBy)}**. ` +
+          "Consider cutting back on non-essential expenses.";
       }
       const remaining = settings.monthlyBudget - expenses;
       const percentUsed = ((expenses / settings.monthlyBudget) * 100).toFixed(1);
-      return `Você está usando ${percentUsed}% do seu orçamento mensal (${formatAmount(expenses)} de ${formatAmount(settings.monthlyBudget)}). ` +
-        `Você ainda tem **${formatAmount(remaining)}** disponível.`;
+      return `You're using ${percentUsed}% of your monthly budget (${formatAmount(expenses)} of ${formatAmount(settings.monthlyBudget)}). ` +
+        `You have **${formatAmount(remaining)}** remaining.`;
     }
 
     // Should I cut back
     if (q.includes('cut') || q.includes('reduce') || q.includes('save') || q.includes('advice')) {
-      if (sortedCategories.length === 0) return "Você ainda não tem dados suficientes. Adicione algumas transações primeiro!";
+      if (sortedCategories.length === 0) return "You don't have enough data yet. Add some transactions first!";
 
       const [topCat] = sortedCategories;
       const percentage = ((topCat[1] / expenses) * 100).toFixed(1);
 
       if (parseFloat(percentage) > 40) {
-        return `Eu sugiro analisar seus gastos com **${topCat[0]}** - representa ${percentage}% das suas despesas. ` +
-          "Reduzir isso pode melhorar significativamente suas economias.";
+        return `I'd suggest looking at your **${topCat[0]}** spending - it accounts for ${percentage}% of your expenses. ` +
+          "Reducing this could significantly improve your savings.";
       }
-      return "Seus gastos parecem bem equilibrados entre as categorias. Continue monitorando suas despesas!";
+      return "Your spending looks fairly balanced across categories. Keep monitoring your expenses!";
     }
 
     // Help
     if (q.includes('help') || q.includes('what')) {
-      return "Aqui estão algumas coisas que você pode me perguntar:\n\n" +
-        "• Quanto gastei com [categoria]?\n" +
-        "• Qual é minha maior despesa?\n" +
-        "• Quanto economizei este mês?\n" +
-        "• Qual é meu resumo mensal?\n" +
-        "• Estou acima do orçamento?\n" +
-        "• Devo reduzir alguma coisa?";
+      return "Here are some things you can ask me:\n\n" +
+        "• How much did I spend on [category]?\n" +
+        "• What's my biggest expense?\n" +
+        "• How much have I saved this month?\n" +
+        "• What's my monthly summary?\n" +
+        "• Am I over budget?\n" +
+        "• Should I cut back on anything?";
     }
 
     // Default response
-    return "Não tenho certeza se entendi. Tente perguntar sobre seus gastos, economias ou peça um resumo mensal!";
+    return "I'm not sure I understand. Try asking about your spending, savings, or ask for a monthly summary!";
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -191,9 +191,9 @@ export default function AIPage() {
       <div className="mb-4">
         <h1 className="text-2xl md:text-3xl font-bold gradient-text flex items-center gap-2">
           <Sparkles className="w-6 h-6" style={{ color: '#a78bfa', filter: 'drop-shadow(0 0 8px rgba(124, 58, 237, 0.4))' }} />
-          Assistente Financeiro IA
+          AI Financial Assistant
         </h1>
-        <p style={{ color: 'var(--text-secondary)' }}>Pergunte qualquer coisa sobre suas finanças</p>
+        <p style={{ color: 'var(--text-secondary)' }}>Ask me anything about your finances</p>
       </div>
 
       {/* Chat Container */}
@@ -267,7 +267,7 @@ export default function AIPage() {
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Pergunte sobre suas finanças..."
+              placeholder="Ask about your finances..."
               className="input-field flex-1"
               disabled={isLoading}
             />
@@ -285,18 +285,18 @@ export default function AIPage() {
       {/* Quick Questions */}
       <div className="mt-4 flex flex-wrap gap-2">
         {[
-          { label: 'Resumo Mensal', icon: '���' },
-          { label: 'Maior Despesa', icon: '🔝' },
-          { label: 'Status do Orçamento', icon: '💰' },
-          { label: 'Economias', icon: '✅' },
+          { label: 'Monthly Summary', icon: '📊' },
+          { label: 'Biggest Expense', icon: '🔝' },
+          { label: 'Budget Status', icon: '💰' },
+          { label: 'Savings', icon: '✅' },
         ].map((q) => (
           <button
             key={q.label}
             onClick={() => setInput(
-              q.label === 'Resumo Mensal' ? "Qual é meu resumo mensal?" :
-              q.label === 'Maior Despesa' ? "Qual é minha maior despesa?" :
-              q.label === 'Status do Orçamento' ? "Estou acima do orçamento?" :
-              "Quanto economizei este mês?"
+              q.label === 'Monthly Summary' ? "What's my monthly summary?" :
+              q.label === 'Biggest Expense' ? "What's my biggest expense?" :
+              q.label === 'Budget Status' ? "Am I over budget?" :
+              "How much have I saved this month?"
             )}
             className="px-4 py-2 rounded-full text-sm font-medium transition-all"
             style={{

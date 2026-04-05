@@ -113,7 +113,7 @@ export default function SettingsPage() {
   };
 
   const handleRegenerateToken = () => {
-    if (confirm('Tem certeza? Você precisará vincular novamente seu bot do Telegram com o novo token.')) {
+    if (confirm('Are you sure? You will need to re-link your Telegram bot with the new token.')) {
       const token = generateToken();
       localStorage.setItem(LINK_TOKEN_KEY, token);
       setLinkToken(token);
@@ -145,7 +145,7 @@ export default function SettingsPage() {
   const handleExport = () => {
     const data = localStorage.getItem('expense-tracker-data');
     if (!data) {
-      alert('Sem dados para exportar');
+      alert('No data to export');
       return;
     }
     const blob = new Blob([data], { type: 'application/json' });
@@ -158,8 +158,8 @@ export default function SettingsPage() {
   };
 
   const handleClearData = () => {
-    if (confirm('Tem certeza que deseja excluir TODOS os dados? Isso não pode ser desfeito!')) {
-      if (confirm('Tem certeza mesmo? Todas as suas transações serão excluídas permanentemente.')) {
+    if (confirm('Are you sure you want to delete ALL data? This cannot be undone!')) {
+      if (confirm('Really? All your transactions will be permanently deleted.')) {
         localStorage.removeItem('expense-tracker-data');
         window.location.reload();
       }
@@ -170,17 +170,17 @@ export default function SettingsPage() {
     <div className="max-w-2xl mx-auto space-y-6 animate-fadeIn">
       {/* Header */}
       <div>
-        <h1 className="text-2xl md:text-3xl font-bold gradient-text">Configurações</h1>
-        <p style={{ color: 'var(--text-secondary)' }}>Personalize sua experiência</p>
+        <h1 className="text-2xl md:text-3xl font-bold gradient-text">Settings</h1>
+        <p style={{ color: 'var(--text-secondary)' }}>Customize your experience</p>
       </div>
 
       {/* Currency */}
       <div className="glass-card-static p-6">
-        <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Moeda</h2>
+        <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Currency</h2>
         <div className="grid grid-cols-3 gap-3">
           {[
             { value: 'EUR', label: 'Euro', icon: Euro, symbol: '\u20ac' },
-            { value: 'USD', label: 'Dólar', icon: DollarSign, symbol: '$' },
+            { value: 'USD', label: 'US Dollar', icon: DollarSign, symbol: '$' },
             { value: 'BRL', label: 'Real', icon: Ban, symbol: 'R$' },
           ].map((curr) => (
             <button
@@ -217,10 +217,10 @@ export default function SettingsPage() {
 
       {/* Monthly Budget */}
       <div className="glass-card-static p-6">
-        <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Orçamento Mensal</h2>
+        <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Monthly Budget</h2>
         <div>
           <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
-            Limite de Despesas Mensal
+            Monthly Expense Limit
           </label>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <span style={{ color: 'var(--text-secondary)', fontSize: 18, fontWeight: 600, minWidth: 24 }}>
@@ -243,14 +243,14 @@ export default function SettingsPage() {
             />
           </div>
           <p className="text-sm mt-2" style={{ color: 'var(--text-muted)' }}>
-            Defina um limite para receber alertas de orçamento ao se aproximar ou ultrapassá-lo.
+            Set a limit to get budget warnings when approaching or exceeding it.
           </p>
         </div>
       </div>
 
       {/* Appearance */}
       <div className="glass-card-static p-6">
-        <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Aparência</h2>
+        <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Appearance</h2>
         <button
           onClick={handleToggleDarkMode}
           className="w-full flex items-center justify-between p-4 rounded-xl transition-all"
@@ -269,9 +269,9 @@ export default function SettingsPage() {
               <Sun className="w-5 h-5" style={{ color: '#a78bfa' }} />
             )}
             <div className="text-left">
-              <p className="font-medium" style={{ color: 'var(--text-primary)' }}>Modo Escuro</p>
+              <p className="font-medium" style={{ color: 'var(--text-primary)' }}>Dark Mode</p>
               <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-                {form.darkMode ? 'Usando tema escuro' : 'Usando tema claro'}
+                {form.darkMode ? 'Currently using dark theme' : 'Currently using light theme'}
               </p>
             </div>
           </div>
@@ -295,30 +295,30 @@ export default function SettingsPage() {
       <div className="glass-card-static p-6">
         <div className="flex items-center gap-3 mb-4">
           <MessageCircle className="w-5 h-5" style={{ color: '#a78bfa' }} />
-          <h2 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>Bot do Telegram</h2>
+          <h2 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>Telegram Bot</h2>
         </div>
 
         {/* Connection Status */}
         <div className="flex items-center gap-2 mb-4">
           {connectionStatus === 'checking' && (
-            <span className="text-sm" style={{ color: 'var(--text-muted)' }}>Verificando conexão...</span>
+            <span className="text-sm" style={{ color: 'var(--text-muted)' }}>Checking connection...</span>
           )}
           {connectionStatus === 'connected' && (
             <>
               <CheckCircle className="w-4 h-4 text-green-400" />
-              <span className="text-sm text-green-400 font-medium">Conectado ao Telegram</span>
+              <span className="text-sm text-green-400 font-medium">Connected to Telegram</span>
             </>
           )}
           {connectionStatus === 'not_connected' && (
             <>
               <XCircle className="w-4 h-4 text-amber-400" />
-              <span className="text-sm text-amber-400 font-medium">Ainda não vinculado</span>
+              <span className="text-sm text-amber-400 font-medium">Not linked yet</span>
             </>
           )}
           {connectionStatus === 'unavailable' && (
             <>
               <XCircle className="w-4 h-4" style={{ color: 'var(--text-muted)' }} />
-              <span className="text-sm" style={{ color: 'var(--text-muted)' }}>Supabase não configurado</span>
+              <span className="text-sm" style={{ color: 'var(--text-muted)' }}>Supabase not configured</span>
             </>
           )}
         </div>
@@ -326,7 +326,7 @@ export default function SettingsPage() {
         {/* Link Token */}
         <div className="mb-4">
           <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
-            Seu Token de Vinculação
+            Your Link Token
           </label>
           <div className="flex gap-2">
             <input
@@ -356,7 +356,7 @@ export default function SettingsPage() {
               }}
             >
               <Copy className="w-4 h-4" />
-              {copied ? 'Copiado!' : 'Copiar'}
+              {copied ? 'Copied!' : 'Copy'}
             </button>
           </div>
         </div>
@@ -369,11 +369,11 @@ export default function SettingsPage() {
             border: '1px solid rgba(124, 58, 237, 0.15)',
           }}
         >
-          <p className="text-sm font-medium mb-2 gradient-text">Como conectar:</p>
+          <p className="text-sm font-medium mb-2 gradient-text">How to connect:</p>
           <ol className="text-sm space-y-1 list-decimal list-inside" style={{ color: 'var(--text-secondary)' }}>
-            <li>Abra o <span className="font-medium" style={{ color: 'var(--text-primary)' }}>@ExpenseTrackerBot</span> no Telegram</li>
-            <li>Envie <code className="px-1.5 py-0.5 rounded text-xs font-mono" style={{ background: 'rgba(124, 58, 237, 0.15)', color: '#c4b5fd' }}>/link SEU_TOKEN</code></li>
-            <li>Comece a enviar mensagens de voz!</li>
+            <li>Open <span className="font-medium" style={{ color: 'var(--text-primary)' }}>@ExpenseTrackerBot</span> on Telegram</li>
+            <li>Send <code className="px-1.5 py-0.5 rounded text-xs font-mono" style={{ background: 'rgba(124, 58, 237, 0.15)', color: '#c4b5fd' }}>/link YOUR_TOKEN</code></li>
+            <li>Start sending voice messages!</li>
           </ol>
         </div>
 
@@ -386,13 +386,13 @@ export default function SettingsPage() {
           onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-muted)'; }}
         >
           <RefreshCw className="w-4 h-4" />
-          Regenerar Token
+          Regenerate Token
         </button>
       </div>
 
       {/* Data Management */}
       <div className="glass-card-static p-6">
-        <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Gerenciamento de Dados</h2>
+        <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Data Management</h2>
         <div className="space-y-3">
           <button
             onClick={handleExport}
@@ -407,8 +407,8 @@ export default function SettingsPage() {
           >
             <Download className="w-5 h-5" style={{ color: '#a78bfa' }} />
             <div className="text-left">
-              <p className="font-medium" style={{ color: 'var(--text-primary)' }}>Exportar Dados</p>
-              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Baixe todos os seus dados em JSON</p>
+              <p className="font-medium" style={{ color: 'var(--text-primary)' }}>Export Data</p>
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Download all your data as JSON</p>
             </div>
           </button>
           <button
@@ -424,8 +424,8 @@ export default function SettingsPage() {
           >
             <Trash2 className="w-5 h-5 text-red-400" />
             <div className="text-left">
-              <p className="font-medium text-red-400">Limpar Todos os Dados</p>
-              <p className="text-sm" style={{ color: 'rgba(239, 68, 68, 0.6)' }}>Excluir permanentemente todas as transações</p>
+              <p className="font-medium text-red-400">Clear All Data</p>
+              <p className="text-sm" style={{ color: 'rgba(239, 68, 68, 0.6)' }}>Permanently delete all transactions</p>
             </div>
           </button>
         </div>
@@ -437,13 +437,13 @@ export default function SettingsPage() {
         className="btn-primary w-full py-4 flex items-center justify-center gap-2 animate-pulse-glow"
       >
         <Save className="w-5 h-5" />
-        {saved ? 'Salvo!' : 'Salvar Configurações'}
+        {saved ? 'Saved!' : 'Save Settings'}
       </button>
 
       {/* Version Info */}
       <div className="text-center text-sm" style={{ color: 'var(--text-muted)' }}>
         <p>ExpensesAI v1.0.0</p>
-        <p>Feito com Next.js + Tailwind CSS</p>
+        <p>Built with Next.js + Tailwind CSS</p>
       </div>
     </div>
   );

@@ -80,14 +80,14 @@ export default function ReportsPage() {
     // Initialize all months
     for (let i = 0; i < 12; i++) {
       const d = new Date(now.getFullYear(), i, 1);
-      const key = d.toLocaleDateString('pt-BR', { month: 'short' });
+      const key = d.toLocaleDateString('en-US', { month: 'short' });
       months[key] = { income: 0, expense: 0 };
     }
 
     transactions.forEach((t) => {
       const d = new Date(t.date);
       if (d.getFullYear() === now.getFullYear()) {
-        const key = d.toLocaleDateString('pt-BR', { month: 'short' });
+        const key = d.toLocaleDateString('en-US', { month: 'short' });
         if (months[key]) {
           if (t.type === 'income') {
             months[key].income += t.amount;
@@ -144,8 +144,8 @@ export default function ReportsPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold gradient-text">Relatórios</h1>
-          <p style={{ color: 'var(--text-secondary)' }}>Analise seus padrões de gastos</p>
+          <h1 className="text-2xl md:text-3xl font-bold gradient-text">Reports</h1>
+          <p style={{ color: 'var(--text-secondary)' }}>Analyze your spending patterns</p>
         </div>
         <div className="flex items-center gap-3">
           <select
@@ -153,13 +153,13 @@ export default function ReportsPage() {
             onChange={(e) => setDateRange(e.target.value)}
             className="select-field"
           >
-            <option value="week">Esta Semana</option>
-            <option value="month">Este Mês</option>
-            <option value="year">Este Ano</option>
+            <option value="week">This Week</option>
+            <option value="month">This Month</option>
+            <option value="year">This Year</option>
           </select>
           <button onClick={handleExport} className="btn-secondary flex items-center gap-2">
             <Download className="w-4 h-4" />
-            Exportar CSV
+            Export CSV
           </button>
         </div>
       </div>
@@ -167,21 +167,21 @@ export default function ReportsPage() {
       {/* Summary Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 stagger-children">
         <div className="glass-card p-4">
-          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Receita Total</p>
+          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Total Income</p>
           <p className="text-xl font-bold text-green-400">{formatAmount(stats.income)}</p>
         </div>
         <div className="glass-card p-4">
-          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Despesas Totais</p>
+          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Total Expenses</p>
           <p className="text-xl font-bold text-red-400">{formatAmount(stats.expenses)}</p>
         </div>
         <div className="glass-card p-4">
-          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Saldo</p>
+          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Net</p>
           <p className={`text-xl font-bold ${stats.net >= 0 ? 'text-green-400' : 'text-red-400'}`}>
             {formatAmount(stats.net)}
           </p>
         </div>
         <div className="glass-card p-4">
-          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Transações</p>
+          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Transactions</p>
           <p className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>{filteredTransactions.length}</p>
         </div>
       </div>
@@ -190,7 +190,7 @@ export default function ReportsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Monthly Trend */}
         <div className="glass-card-static p-6">
-          <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Receitas vs Despesas (Ano)</h2>
+          <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Income vs Expenses (Year)</h2>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={monthlyData}>
@@ -203,8 +203,8 @@ export default function ReportsPage() {
                   itemStyle={{ color: 'var(--text-primary)' }}
                   labelStyle={{ color: 'var(--text-secondary)' }}
                 />
-                <Bar dataKey="income" fill="#10B981" name="Receita" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="expense" fill="#EF4444" name="Despesa" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="income" fill="#10B981" name="Income" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="expense" fill="#EF4444" name="Expense" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -212,7 +212,7 @@ export default function ReportsPage() {
 
         {/* Category Breakdown */}
         <div className="glass-card-static p-6">
-          <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Despesas por Categoria</h2>
+          <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Expenses by Category</h2>
           {categoryData.length > 0 ? (
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
@@ -242,7 +242,7 @@ export default function ReportsPage() {
             </div>
           ) : (
             <div className="h-64 flex items-center justify-center" style={{ color: 'var(--text-muted)' }}>
-              Sem dados de despesas
+              No expense data
             </div>
           )}
         </div>
@@ -250,7 +250,7 @@ export default function ReportsPage() {
 
       {/* Category Table */}
       <div className="glass-card-static p-6">
-        <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Detalhamento por Categoria</h2>
+        <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Category Breakdown</h2>
         {categoryData.length > 0 ? (
           <div className="space-y-3">
             {categoryData.map((cat, index) => {
@@ -286,7 +286,7 @@ export default function ReportsPage() {
             })}
           </div>
         ) : (
-          <p className="text-center py-8" style={{ color: 'var(--text-muted)' }}>Sem dados disponíveis</p>
+          <p className="text-center py-8" style={{ color: 'var(--text-muted)' }}>No data available</p>
         )}
       </div>
     </div>
