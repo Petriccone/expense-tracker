@@ -105,6 +105,13 @@ function Sidebar() {
 
 function MobileBottomNav() {
   const pathname = usePathname();
+  const [tapped, setTapped] = useState<string | null>(null);
+
+  const handleTap = (href: string) => {
+    setTapped(href);
+    setTimeout(() => setTapped(null), 200);
+  };
+
   return (
     <nav style={{
       background: 'rgba(10, 15, 30, 0.92)',
@@ -117,25 +124,32 @@ function MobileBottomNav() {
       <div style={{ display: 'flex', height: 68 }}>
         {mobileNavItems.map(({ href, icon: Icon, label }) => {
           const active = pathname === href;
+          const isTapped = tapped === href;
           return (
-            <Link key={href} href={href} style={{
+            <Link key={href} href={href} onClick={() => handleTap(href)} style={{
               display: 'flex', flexDirection: 'column',
               alignItems: 'center', justifyContent: 'center',
               flex: 1, textDecoration: 'none',
               color: active ? '#c4b5fd' : '#5a6478',
               fontSize: 11, fontWeight: 500,
-              transition: 'all 0.25s',
+              transition: 'all 0.15s',
+              transform: isTapped ? 'scale(0.85)' : 'scale(1)',
             }}>
               <div style={{
                 padding: 8, borderRadius: 14,
-                background: active
-                  ? 'linear-gradient(135deg, rgba(124, 58, 237, 0.2), rgba(6, 182, 212, 0.1))'
-                  : 'transparent',
-                boxShadow: active ? '0 0 16px rgba(124, 58, 237, 0.25)' : 'none',
-                transition: 'all 0.25s',
+                background: isTapped
+                  ? 'linear-gradient(135deg, rgba(124, 58, 237, 0.35), rgba(6, 182, 212, 0.2))'
+                  : active
+                    ? 'linear-gradient(135deg, rgba(124, 58, 237, 0.2), rgba(6, 182, 212, 0.1))'
+                    : 'transparent',
+                boxShadow: isTapped
+                  ? '0 0 24px rgba(124, 58, 237, 0.4)'
+                  : active ? '0 0 16px rgba(124, 58, 237, 0.25)' : 'none',
+                transition: 'all 0.15s',
               }}>
                 <Icon size={20} style={{
-                  filter: active ? 'drop-shadow(0 0 6px rgba(124, 58, 237, 0.5))' : 'none',
+                  filter: (active || isTapped) ? 'drop-shadow(0 0 6px rgba(124, 58, 237, 0.5))' : 'none',
+                  transition: 'filter 0.15s',
                 }} />
               </div>
               <span style={{ marginTop: 2 }}>{label}</span>
