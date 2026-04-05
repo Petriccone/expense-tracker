@@ -31,22 +31,45 @@ const mobileMenuItems = [
   { href: '/settings', icon: Settings, label: 'Settings' },
 ];
 
+function applyThemeClass(darkMode: boolean) {
+  if (darkMode) {
+    document.documentElement.classList.add('dark');
+  } else {
+    document.documentElement.classList.remove('dark');
+  }
+}
+
+function getStoredDarkMode(): boolean {
+  try {
+    const stored = localStorage.getItem('expense-tracker-data');
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (parsed.settings && typeof parsed.settings.darkMode === 'boolean') {
+        return parsed.settings.darkMode;
+      }
+    }
+  } catch {
+    // ignore
+  }
+  return false;
+}
+
 function Sidebar() {
   const pathname = usePathname();
   return (
     <aside style={{
       width: 260, minHeight: '100vh',
-      background: 'rgba(10, 15, 30, 0.85)',
+      background: 'var(--sidebar-bg)',
       backdropFilter: 'blur(24px)',
       WebkitBackdropFilter: 'blur(24px)',
-      borderRight: '1px solid rgba(255, 255, 255, 0.06)',
+      borderRight: '1px solid var(--border-color)',
       padding: '20px 14px',
       display: 'flex', flexDirection: 'column',
     }}>
       {/* Logo */}
       <div style={{
         display: 'flex', alignItems: 'center', gap: 12, padding: '4px 12px 24px',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.06)', marginBottom: 16,
+        borderBottom: '1px solid var(--border-color)', marginBottom: 16,
       }}>
         <img src="/expense-tracker/icon.svg" alt="ExpenseAI" style={{
           width: 40, height: 40, borderRadius: 14,
@@ -75,14 +98,14 @@ function Sidebar() {
               background: active
                 ? 'linear-gradient(135deg, rgba(124, 58, 237, 0.15), rgba(6, 182, 212, 0.08))'
                 : 'transparent',
-              color: active ? '#c4b5fd' : '#8892a8',
+              color: active ? '#c4b5fd' : 'var(--inactive-color)',
               fontWeight: active ? 600 : 400,
               border: active ? '1px solid rgba(124, 58, 237, 0.2)' : '1px solid transparent',
               boxShadow: active ? '0 0 20px rgba(124, 58, 237, 0.1)' : 'none',
               transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
             }}>
               <Icon size={20} style={{
-                color: active ? '#a78bfa' : '#5a6478',
+                color: active ? '#a78bfa' : 'var(--inactive-icon)',
                 filter: active ? 'drop-shadow(0 0 6px rgba(124, 58, 237, 0.4))' : 'none',
               }} />
               {label}
@@ -115,10 +138,10 @@ function MobileBottomNav() {
 
   return (
     <nav style={{
-      background: 'rgba(10, 15, 30, 0.92)',
+      background: 'var(--nav-bg)',
       backdropFilter: 'blur(24px)',
       WebkitBackdropFilter: 'blur(24px)',
-      borderTop: '1px solid rgba(255, 255, 255, 0.06)',
+      borderTop: '1px solid var(--border-color)',
       paddingBottom: 'env(safe-area-inset-bottom, 0px)',
       flexShrink: 0,
     }}>
@@ -131,7 +154,7 @@ function MobileBottomNav() {
               display: 'flex', flexDirection: 'column',
               alignItems: 'center', justifyContent: 'center',
               flex: 1, textDecoration: 'none',
-              color: active ? '#c4b5fd' : '#5a6478',
+              color: active ? '#c4b5fd' : 'var(--inactive-icon)',
               fontSize: 11, fontWeight: 500,
               transition: 'all 0.15s',
               transform: isTapped ? 'scale(0.85)' : 'scale(1)',
@@ -169,6 +192,10 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
   const pathname = usePathname();
 
   useEffect(() => {
+    // Apply theme class before rendering
+    const darkMode = getStoredDarkMode();
+    applyThemeClass(darkMode);
+
     setReady(true);
     const mq = window.matchMedia('(min-width: 768px)');
     setIsDesktop(mq.matches);
@@ -177,15 +204,30 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
     return () => mq.removeEventListener('change', handler);
   }, []);
 
+  // Listen for theme changes from settings
+  useEffect(() => {
+    const handleStorage = () => {
+      const darkMode = getStoredDarkMode();
+      applyThemeClass(darkMode);
+    };
+    window.addEventListener('storage', handleStorage);
+    // Also listen for custom event dispatched from settings
+    window.addEventListener('theme-change', handleStorage);
+    return () => {
+      window.removeEventListener('storage', handleStorage);
+      window.removeEventListener('theme-change', handleStorage);
+    };
+  }, []);
+
   if (!ready) {
     return (
       <div style={{
         minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-        background: '#0a0f1e',
+        background: 'var(--bg-base)',
       }}>
         <div style={{
           width: 36, height: 36,
-          border: '3px solid rgba(255,255,255,0.06)',
+          border: '3px solid var(--border-color)',
           borderTopColor: '#7C3AED',
           borderRadius: '50%',
           animation: 'spin 0.6s linear infinite',
@@ -204,7 +246,7 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
   if (isDesktop) {
     return (
       <AppProvider>
-        <div className="mesh-bg" style={{ display: 'flex', minHeight: '100vh', background: '#0a0f1e' }}>
+        <div className="mesh-bg" style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-base)' }}>
           <Sidebar />
           <main style={{ flex: 1, padding: 28, overflowY: 'auto', position: 'relative', zIndex: 1 }}>
             <div style={{ maxWidth: 1100, margin: '0 auto' }}>
@@ -220,13 +262,13 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
   return (
     <AppProvider>
       <div className="mesh-bg" style={{
-        display: 'flex', flexDirection: 'column', height: '100dvh', background: '#0a0f1e',
+        display: 'flex', flexDirection: 'column', height: '100dvh', background: 'var(--bg-base)',
       }}>
         <header style={{
-          background: 'rgba(10, 15, 30, 0.92)',
+          background: 'var(--nav-bg)',
           backdropFilter: 'blur(24px)',
           WebkitBackdropFilter: 'blur(24px)',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
+          borderBottom: '1px solid var(--border-color)',
           padding: '12px 16px',
           paddingTop: 'max(12px, env(safe-area-inset-top))',
           flexShrink: 0,
@@ -253,7 +295,7 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
               onClick={() => setMenuOpen(!menuOpen)}
               style={{
                 background: 'none', border: 'none', cursor: 'pointer',
-                color: '#8892a8', padding: 6, borderRadius: 10,
+                color: 'var(--text-secondary)', padding: 6, borderRadius: 10,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}
             >
@@ -263,12 +305,12 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
           {menuOpen && (
             <div style={{
               position: 'absolute', top: '100%', right: 12,
-              background: 'rgba(15, 20, 35, 0.95)',
+              background: 'var(--menu-bg)',
               backdropFilter: 'blur(24px)',
               WebkitBackdropFilter: 'blur(24px)',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
+              border: '1px solid var(--glass-border)',
               borderRadius: 16, padding: 8, minWidth: 180,
-              boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
               animation: 'slideUp 0.2s ease-out',
             }}>
               {mobileMenuItems.map(({ href, icon: Icon, label }) => {
@@ -278,11 +320,11 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
                     display: 'flex', alignItems: 'center', gap: 12,
                     padding: '10px 14px', borderRadius: 12,
                     textDecoration: 'none', fontSize: 14,
-                    color: active ? '#c4b5fd' : '#8892a8',
+                    color: active ? '#c4b5fd' : 'var(--inactive-color)',
                     fontWeight: active ? 600 : 400,
                     background: active ? 'rgba(124, 58, 237, 0.12)' : 'transparent',
                   }}>
-                    <Icon size={18} style={{ color: active ? '#a78bfa' : '#5a6478' }} />
+                    <Icon size={18} style={{ color: active ? '#a78bfa' : 'var(--inactive-icon)' }} />
                     {label}
                   </Link>
                 );

@@ -152,15 +152,15 @@ export default function ImportPage() {
         <Link
           href="/"
           className="p-2 rounded-xl transition-all"
-          style={{ color: '#8892a8' }}
-          onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; }}
+          style={{ color: 'var(--text-secondary)' }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--hover-bg)'; }}
           onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
         >
           <ArrowLeft className="w-5 h-5" />
         </Link>
         <div>
           <h1 className="text-2xl md:text-3xl font-bold gradient-text">Import Data</h1>
-          <p style={{ color: '#8892a8' }}>Upload your expense spreadsheet</p>
+          <p style={{ color: 'var(--text-secondary)' }}>Upload your expense spreadsheet</p>
         </div>
       </div>
 
@@ -169,7 +169,7 @@ export default function ImportPage() {
         <div
           onClick={() => fileInputRef.current?.click()}
           className="border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all"
-          style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}
+          style={{ borderColor: 'var(--dashed-border)' }}
           onMouseEnter={(e) => {
             e.currentTarget.style.borderColor = 'rgba(124, 58, 237, 0.3)';
             e.currentTarget.style.background = 'rgba(124, 58, 237, 0.04)';
@@ -190,13 +190,13 @@ export default function ImportPage() {
           {loading ? (
             <div className="py-8">
               <Loader2 className="w-12 h-12 mx-auto animate-spin" style={{ color: '#a78bfa' }} />
-              <p className="mt-4" style={{ color: '#8892a8' }}>Processing your file...</p>
+              <p className="mt-4" style={{ color: 'var(--text-secondary)' }}>Processing your file...</p>
             </div>
           ) : (
             <>
               <FileSpreadsheet className="w-12 h-12 mx-auto mb-4" style={{ color: '#a78bfa', filter: 'drop-shadow(0 0 8px rgba(124, 58, 237, 0.3))' }} />
-              <p className="text-lg font-medium" style={{ color: '#e8edf5' }}>Click to upload your spreadsheet</p>
-              <p className="text-sm mt-2" style={{ color: '#5a6478' }}>Supports .csv files</p>
+              <p className="text-lg font-medium" style={{ color: 'var(--text-primary)' }}>Click to upload your spreadsheet</p>
+              <p className="text-sm mt-2" style={{ color: 'var(--text-muted)' }}>Supports .csv files</p>
             </>
           )}
         </div>
@@ -234,7 +234,7 @@ export default function ImportPage() {
       {preview.length > 0 && (
         <div className="glass-card-static p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold" style={{ color: '#e8edf5' }}>Preview</h2>
+            <h2 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>Preview</h2>
             <button onClick={handleImport} className="btn-primary">
               Import All ({preview.length})
             </button>
@@ -245,11 +245,11 @@ export default function ImportPage() {
               <div
                 key={i}
                 className="flex items-center justify-between p-3 rounded-lg"
-                style={{ background: 'rgba(255, 255, 255, 0.03)' }}
+                style={{ background: 'var(--bg-input)' }}
               >
                 <div>
-                  <p className="font-medium" style={{ color: '#e8edf5' }}>{t.description}</p>
-                  <p className="text-sm" style={{ color: '#5a6478' }}>{t.date} - {t.category}</p>
+                  <p className="font-medium" style={{ color: 'var(--text-primary)' }}>{t.description}</p>
+                  <p className="text-sm" style={{ color: 'var(--text-muted)' }}>{t.date} - {t.category}</p>
                 </div>
                 <span className={t.type === 'income' ? 'text-green-400 font-medium' : 'text-red-400 font-medium'}>
                   {t.type === 'income' ? '+' : '-'}{currencySymbol}{t.amount.toFixed(2)}
@@ -257,7 +257,7 @@ export default function ImportPage() {
               </div>
             ))}
             {preview.length > 10 && (
-              <p className="text-center text-sm py-2" style={{ color: '#5a6478' }}>
+              <p className="text-center text-sm py-2" style={{ color: 'var(--text-muted)' }}>
                 ...and {preview.length - 10} more
               </p>
             )}
@@ -267,15 +267,15 @@ export default function ImportPage() {
 
       {/* Instructions */}
       <div className="glass-card-static p-6">
-        <h2 className="text-lg font-semibold mb-4" style={{ color: '#e8edf5' }}>CSV Format</h2>
-        <p className="text-sm mb-4" style={{ color: '#8892a8' }}>Your CSV should have columns like:</p>
+        <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>CSV Format</h2>
+        <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>Your CSV should have columns like:</p>
         <div
           className="rounded-xl p-4 text-xs font-mono overflow-x-auto"
-          style={{ background: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(255,255,255,0.06)' }}
+          style={{ background: 'var(--bg-input)', border: '1px solid var(--border-color)' }}
         >
           <table className="w-full">
             <thead>
-              <tr style={{ color: '#8892a8' }} className="font-semibold">
+              <tr style={{ color: 'var(--text-secondary)' }} className="font-semibold">
                 <td className="pr-3 pb-2">Date</td>
                 <td className="pr-3 pb-2">Description</td>
                 <td className="pr-3 pb-2">Amount</td>
@@ -283,7 +283,7 @@ export default function ImportPage() {
               </tr>
             </thead>
             <tbody>
-              <tr style={{ color: '#5a6478' }}>
+              <tr style={{ color: 'var(--text-muted)' }}>
                 <td className="pr-3">2026-04-03</td>
                 <td className="pr-3">Supermarket</td>
                 <td className="pr-3">45.50</td>

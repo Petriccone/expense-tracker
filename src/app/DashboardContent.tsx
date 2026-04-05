@@ -180,7 +180,7 @@ export default function DashboardContent() {
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold gradient-text">Dashboard</h1>
-          <p style={{ color: '#8892a8' }}>Welcome back! Here's your financial overview.</p>
+          <p style={{ color: 'var(--text-secondary)' }}>Welcome back! Here's your financial overview.</p>
         </div>
         <Link
           href="/add"
@@ -210,7 +210,7 @@ export default function DashboardContent() {
               {Math.abs(stats.percentChange).toFixed(1)}%
             </span>
           </div>
-          <p style={{ color: '#8892a8', fontSize: 14 }}>Monthly Balance</p>
+          <p style={{ color: 'var(--text-secondary)', fontSize: 14 }}>Monthly Balance</p>
           <p className={`text-2xl font-bold ${stats.net >= 0 ? 'text-green-400' : 'text-red-400'}`}>
             {formatAmount(stats.net)}
           </p>
@@ -229,7 +229,7 @@ export default function DashboardContent() {
               <TrendingUp className="w-6 h-6 text-green-400" />
             </div>
           </div>
-          <p style={{ color: '#8892a8', fontSize: 14 }}>Monthly Income</p>
+          <p style={{ color: 'var(--text-secondary)', fontSize: 14 }}>Monthly Income</p>
           <p className="text-2xl font-bold text-green-400">{formatAmount(stats.income)}</p>
         </div>
 
@@ -246,7 +246,7 @@ export default function DashboardContent() {
               <TrendingDown className="w-6 h-6 text-red-400" />
             </div>
           </div>
-          <p style={{ color: '#8892a8', fontSize: 14 }}>Monthly Expenses</p>
+          <p style={{ color: 'var(--text-secondary)', fontSize: 14 }}>Monthly Expenses</p>
           <p className="text-2xl font-bold text-red-400">{formatAmount(stats.expenses)}</p>
         </div>
       </div>
@@ -255,7 +255,7 @@ export default function DashboardContent() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Category Pie Chart */}
         <div className="glass-card-static p-6">
-          <h2 className="text-lg font-semibold mb-4" style={{ color: '#e8edf5' }}>Spending by Category</h2>
+          <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Spending by Category</h2>
           {categoryData.length > 0 ? (
             <div className="chart-container">
               <ResponsiveContainer width="100%" height="100%">
@@ -277,20 +277,20 @@ export default function DashboardContent() {
                   <Tooltip
                     formatter={(value) => formatAmount(Number(value))}
                     contentStyle={{
-                      background: '#151d33',
-                      border: '1px solid rgba(255,255,255,0.08)',
+                      background: 'var(--tooltip-bg)',
+                      border: '1px solid var(--glass-border)',
                       borderRadius: 12,
-                      boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
-                      color: '#e8edf5',
+                      boxShadow: 'var(--tooltip-shadow)',
+                      color: 'var(--text-primary)',
                     }}
-                    itemStyle={{ color: '#e8edf5' }}
-                    labelStyle={{ color: '#8892a8' }}
+                    itemStyle={{ color: 'var(--text-primary)' }}
+                    labelStyle={{ color: 'var(--text-secondary)' }}
                   />
                 </PieChart>
               </ResponsiveContainer>
             </div>
           ) : (
-            <div className="h-64 flex items-center justify-center" style={{ color: '#5a6478' }}>
+            <div className="h-64 flex items-center justify-center" style={{ color: 'var(--text-muted)' }}>
               No expenses this month
             </div>
           )}
@@ -306,7 +306,7 @@ export default function DashboardContent() {
                       boxShadow: `0 0 6px ${COLORS[index % COLORS.length]}40`,
                     }}
                   />
-                  <span style={{ color: '#8892a8' }}>{item.name}</span>
+                  <span style={{ color: 'var(--text-secondary)' }}>{item.name}</span>
                 </div>
               );
             })}
@@ -315,25 +315,25 @@ export default function DashboardContent() {
 
         {/* Monthly Bar Chart */}
         <div className="glass-card-static p-6">
-          <h2 className="text-lg font-semibold mb-4" style={{ color: '#e8edf5' }}>Monthly Trend</h2>
+          <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Monthly Trend</h2>
           {monthlyData.some((m) => m.income > 0 || m.expense > 0) ? (
             <div className="chart-container">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={monthlyData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
-                  <XAxis dataKey="month" stroke="#5a6478" fontSize={12} />
-                  <YAxis stroke="#5a6478" fontSize={12} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />
+                  <XAxis dataKey="month" stroke="var(--text-muted)" fontSize={12} />
+                  <YAxis stroke="var(--text-muted)" fontSize={12} />
                   <Tooltip
                     formatter={(value) => formatAmount(Number(value))}
                     contentStyle={{
-                      background: '#151d33',
-                      border: '1px solid rgba(255,255,255,0.08)',
+                      background: 'var(--tooltip-bg)',
+                      border: '1px solid var(--glass-border)',
                       borderRadius: 12,
-                      boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
-                      color: '#e8edf5',
+                      boxShadow: 'var(--tooltip-shadow)',
+                      color: 'var(--text-primary)',
                     }}
-                    itemStyle={{ color: '#e8edf5' }}
-                    labelStyle={{ color: '#8892a8' }}
+                    itemStyle={{ color: 'var(--text-primary)' }}
+                    labelStyle={{ color: 'var(--text-secondary)' }}
                   />
                   <Bar dataKey="income" fill="#10B981" radius={[4, 4, 0, 0]} name="Income" />
                   <Bar dataKey="expense" fill="#EF4444" radius={[4, 4, 0, 0]} name="Expense" />
@@ -341,7 +341,7 @@ export default function DashboardContent() {
               </ResponsiveContainer>
             </div>
           ) : (
-            <div className="h-64 flex items-center justify-center" style={{ color: '#5a6478' }}>
+            <div className="h-64 flex items-center justify-center" style={{ color: 'var(--text-muted)' }}>
               No data yet
             </div>
           )}
@@ -382,8 +382,8 @@ export default function DashboardContent() {
                 {insight.type === 'tip' && <Lightbulb className="w-5 h-5 text-green-400 flex-shrink-0" />}
                 {insight.type === 'info' && <Sparkles className="w-5 h-5 flex-shrink-0" style={{ color: '#a78bfa' }} />}
                 <div>
-                  <p className="font-medium" style={{ color: '#e8edf5' }}>{insight.title}</p>
-                  <p className="text-sm" style={{ color: '#8892a8' }}>{insight.description}</p>
+                  <p className="font-medium" style={{ color: 'var(--text-primary)' }}>{insight.title}</p>
+                  <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{insight.description}</p>
                 </div>
               </div>
             ))}
@@ -394,7 +394,7 @@ export default function DashboardContent() {
       {/* Recent Transactions */}
       <div className="glass-card-static p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold" style={{ color: '#e8edf5' }}>Recent Transactions</h2>
+          <h2 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>Recent Transactions</h2>
           <Link
             href="/transactions"
             className="text-sm font-medium transition-colors"
@@ -416,7 +416,7 @@ export default function DashboardContent() {
                     cursor: 'default',
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
+                    e.currentTarget.style.background = 'var(--hover-bg)';
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.background = 'transparent';
@@ -430,8 +430,8 @@ export default function DashboardContent() {
                       {cat.icon}
                     </div>
                     <div>
-                      <p className="font-medium" style={{ color: '#e8edf5' }}>{transaction.description}</p>
-                      <p className="text-sm" style={{ color: '#5a6478' }}>
+                      <p className="font-medium" style={{ color: 'var(--text-primary)' }}>{transaction.description}</p>
+                      <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
                         {new Date(transaction.date).toLocaleDateString('en-US', {
                           month: 'short',
                           day: 'numeric',
@@ -452,7 +452,7 @@ export default function DashboardContent() {
             })}
           </div>
         ) : (
-          <div className="text-center py-8" style={{ color: '#5a6478' }}>
+          <div className="text-center py-8" style={{ color: 'var(--text-muted)' }}>
             <p>No transactions yet</p>
             <Link href="/add" className="font-medium mt-2 inline-block" style={{ color: '#a78bfa' }}>
               Add your first transaction

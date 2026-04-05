@@ -89,7 +89,7 @@ export default function TransactionsPage() {
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold gradient-text">Transactions</h1>
-          <p style={{ color: '#8892a8' }}>{transactions.length} total transactions</p>
+          <p style={{ color: 'var(--text-secondary)' }}>{transactions.length} total transactions</p>
         </div>
         <Link href="/add" className="btn-primary flex items-center gap-2 justify-center w-fit">
           <Plus className="w-5 h-5" />
@@ -102,7 +102,7 @@ export default function TransactionsPage() {
         <div className="flex flex-col md:flex-row gap-3">
           {/* Search */}
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: '#5a6478' }} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: 'var(--text-muted)' }} />
             <input
               type="text"
               placeholder="Search transactions..."
@@ -152,7 +152,7 @@ export default function TransactionsPage() {
       {/* Transactions List */}
       <div className="glass-card-static overflow-hidden">
         {filteredTransactions.length > 0 ? (
-          <div style={{ borderColor: 'rgba(255,255,255,0.04)' }}>
+          <div style={{ borderColor: 'var(--border-color)' }}>
             {filteredTransactions.map((transaction, index) => {
               const cat = getCategoryInfo(transaction.category);
               return (
@@ -160,9 +160,9 @@ export default function TransactionsPage() {
                   key={transaction.id}
                   className="flex items-center justify-between p-4 transition-all duration-200"
                   style={{
-                    borderBottom: index < filteredTransactions.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none',
+                    borderBottom: index < filteredTransactions.length - 1 ? '1px solid var(--border-color)' : 'none',
                   }}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--hover-bg)'; }}
                   onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
                 >
                   <div className="flex items-center gap-4">
@@ -173,8 +173,8 @@ export default function TransactionsPage() {
                       {cat.icon}
                     </div>
                     <div>
-                      <p className="font-medium" style={{ color: '#e8edf5' }}>{transaction.description}</p>
-                      <div className="flex items-center gap-2 text-sm" style={{ color: '#5a6478' }}>
+                      <p className="font-medium" style={{ color: 'var(--text-primary)' }}>{transaction.description}</p>
+                      <div className="flex items-center gap-2 text-sm" style={{ color: 'var(--text-muted)' }}>
                         <span>{transaction.category}</span>
                         <span>•</span>
                         <span>
@@ -203,7 +203,7 @@ export default function TransactionsPage() {
                           setEditForm(transaction);
                         }}
                         className="p-2 rounded-lg transition-all"
-                        style={{ color: '#5a6478' }}
+                        style={{ color: 'var(--text-muted)' }}
                         onMouseEnter={(e) => { e.currentTarget.style.color = '#a78bfa'; e.currentTarget.style.background = 'rgba(124, 58, 237, 0.1)'; }}
                         onMouseLeave={(e) => { e.currentTarget.style.color = '#5a6478'; e.currentTarget.style.background = 'transparent'; }}
                       >
@@ -212,7 +212,7 @@ export default function TransactionsPage() {
                       <button
                         onClick={() => handleDelete(transaction.id)}
                         className="p-2 rounded-lg transition-all"
-                        style={{ color: '#5a6478' }}
+                        style={{ color: 'var(--text-muted)' }}
                         onMouseEnter={(e) => { e.currentTarget.style.color = '#f87171'; e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)'; }}
                         onMouseLeave={(e) => { e.currentTarget.style.color = '#5a6478'; e.currentTarget.style.background = 'transparent'; }}
                       >
@@ -225,7 +225,7 @@ export default function TransactionsPage() {
             })}
           </div>
         ) : (
-          <div className="text-center py-12" style={{ color: '#5a6478' }}>
+          <div className="text-center py-12" style={{ color: 'var(--text-muted)' }}>
             <p className="text-lg">No transactions found</p>
             <p className="text-sm mt-1">Try adjusting your filters</p>
           </div>
@@ -236,7 +236,7 @@ export default function TransactionsPage() {
       {editingId && editForm && portalRoot && createPortal(
         <div
           className="fixed inset-0 flex items-center justify-center p-4"
-          style={{ background: 'rgba(5, 10, 24, 0.8)', backdropFilter: 'blur(8px)', zIndex: 9999 }}
+          style={{ background: 'var(--modal-overlay)', backdropFilter: 'blur(8px)', zIndex: 9999 }}
           onClick={(e) => { if (e.target === e.currentTarget) setEditingId(null); }}
         >
           <div
@@ -246,12 +246,12 @@ export default function TransactionsPage() {
             }}
           >
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold" style={{ color: '#e8edf5' }}>Edit Transaction</h2>
+              <h2 className="text-xl font-semibold" style={{ color: 'var(--text-primary)' }}>Edit Transaction</h2>
               <button
                 onClick={() => setEditingId(null)}
                 className="p-2 rounded-lg transition-colors"
-                style={{ color: '#5a6478' }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; }}
+                style={{ color: 'var(--text-muted)' }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--hover-bg)'; }}
                 onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
               >
                 <X className="w-5 h-5" />
@@ -259,7 +259,7 @@ export default function TransactionsPage() {
             </div>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: '#8892a8' }}>Description</label>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Description</label>
                 <input
                   type="text"
                   value={editForm.description || ''}
@@ -268,7 +268,7 @@ export default function TransactionsPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: '#8892a8' }}>Amount</label>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Amount</label>
                 <input
                   type="number"
                   step="0.01"
@@ -278,7 +278,7 @@ export default function TransactionsPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: '#8892a8' }}>Type</label>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Type</label>
                 <select
                   value={editForm.type || 'expense'}
                   onChange={(e) => setEditForm({ ...editForm, type: e.target.value as 'income' | 'expense' })}
@@ -289,7 +289,7 @@ export default function TransactionsPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: '#8892a8' }}>Category</label>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Category</label>
                 <select
                   value={editForm.category || ''}
                   onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
@@ -301,13 +301,13 @@ export default function TransactionsPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: '#8892a8' }}>Date</label>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Date</label>
                 <input
                   type="date"
                   value={editForm.date || ''}
                   onChange={(e) => setEditForm({ ...editForm, date: e.target.value })}
                   className="input-field"
-                  style={{ colorScheme: 'dark' }}
+                  style={{ colorScheme: 'var(--color-scheme)' }}
                 />
               </div>
               <div className="flex gap-3 pt-4">

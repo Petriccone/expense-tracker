@@ -68,7 +68,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden"
-      style={{ background: '#050a18' }}
+      style={{ background: 'var(--bg-deep)' }}
     >
       {/* Animated gradient orbs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -135,7 +135,7 @@ export default function LoginPage() {
           >
             ExpenseAI
           </h1>
-          <p style={{ color: '#8892a8' }}>Smart expense tracking, powered by intelligence</p>
+          <p style={{ color: 'var(--text-secondary)' }}>Smart expense tracking, powered by intelligence</p>
         </div>
 
         {/* Login Card */}
@@ -145,7 +145,7 @@ export default function LoginPage() {
             boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), 0 0 60px rgba(124, 58, 237, 0.08)',
           }}
         >
-          <h2 className="text-2xl font-bold mb-6 text-center" style={{ color: '#e8edf5' }}>
+          <h2 className="text-2xl font-bold mb-6 text-center" style={{ color: 'var(--text-primary)' }}>
             {isLogin ? 'Welcome back!' : 'Create account'}
           </h2>
 
@@ -165,7 +165,7 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {!isLogin && (
               <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: '#8892a8' }}>Name</label>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Name</label>
                 <input
                   type="text"
                   value={form.name}
@@ -178,7 +178,7 @@ export default function LoginPage() {
             )}
 
             <div>
-              <label className="block text-sm font-medium mb-1" style={{ color: '#8892a8' }}>Email</label>
+              <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Email</label>
               <input
                 type="email"
                 value={form.email}
@@ -190,7 +190,7 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1" style={{ color: '#8892a8' }}>Password</label>
+              <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Password</label>
               <input
                 type="password"
                 value={form.password}
@@ -243,7 +243,7 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <p className="text-center text-sm mt-6" style={{ color: '#5a6478' }}>
+        <p className="text-center text-sm mt-6" style={{ color: 'var(--text-muted)' }}>
           Demo: Register a new account to get started
         </p>
       </div>

@@ -193,7 +193,7 @@ export default function AIPage() {
           <Sparkles className="w-6 h-6" style={{ color: '#a78bfa', filter: 'drop-shadow(0 0 8px rgba(124, 58, 237, 0.4))' }} />
           AI Financial Assistant
         </h1>
-        <p style={{ color: '#8892a8' }}>Ask me anything about your finances</p>
+        <p style={{ color: 'var(--text-secondary)' }}>Ask me anything about your finances</p>
       </div>
 
       {/* Chat Container */}
@@ -210,14 +210,14 @@ export default function AIPage() {
                 style={{
                   background: message.role === 'assistant'
                     ? 'linear-gradient(135deg, rgba(124, 58, 237, 0.2), rgba(6, 182, 212, 0.1))'
-                    : 'rgba(255, 255, 255, 0.06)',
-                  border: '1px solid ' + (message.role === 'assistant' ? 'rgba(124, 58, 237, 0.2)' : 'rgba(255,255,255,0.08)'),
+                    : 'var(--bg-input)',
+                  border: '1px solid ' + (message.role === 'assistant' ? 'rgba(124, 58, 237, 0.2)' : 'var(--border-color)'),
                 }}
               >
                 {message.role === 'assistant' ? (
                   <Bot className="w-4 h-4" style={{ color: '#a78bfa' }} />
                 ) : (
-                  <User className="w-4 h-4" style={{ color: '#8892a8' }} />
+                  <User className="w-4 h-4" style={{ color: 'var(--text-secondary)' }} />
                 )}
               </div>
               <div
@@ -225,11 +225,11 @@ export default function AIPage() {
                 style={{
                   background: message.role === 'assistant'
                     ? 'linear-gradient(135deg, rgba(124, 58, 237, 0.08), rgba(6, 182, 212, 0.04))'
-                    : 'rgba(255, 255, 255, 0.04)',
-                  border: '1px solid ' + (message.role === 'assistant' ? 'rgba(124, 58, 237, 0.12)' : 'rgba(255,255,255,0.06)'),
+                    : 'var(--bg-card)',
+                  border: '1px solid ' + (message.role === 'assistant' ? 'rgba(124, 58, 237, 0.12)' : 'var(--border-color)'),
                 }}
               >
-                <div className="whitespace-pre-wrap text-sm leading-relaxed" style={{ color: '#e8edf5' }}>
+                <div className="whitespace-pre-wrap text-sm leading-relaxed" style={{ color: 'var(--text-primary)' }}>
                   {message.content}
                 </div>
               </div>
@@ -261,7 +261,7 @@ export default function AIPage() {
         </div>
 
         {/* Input */}
-        <div className="p-4" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+        <div className="p-4" style={{ borderTop: '1px solid var(--border-color)' }}>
           <form onSubmit={handleSubmit} className="flex gap-3">
             <input
               type="text"
@@ -300,9 +300,9 @@ export default function AIPage() {
             )}
             className="px-4 py-2 rounded-full text-sm font-medium transition-all"
             style={{
-              background: 'rgba(255, 255, 255, 0.04)',
-              border: '1px solid rgba(255,255,255,0.08)',
-              color: '#8892a8',
+              background: 'var(--bg-card)',
+              border: '1px solid var(--border-color)',
+              color: 'var(--text-secondary)',
               cursor: 'pointer',
             }}
             onMouseEnter={(e) => {
@@ -312,9 +312,9 @@ export default function AIPage() {
               e.currentTarget.style.boxShadow = '0 0 15px rgba(124, 58, 237, 0.1)';
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
-              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.04)';
-              e.currentTarget.style.color = '#8892a8';
+              e.currentTarget.style.borderColor = 'var(--border-color)';
+              e.currentTarget.style.background = 'var(--bg-card)';
+              e.currentTarget.style.color = 'var(--text-secondary)';
               e.currentTarget.style.boxShadow = 'none';
             }}
           >

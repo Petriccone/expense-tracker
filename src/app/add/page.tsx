@@ -108,15 +108,15 @@ export default function AddTransactionPage() {
         <Link
           href="/"
           className="p-2 rounded-xl transition-all"
-          style={{ color: '#8892a8' }}
-          onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; }}
+          style={{ color: 'var(--text-secondary)' }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--hover-bg)'; }}
           onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
         >
           <ArrowLeft className="w-5 h-5" />
         </Link>
         <div>
           <h1 className="text-2xl md:text-3xl font-bold gradient-text">Add Transaction</h1>
-          <p style={{ color: '#8892a8' }}>Record a new expense or income</p>
+          <p style={{ color: 'var(--text-secondary)' }}>Record a new expense or income</p>
         </div>
       </div>
 
@@ -159,9 +159,9 @@ export default function AddTransactionPage() {
 
         {/* Amount */}
         <div className="glass-card-static p-6">
-          <label className="block text-sm font-medium mb-2" style={{ color: '#8892a8' }}>Amount</label>
+          <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>Amount</label>
           <div className="relative">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-2xl" style={{ color: '#5a6478' }}>
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-2xl" style={{ color: 'var(--text-muted)' }}>
               {currencySymbol}
             </span>
             <input
@@ -180,7 +180,7 @@ export default function AddTransactionPage() {
         {/* Description */}
         <div className="glass-card-static p-6">
           <div className="flex items-center justify-between mb-2">
-            <label className="block text-sm font-medium" style={{ color: '#8892a8' }}>Description</label>
+            <label className="block text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Description</label>
             <button
               type="button"
               onClick={handleAIAutoCategorize}
@@ -214,7 +214,7 @@ export default function AddTransactionPage() {
 
         {/* Category */}
         <div className="glass-card-static p-6">
-          <label className="block text-sm font-medium mb-2" style={{ color: '#8892a8' }}>Category</label>
+          <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>Category</label>
           <select
             value={form.category}
             onChange={(e) => setForm({ ...form, category: e.target.value })}
@@ -232,7 +232,7 @@ export default function AddTransactionPage() {
 
         {/* Date */}
         <div className="glass-card-static p-6">
-          <label className="block text-sm font-medium mb-2" style={{ color: '#8892a8' }}>Date</label>
+          <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>Date</label>
           <input
             type="date"
             value={form.date}
@@ -244,7 +244,7 @@ export default function AddTransactionPage() {
 
         {/* Notes */}
         <div className="glass-card-static p-6">
-          <label className="block text-sm font-medium mb-2" style={{ color: '#8892a8' }}>Notes (optional)</label>
+          <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>Notes (optional)</label>
           <textarea
             rows={3}
             placeholder="Any additional details..."

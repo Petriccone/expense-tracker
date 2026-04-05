@@ -139,7 +139,7 @@ export default function BudgetPage() {
             <Target className="w-7 h-7" style={{ color: '#a78bfa', filter: 'drop-shadow(0 0 6px rgba(124, 58, 237, 0.4))' }} />
             Budget Planning
           </h1>
-          <p style={{ color: '#8892a8' }}>Set per-category spending limits and track your progress</p>
+          <p style={{ color: 'var(--text-secondary)' }}>Set per-category spending limits and track your progress</p>
         </div>
 
         {/* Month Navigator */}
@@ -150,20 +150,20 @@ export default function BudgetPage() {
           <button
             onClick={() => navigateMonth(-1)}
             className="p-2 rounded-lg transition-colors"
-            style={{ color: '#8892a8' }}
-            onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; }}
+            style={{ color: 'var(--text-secondary)' }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--hover-bg)'; }}
             onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
-          <span className="text-sm font-semibold min-w-[140px] text-center" style={{ color: '#e8edf5' }}>
+          <span className="text-sm font-semibold min-w-[140px] text-center" style={{ color: 'var(--text-primary)' }}>
             {monthLabel}
           </span>
           <button
             onClick={() => navigateMonth(1)}
             className="p-2 rounded-lg transition-colors"
-            style={{ color: '#8892a8' }}
-            onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; }}
+            style={{ color: 'var(--text-secondary)' }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--hover-bg)'; }}
             onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
           >
             <ChevronRight className="w-5 h-5" />
@@ -179,9 +179,9 @@ export default function BudgetPage() {
               style={{ background: 'rgba(124, 58, 237, 0.12)', boxShadow: '0 0 12px rgba(124, 58, 237, 0.1)' }}>
               <PiggyBank className="w-5 h-5" style={{ color: '#a78bfa' }} />
             </div>
-            <p className="text-sm" style={{ color: '#8892a8' }}>Total Budget</p>
+            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Total Budget</p>
           </div>
-          <p className="text-2xl font-bold" style={{ color: '#e8edf5' }}>{formatAmount(settings.monthlyBudget)}</p>
+          <p className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{formatAmount(settings.monthlyBudget)}</p>
         </div>
 
         <div className="glass-card p-5">
@@ -190,12 +190,12 @@ export default function BudgetPage() {
               style={{ background: 'rgba(6, 182, 212, 0.12)', boxShadow: '0 0 12px rgba(6, 182, 212, 0.1)' }}>
               <Target className="w-5 h-5" style={{ color: '#22d3ee' }} />
             </div>
-            <p className="text-sm" style={{ color: '#8892a8' }}>Allocated</p>
+            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Allocated</p>
           </div>
           <p className={`text-2xl font-bold ${overallStats.totalAllocated <= settings.monthlyBudget ? 'text-cyan-400' : 'text-amber-400'}`}>
             {formatAmount(overallStats.totalAllocated)}
           </p>
-          <p className="text-xs mt-1" style={{ color: '#5a6478' }}>
+          <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
             {settings.monthlyBudget > 0
               ? `${Math.round((overallStats.totalAllocated / settings.monthlyBudget) * 100)}% of total budget`
               : 'No total budget set'}
@@ -208,12 +208,12 @@ export default function BudgetPage() {
               style={{ background: 'rgba(16, 185, 129, 0.12)', boxShadow: '0 0 12px rgba(16, 185, 129, 0.1)' }}>
               <TrendingUp className="w-5 h-5 text-green-400" />
             </div>
-            <p className="text-sm" style={{ color: '#8892a8' }}>Unallocated</p>
+            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Unallocated</p>
           </div>
           <p className={`text-2xl font-bold ${overallStats.unallocated >= 0 ? 'text-green-400' : 'text-red-400'}`}>
             {formatAmount(overallStats.unallocated)}
           </p>
-          <p className="text-xs mt-1" style={{ color: '#5a6478' }}>
+          <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
             {overallStats.unallocated < 0 ? 'Over-allocated!' : 'Available to assign'}
           </p>
         </div>
@@ -227,12 +227,12 @@ export default function BudgetPage() {
               }}>
               <AlertTriangle className={`w-5 h-5 ${overallStats.categoriesOverBudget > 0 ? 'text-red-400' : 'text-green-400'}`} />
             </div>
-            <p className="text-sm" style={{ color: '#8892a8' }}>Over Budget</p>
+            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Over Budget</p>
           </div>
           <p className={`text-2xl font-bold ${overallStats.categoriesOverBudget > 0 ? 'text-red-400' : 'text-green-400'}`}>
             {overallStats.categoriesOverBudget}
           </p>
-          <p className="text-xs mt-1" style={{ color: '#5a6478' }}>
+          <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
             {overallStats.categoriesOverBudget > 0
               ? `${overallStats.categoriesOverBudget} categor${overallStats.categoriesOverBudget === 1 ? 'y' : 'ies'} exceeded`
               : 'All categories on track'}
@@ -243,8 +243,8 @@ export default function BudgetPage() {
       {/* Allocation Progress Bar */}
       {overallStats.totalAllocated > 0 && (
         <div className="glass-card-static p-6">
-          <h2 className="text-sm font-semibold mb-3" style={{ color: '#8892a8' }}>Budget Allocation</h2>
-          <div className="h-4 rounded-full overflow-hidden flex" style={{ background: 'rgba(255,255,255,0.04)' }}>
+          <h2 className="text-sm font-semibold mb-3" style={{ color: 'var(--text-secondary)' }}>Budget Allocation</h2>
+          <div className="h-4 rounded-full overflow-hidden flex" style={{ background: 'var(--bg-input)' }}>
             {budgetData
               .filter((d) => d.limit > 0)
               .map((d) => {
@@ -267,7 +267,7 @@ export default function BudgetPage() {
             {budgetData
               .filter((d) => d.limit > 0)
               .map((d) => (
-                <div key={d.category.id} className="flex items-center gap-1.5 text-xs" style={{ color: '#8892a8' }}>
+                <div key={d.category.id} className="flex items-center gap-1.5 text-xs" style={{ color: 'var(--text-secondary)' }}>
                   <span className="w-2.5 h-2.5 rounded-full" style={{
                     backgroundColor: d.category.color,
                     boxShadow: `0 0 4px ${d.category.color}40`,
@@ -281,7 +281,7 @@ export default function BudgetPage() {
 
       {/* Per-Category Budget List */}
       <div className="glass-card-static p-6">
-        <h2 className="text-lg font-semibold mb-4" style={{ color: '#e8edf5' }}>Category Budgets</h2>
+        <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Category Budgets</h2>
         <div className="space-y-4">
           {budgetData.map((item) => {
             const isEditing = editingCategoryId === item.category.id;
@@ -301,11 +301,11 @@ export default function BudgetPage() {
                   {/* Name + progress */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-1">
-                      <span className="font-medium text-sm" style={{ color: '#e8edf5' }}>{item.category.name}</span>
+                      <span className="font-medium text-sm" style={{ color: 'var(--text-primary)' }}>{item.category.name}</span>
                       <div className="flex items-center gap-2">
                         {isEditing ? (
                           <div className="flex items-center gap-1">
-                            <span className="text-sm" style={{ color: '#5a6478' }}>{currencySymbol}</span>
+                            <span className="text-sm" style={{ color: 'var(--text-muted)' }}>{currencySymbol}</span>
                             <input
                               type="number"
                               step="10"
@@ -318,9 +318,9 @@ export default function BudgetPage() {
                               }}
                               className="w-24 px-2 py-1 text-sm rounded-lg"
                               style={{
-                                background: 'rgba(255,255,255,0.05)',
+                                background: 'var(--bg-input)',
                                 border: '1px solid rgba(124, 58, 237, 0.3)',
-                                color: '#e8edf5',
+                                color: 'var(--text-primary)',
                                 outline: 'none',
                               }}
                               autoFocus
@@ -336,8 +336,8 @@ export default function BudgetPage() {
                             <button
                               onClick={handleCancelEdit}
                               className="p-1 rounded-lg transition-colors"
-                              style={{ color: '#5a6478' }}
-                              onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; }}
+                              style={{ color: 'var(--text-muted)' }}
+                              onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--hover-bg)'; }}
                               onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
                             >
                               <X className="w-4 h-4" />
@@ -345,23 +345,23 @@ export default function BudgetPage() {
                           </div>
                         ) : (
                           <div className="flex items-center gap-2">
-                            <span className="text-sm" style={{ color: '#8892a8' }}>
+                            <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>
                               {item.limit > 0 ? (
                                 <>
                                   <span style={{ color: item.spent > item.limit ? '#f87171' : '#8892a8', fontWeight: item.spent > item.limit ? 600 : 400 }}>
                                     {formatAmount(item.spent)}
                                   </span>
-                                  <span style={{ color: '#5a6478' }}> / </span>
-                                  <span className="font-medium" style={{ color: '#e8edf5' }}>{formatAmount(item.limit)}</span>
+                                  <span style={{ color: 'var(--text-muted)' }}> / </span>
+                                  <span className="font-medium" style={{ color: 'var(--text-primary)' }}>{formatAmount(item.limit)}</span>
                                 </>
                               ) : (
-                                <span style={{ color: '#5a6478' }}>{formatAmount(item.spent)} spent</span>
+                                <span style={{ color: 'var(--text-muted)' }}>{formatAmount(item.spent)} spent</span>
                               )}
                             </span>
                             <button
                               onClick={() => handleStartEdit(item.category.id)}
                               className="p-1 rounded-lg transition-all"
-                              style={{ color: '#5a6478' }}
+                              style={{ color: 'var(--text-muted)' }}
                               onMouseEnter={(e) => { e.currentTarget.style.color = '#a78bfa'; e.currentTarget.style.background = 'rgba(124, 58, 237, 0.1)'; }}
                               onMouseLeave={(e) => { e.currentTarget.style.color = '#5a6478'; e.currentTarget.style.background = 'transparent'; }}
                             >
@@ -374,7 +374,7 @@ export default function BudgetPage() {
 
                     {/* Progress bar */}
                     {item.limit > 0 ? (
-                      <div className="h-2 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.04)' }}>
+                      <div className="h-2 rounded-full overflow-hidden" style={{ background: 'var(--bg-input)' }}>
                         <div
                           className="h-full rounded-full transition-all duration-500"
                           style={{
@@ -387,7 +387,7 @@ export default function BudgetPage() {
                     ) : (
                       <div
                         className="h-4 border border-dashed rounded-full cursor-pointer transition-colors"
-                        style={{ borderColor: 'rgba(255,255,255,0.08)' }}
+                        style={{ borderColor: 'var(--border-color)' }}
                         onClick={() => handleStartEdit(item.category.id)}
                         onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'rgba(124, 58, 237, 0.3)'; }}
                         onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; }}
@@ -420,26 +420,26 @@ export default function BudgetPage() {
       {/* Budget vs Actual Chart */}
       {chartData.length > 0 && (
         <div className="glass-card-static p-6">
-          <h2 className="text-lg font-semibold mb-4" style={{ color: '#e8edf5' }}>Budget vs Actual</h2>
+          <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Budget vs Actual</h2>
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData} barGap={4}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
-                <XAxis dataKey="name" stroke="#5a6478" fontSize={11} angle={-20} textAnchor="end" height={60} />
-                <YAxis stroke="#5a6478" fontSize={12} />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />
+                <XAxis dataKey="name" stroke="var(--text-muted)" fontSize={11} angle={-20} textAnchor="end" height={60} />
+                <YAxis stroke="var(--text-muted)" fontSize={12} />
                 <Tooltip
                   formatter={(value) => formatAmount(Number(value))}
                   contentStyle={{
-                    background: '#151d33',
-                    border: '1px solid rgba(255,255,255,0.08)',
+                    background: 'var(--tooltip-bg)',
+                    border: '1px solid var(--glass-border)',
                     borderRadius: 12,
-                    boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
-                    color: '#e8edf5',
+                    boxShadow: 'var(--tooltip-shadow)',
+                    color: 'var(--text-primary)',
                   }}
-                  itemStyle={{ color: '#e8edf5' }}
-                  labelStyle={{ color: '#8892a8' }}
+                  itemStyle={{ color: 'var(--text-primary)' }}
+                  labelStyle={{ color: 'var(--text-secondary)' }}
                 />
-                <Bar dataKey="budget" fill="rgba(255,255,255,0.08)" name="Budget" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="budget" fill="var(--border-color)" name="Budget" radius={[4, 4, 0, 0]} />
                 <Bar dataKey="spent" name="Spent" radius={[4, 4, 0, 0]}>
                   {chartData.map((entry, index) => (
                     <Cell
@@ -462,7 +462,7 @@ export default function BudgetPage() {
         >
           <Target className="w-10 h-10 mx-auto mb-3" style={{ color: '#a78bfa', filter: 'drop-shadow(0 0 8px rgba(124, 58, 237, 0.3))' }} />
           <h3 className="font-semibold mb-1 gradient-text">No budgets set yet</h3>
-          <p className="text-sm" style={{ color: '#8892a8' }}>
+          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
             Click the edit icon next to any category above to set a monthly spending limit.
             Your total monthly budget is {formatAmount(settings.monthlyBudget)} (configurable in Settings).
           </p>

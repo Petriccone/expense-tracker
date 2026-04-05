@@ -84,7 +84,7 @@ export default function CategoriesPage() {
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold gradient-text">Categories</h1>
-          <p style={{ color: '#8892a8' }}>Manage your expense and income categories</p>
+          <p style={{ color: 'var(--text-secondary)' }}>Manage your expense and income categories</p>
         </div>
         <button
           onClick={() => setIsAdding(true)}
@@ -103,7 +103,7 @@ export default function CategoriesPage() {
         >
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold" style={{ color: '#e8edf5' }}>
+              <h2 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
                 {editingId ? 'Edit Category' : 'New Category'}
               </h2>
               <button
@@ -114,8 +114,8 @@ export default function CategoriesPage() {
                   setForm({ name: '', icon: '📦', color: '#7C3AED', type: 'expense' });
                 }}
                 className="p-2 rounded-lg transition-colors"
-                style={{ color: '#5a6478', background: 'none', border: 'none', cursor: 'pointer' }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; }}
+                style={{ color: 'var(--text-muted)', background: 'none', border: 'none', cursor: 'pointer' }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--hover-bg)'; }}
                 onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
               >
                 <X className="w-5 h-5" />
@@ -124,7 +124,7 @@ export default function CategoriesPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: '#8892a8' }}>Name</label>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Name</label>
                 <input
                   type="text"
                   value={form.name || ''}
@@ -135,7 +135,7 @@ export default function CategoriesPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: '#8892a8' }}>Type</label>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Type</label>
                 <select
                   value={form.type || 'expense'}
                   onChange={(e) => setForm({ ...form, type: e.target.value as 'income' | 'expense' })}
@@ -148,7 +148,7 @@ export default function CategoriesPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2" style={{ color: '#8892a8' }}>Icon</label>
+              <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>Icon</label>
               <div className="flex flex-wrap gap-2 items-center">
                 {EMOJI_OPTIONS.map((emoji) => (
                   <button
@@ -159,7 +159,7 @@ export default function CategoriesPage() {
                     style={{
                       background: form.icon === emoji
                         ? 'linear-gradient(135deg, rgba(124, 58, 237, 0.2), rgba(6, 182, 212, 0.1))'
-                        : 'rgba(255, 255, 255, 0.03)',
+                        : 'var(--bg-input)',
                       border: form.icon === emoji
                         ? '2px solid rgba(124, 58, 237, 0.4)'
                         : '2px solid transparent',
@@ -178,10 +178,10 @@ export default function CategoriesPage() {
                   style={{
                     background: form.icon?.startsWith('data:image')
                       ? 'linear-gradient(135deg, rgba(124, 58, 237, 0.2), rgba(6, 182, 212, 0.1))'
-                      : 'rgba(255, 255, 255, 0.03)',
+                      : 'var(--bg-input)',
                     border: form.icon?.startsWith('data:image')
                       ? '2px solid rgba(124, 58, 237, 0.4)'
-                      : '2px dashed rgba(255, 255, 255, 0.15)',
+                      : '2px dashed var(--dashed-border)',
                     cursor: 'pointer',
                   }}
                   title="Upload custom icon"
@@ -189,7 +189,7 @@ export default function CategoriesPage() {
                   {form.icon?.startsWith('data:image') ? (
                     <img src={form.icon} alt="" className="w-7 h-7 rounded object-cover" />
                   ) : (
-                    <Upload className="w-4 h-4" style={{ color: '#5a6478' }} />
+                    <Upload className="w-4 h-4" style={{ color: 'var(--text-muted)' }} />
                   )}
                 </button>
                 <input
@@ -201,14 +201,14 @@ export default function CategoriesPage() {
                 />
               </div>
               {form.icon?.startsWith('data:image') && (
-                <p className="text-xs mt-2" style={{ color: '#5a6478' }}>
+                <p className="text-xs mt-2" style={{ color: 'var(--text-muted)' }}>
                   Custom icon uploaded. Click ⬆ to change or select an emoji above.
                 </p>
               )}
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2" style={{ color: '#8892a8' }}>Color</label>
+              <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>Color</label>
               <div className="flex flex-wrap gap-2">
                 {COLOR_OPTIONS.map((color) => (
                   <button
@@ -219,7 +219,7 @@ export default function CategoriesPage() {
                     style={{
                       backgroundColor: color,
                       boxShadow: form.color === color
-                        ? `0 0 0 2px #0a0f1e, 0 0 0 4px ${color}, 0 0 12px ${color}40`
+                        ? `0 0 0 2px var(--bg-base), 0 0 0 4px ${color}, 0 0 12px ${color}40`
                         : 'none',
                       cursor: 'pointer',
                       border: 'none',
@@ -240,7 +240,7 @@ export default function CategoriesPage() {
 
       {/* Expense Categories */}
       <div className="glass-card-static p-6">
-        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2" style={{ color: '#e8edf5' }}>
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
           <span className="w-3 h-3 bg-red-500 rounded-full" style={{ boxShadow: '0 0 8px rgba(239, 68, 68, 0.4)' }} />
           Expense Categories
         </h2>
@@ -250,27 +250,27 @@ export default function CategoriesPage() {
               key={cat.id}
               className="flex items-center justify-between p-3 rounded-xl transition-all"
               style={{
-                background: 'rgba(255, 255, 255, 0.02)',
-                border: '1px solid rgba(255, 255, 255, 0.06)',
+                background: 'var(--bg-input)',
+                border: '1px solid var(--border-color)',
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.borderColor = 'rgba(124, 58, 237, 0.2)';
-                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.04)';
+                e.currentTarget.style.background = 'var(--hover-bg)';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.06)';
-                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.02)';
+                e.currentTarget.style.borderColor = 'var(--border-color)';
+                e.currentTarget.style.background = 'var(--bg-input)';
               }}
             >
               <div className="flex items-center gap-2">
                 <CategoryIcon icon={cat.icon} />
-                <span className="font-medium" style={{ color: '#e8edf5' }}>{cat.name}</span>
+                <span className="font-medium" style={{ color: 'var(--text-primary)' }}>{cat.name}</span>
               </div>
               <div className="flex items-center gap-1">
                 <button
                   onClick={() => handleEdit(cat)}
                   className="p-1.5 rounded-lg transition-all"
-                  style={{ color: '#5a6478', background: 'none', border: 'none', cursor: 'pointer' }}
+                  style={{ color: 'var(--text-muted)', background: 'none', border: 'none', cursor: 'pointer' }}
                   onMouseEnter={(e) => { e.currentTarget.style.color = '#a78bfa'; e.currentTarget.style.background = 'rgba(124, 58, 237, 0.1)'; }}
                   onMouseLeave={(e) => { e.currentTarget.style.color = '#5a6478'; e.currentTarget.style.background = 'transparent'; }}
                 >
@@ -279,7 +279,7 @@ export default function CategoriesPage() {
                 <button
                   onClick={() => handleDelete(cat.id)}
                   className="p-1.5 rounded-lg transition-all"
-                  style={{ color: '#5a6478', background: 'none', border: 'none', cursor: 'pointer' }}
+                  style={{ color: 'var(--text-muted)', background: 'none', border: 'none', cursor: 'pointer' }}
                   onMouseEnter={(e) => { e.currentTarget.style.color = '#f87171'; e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)'; }}
                   onMouseLeave={(e) => { e.currentTarget.style.color = '#5a6478'; e.currentTarget.style.background = 'transparent'; }}
                 >
@@ -293,7 +293,7 @@ export default function CategoriesPage() {
 
       {/* Income Categories */}
       <div className="glass-card-static p-6">
-        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2" style={{ color: '#e8edf5' }}>
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
           <span className="w-3 h-3 bg-green-500 rounded-full" style={{ boxShadow: '0 0 8px rgba(16, 185, 129, 0.4)' }} />
           Income Categories
         </h2>
@@ -303,27 +303,27 @@ export default function CategoriesPage() {
               key={cat.id}
               className="flex items-center justify-between p-3 rounded-xl transition-all"
               style={{
-                background: 'rgba(255, 255, 255, 0.02)',
-                border: '1px solid rgba(255, 255, 255, 0.06)',
+                background: 'var(--bg-input)',
+                border: '1px solid var(--border-color)',
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.borderColor = 'rgba(16, 185, 129, 0.2)';
-                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.04)';
+                e.currentTarget.style.background = 'var(--hover-bg)';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.06)';
-                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.02)';
+                e.currentTarget.style.borderColor = 'var(--border-color)';
+                e.currentTarget.style.background = 'var(--bg-input)';
               }}
             >
               <div className="flex items-center gap-2">
                 <CategoryIcon icon={cat.icon} />
-                <span className="font-medium" style={{ color: '#e8edf5' }}>{cat.name}</span>
+                <span className="font-medium" style={{ color: 'var(--text-primary)' }}>{cat.name}</span>
               </div>
               <div className="flex items-center gap-1">
                 <button
                   onClick={() => handleEdit(cat)}
                   className="p-1.5 rounded-lg transition-all"
-                  style={{ color: '#5a6478', background: 'none', border: 'none', cursor: 'pointer' }}
+                  style={{ color: 'var(--text-muted)', background: 'none', border: 'none', cursor: 'pointer' }}
                   onMouseEnter={(e) => { e.currentTarget.style.color = '#a78bfa'; e.currentTarget.style.background = 'rgba(124, 58, 237, 0.1)'; }}
                   onMouseLeave={(e) => { e.currentTarget.style.color = '#5a6478'; e.currentTarget.style.background = 'transparent'; }}
                 >
@@ -332,7 +332,7 @@ export default function CategoriesPage() {
                 <button
                   onClick={() => handleDelete(cat.id)}
                   className="p-1.5 rounded-lg transition-all"
-                  style={{ color: '#5a6478', background: 'none', border: 'none', cursor: 'pointer' }}
+                  style={{ color: 'var(--text-muted)', background: 'none', border: 'none', cursor: 'pointer' }}
                   onMouseEnter={(e) => { e.currentTarget.style.color = '#f87171'; e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)'; }}
                   onMouseLeave={(e) => { e.currentTarget.style.color = '#5a6478'; e.currentTarget.style.background = 'transparent'; }}
                 >
