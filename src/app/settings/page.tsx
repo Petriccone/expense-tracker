@@ -49,7 +49,7 @@ export default function SettingsPage() {
       try {
         const appData = JSON.parse(localStorage.getItem('expense-tracker-data') || '{}');
         if (appData.linkToken) {
-          token = appData.linkToken;
+          token = appData.linkToken as string;
           localStorage.setItem(LINK_TOKEN_KEY, token);
         }
       } catch { /* ignore */ }
