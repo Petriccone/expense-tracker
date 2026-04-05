@@ -268,6 +268,7 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
     }
     const token = localStorage.getItem('auth_token');
     if (!token) {
+      setAuthChecked(true);
       router.push('/login');
       return;
     }
