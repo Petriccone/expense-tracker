@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useReducer, useEffect, useState, useCallback, ReactNode } from 'react';
 import { Transaction, Category, Settings, AIInsight, CategoryBudget } from '@/types';
+import seedData from '../../public/seed-data.json';
 
 interface AppState {
   transactions: Transaction[];
@@ -150,20 +151,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }
       setLoaded(true);
     } else {
-      // Load seed data from Budget.xlsx export
-      const basePath = process.env.__NEXT_ROUTER_BASEPATH || '';
-      fetch(`${basePath}/seed-data.json`)
-        .then(r => r.ok ? r.json() : [])
-        .then(transactions => {
-          if (transactions.length > 0) {
-            dispatch({
-              type: 'LOAD_STATE',
-              payload: { ...initialState, transactions },
-            });
-          }
-        })
-        .catch(() => {})
-        .finally(() => setLoaded(true));
+      // Load seed data from Budget.xlsx import
+      const transactions = (seedData as unknown as Transaction[]) || [];
+      if (transactions.length > 0) {
+        dispatch({
+          type: 'LOAD_STATE',
+          payload: { ...initialState, transactions },
+        });
+      }
+      setLoaded(true);
     }
   }, []);
 
