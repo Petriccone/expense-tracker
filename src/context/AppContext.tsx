@@ -130,37 +130,42 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(appReducer, initialState);
   const [loaded, setLoaded] = useState(false);
 
-  // Load from localStorage on mount, or seed data if empty
+  // Load from localStorage on mount, seed Budget.xlsx data if no transactions
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
+    let loadedTransactions: Transaction[] = [];
+    let parsedSettings = defaultSettings;
+    let parsedCategories = defaultCategories;
+    let parsedBudgets: CategoryBudget[] = [];
+
     if (stored) {
       try {
         const parsed = JSON.parse(stored);
-        dispatch({
-          type: 'LOAD_STATE',
-          payload: {
-            ...initialState,
-            ...parsed,
-            categories: parsed.categories || defaultCategories,
-            settings: { ...defaultSettings, ...parsed.settings },
-            categoryBudgets: parsed.categoryBudgets || [],
-          },
-        });
+        loadedTransactions = parsed.transactions || [];
+        parsedCategories = parsed.categories || defaultCategories;
+        parsedSettings = { ...defaultSettings, ...parsed.settings };
+        parsedBudgets = parsed.categoryBudgets || [];
       } catch (e) {
         console.error('Failed to load from localStorage', e);
       }
-      setLoaded(true);
-    } else {
-      // Load seed data from Budget.xlsx import
-      const transactions = (seedData as unknown as Transaction[]) || [];
-      if (transactions.length > 0) {
-        dispatch({
-          type: 'LOAD_STATE',
-          payload: { ...initialState, transactions },
-        });
-      }
-      setLoaded(true);
     }
+
+    // If no transactions found, use seed data from Budget.xlsx
+    if (loadedTransactions.length === 0) {
+      loadedTransactions = (seedData as unknown as Transaction[]) || [];
+    }
+
+    dispatch({
+      type: 'LOAD_STATE',
+      payload: {
+        ...initialState,
+        transactions: loadedTransactions,
+        categories: parsedCategories,
+        settings: parsedSettings,
+        categoryBudgets: parsedBudgets,
+      },
+    });
+    setLoaded(true);
   }, []);
 
   // Save to localStorage on state change (only after initial load)
