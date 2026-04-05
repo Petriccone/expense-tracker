@@ -1,0 +1,17 @@
+{
+  "name": "ExpenseAI",
+  "short_name": "ExpenseAI",
+  "description": "Smart expense tracking with AI",
+  "start_url": "/expense-tracker/",
+  "scope": "/expense-tracker/",
+  "display": "standalone",
+  "background_color": "#0a0f1e",
+  "theme_color": "#7C3AED",
+  "icons": [
+    {
+      "src": "/expense-tracker/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
