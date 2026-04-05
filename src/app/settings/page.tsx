@@ -39,31 +39,32 @@ export default function SettingsPage() {
   const [copied, setCopied] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<'checking' | 'connected' | 'not_connected' | 'unavailable'>('checking');
 
-  // Load or generate link token on mount (check both locations for backwards compat)
+  // Load link token on mount - never auto-generate, use default fallback
   useEffect(() => {
-    // First check dedicated key
+    const DEFAULT_TOKEN = 'nDV8UVVnOIHmrJNEIvIlfn6n2CzJL2VA';
+
+    // Check dedicated key first
     let token = localStorage.getItem(LINK_TOKEN_KEY);
 
-    // Also check inside expense-tracker-data for persistence
+    // Check inside app data
     if (!token) {
       try {
         const appData = JSON.parse(localStorage.getItem('expense-tracker-data') || '{}');
         if (appData.linkToken) {
           token = appData.linkToken as string;
-          localStorage.setItem(LINK_TOKEN_KEY, token);
         }
       } catch { /* ignore */ }
     }
 
-    if (token) {
-      setLinkToken(token);
-    } else {
-      token = generateToken();
-      localStorage.setItem(LINK_TOKEN_KEY, token);
-      setLinkToken(token);
+    // Use default token as fallback (never generate random)
+    if (!token) {
+      token = DEFAULT_TOKEN;
     }
 
-    // Always persist in app data too
+    localStorage.setItem(LINK_TOKEN_KEY, token);
+    setLinkToken(token);
+
+    // Persist in app data too
     try {
       const appData = JSON.parse(localStorage.getItem('expense-tracker-data') || '{}');
       if (appData.linkToken !== token) {

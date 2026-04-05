@@ -131,6 +131,7 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 
 const STORAGE_KEY = 'expense-tracker-data';
 const LINK_TOKEN_KEY = 'telegram-link-token';
+const DEFAULT_LINK_TOKEN = 'nDV8UVVnOIHmrJNEIvIlfn6n2CzJL2VA';
 
 // Helper: fetch Telegram transactions from Supabase
 async function fetchSupabaseTransactions(linkToken: string): Promise<Transaction[]> {
@@ -229,6 +230,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
         if (parsed.linkToken && !localStorage.getItem(LINK_TOKEN_KEY)) {
           localStorage.setItem(LINK_TOKEN_KEY, parsed.linkToken);
         }
+        // Ensure link token always exists
+        if (!localStorage.getItem(LINK_TOKEN_KEY)) {
+          localStorage.setItem(LINK_TOKEN_KEY, DEFAULT_LINK_TOKEN);
+        }
       } catch (e) {
         console.error('Failed to load from localStorage', e);
       }
@@ -239,6 +244,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
       loadedTransactions = (seedData as unknown as Transaction[]) || [];
       parsedCategories = (seedCategories as unknown as Category[]) || defaultCategories;
       parsedBudgets = (seedBudgets as unknown as CategoryBudget[]) || [];
+    }
+
+    // Always ensure link token exists
+    if (!localStorage.getItem(LINK_TOKEN_KEY)) {
+      localStorage.setItem(LINK_TOKEN_KEY, DEFAULT_LINK_TOKEN);
     }
 
     // Attempt Supabase merge on mount
