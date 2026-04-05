@@ -122,7 +122,7 @@ export default function LoginPage() {
               backdropFilter: 'blur(12px)',
             }}
           >
-            <img src="/expense-tracker/icon.svg" alt="ExpenseAI" style={{ width: 48, height: 48, borderRadius: 12 }} />
+            <img src="/expense-tracker/icon.svg" alt="ExpensesAI" style={{ width: 48, height: 48, borderRadius: 12 }} />
           </div>
           <h1
             className="text-4xl font-bold mb-2"
@@ -133,7 +133,7 @@ export default function LoginPage() {
               backgroundClip: 'text',
             }}
           >
-            ExpenseAI
+            ExpensesAI
           </h1>
           <p style={{ color: 'var(--text-secondary)' }}>Smart expense tracking, powered by intelligence</p>
         </div>

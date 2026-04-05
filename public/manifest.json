@@ -1,6 +1,6 @@
 {
-  "name": "ExpenseAI",
-  "short_name": "ExpenseAI",
+  "name": "ExpensesAI",
+  "short_name": "ExpensesAI",
   "description": "Smart expense tracking with AI",
   "start_url": "/expense-tracker/",
   "scope": "/expense-tracker/",

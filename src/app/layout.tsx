@@ -3,7 +3,7 @@ import './globals.css';
 import LayoutShell from '@/components/LayoutShell';
 
 export const metadata: Metadata = {
-  title: 'ExpenseTracker AI',
+  title: 'ExpensesAI',
   description: 'Smart expense tracking with AI-powered insights',
 };
 

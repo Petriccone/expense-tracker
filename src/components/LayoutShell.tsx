@@ -71,7 +71,7 @@ function Sidebar() {
         display: 'flex', alignItems: 'center', gap: 12, padding: '4px 12px 24px',
         borderBottom: '1px solid var(--border-color)', marginBottom: 16,
       }}>
-        <img src="/expense-tracker/icon.svg" alt="ExpenseAI" style={{
+        <img src="/expense-tracker/icon.svg" alt="ExpensesAI" style={{
           width: 40, height: 40, borderRadius: 14,
           boxShadow: '0 0 20px rgba(124, 58, 237, 0.3)',
         }} />
@@ -82,7 +82,7 @@ function Sidebar() {
           WebkitTextFillColor: 'transparent',
           backgroundClip: 'text',
         }}>
-          ExpenseAI
+          ExpensesAI
         </span>
       </div>
 
@@ -277,7 +277,7 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
         }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <img src="/expense-tracker/icon.svg" alt="ExpenseAI" style={{
+              <img src="/expense-tracker/icon.svg" alt="ExpensesAI" style={{
                 width: 34, height: 34, borderRadius: 12,
                 boxShadow: '0 0 16px rgba(124, 58, 237, 0.3)',
               }} />
@@ -288,7 +288,7 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
               }}>
-                ExpenseAI
+                ExpensesAI
               </span>
             </div>
             <button

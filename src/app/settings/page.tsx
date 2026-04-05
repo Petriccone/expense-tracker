@@ -441,7 +441,7 @@ export default function SettingsPage() {
 
       {/* Version Info */}
       <div className="text-center text-sm" style={{ color: 'var(--text-muted)' }}>
-        <p>ExpenseTracker AI v1.0.0</p>
+        <p>ExpensesAI v1.0.0</p>
         <p>Built with Next.js + Tailwind CSS</p>
       </div>
     </div>
