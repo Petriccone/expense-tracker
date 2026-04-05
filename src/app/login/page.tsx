@@ -67,25 +67,97 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden"
+      style={{ background: '#050a18' }}
+    >
+      {/* Animated gradient orbs */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div
+          className="animate-gradient"
+          style={{
+            position: 'absolute',
+            top: '-20%', left: '-10%',
+            width: '60%', height: '60%',
+            borderRadius: '50%',
+            background: 'radial-gradient(ellipse, rgba(124, 58, 237, 0.2), transparent 70%)',
+            filter: 'blur(60px)',
+          }}
+        />
+        <div
+          className="animate-gradient"
+          style={{
+            position: 'absolute',
+            bottom: '-20%', right: '-10%',
+            width: '55%', height: '55%',
+            borderRadius: '50%',
+            background: 'radial-gradient(ellipse, rgba(6, 182, 212, 0.15), transparent 70%)',
+            filter: 'blur(60px)',
+            animationDelay: '4s',
+          }}
+        />
+        <div
+          className="animate-gradient"
+          style={{
+            position: 'absolute',
+            top: '40%', left: '50%',
+            width: '40%', height: '40%',
+            borderRadius: '50%',
+            background: 'radial-gradient(ellipse, rgba(124, 58, 237, 0.08), transparent 70%)',
+            filter: 'blur(80px)',
+            animationDelay: '2s',
+          }}
+        />
+      </div>
+
+      <div className="w-full max-w-md relative z-10 animate-fadeIn">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-white/10 rounded-2xl mb-4">
-            <Wallet className="w-8 h-8 text-white" />
+          <div
+            className="inline-flex items-center justify-center w-18 h-18 rounded-2xl mb-5 animate-float"
+            style={{
+              width: 72, height: 72,
+              background: 'linear-gradient(135deg, rgba(124, 58, 237, 0.2), rgba(6, 182, 212, 0.1))',
+              border: '1px solid rgba(124, 58, 237, 0.2)',
+              boxShadow: '0 0 30px rgba(124, 58, 237, 0.25), 0 0 60px rgba(6, 182, 212, 0.1)',
+              backdropFilter: 'blur(12px)',
+            }}
+          >
+            <Wallet className="w-9 h-9" style={{ color: '#a78bfa' }} />
           </div>
-          <h1 className="text-3xl font-bold text-white">ExpenseAI</h1>
-          <p className="text-purple-200 mt-2">Smart expense tracking</p>
+          <h1
+            className="text-4xl font-bold mb-2"
+            style={{
+              background: 'linear-gradient(135deg, #7C3AED, #06B6D4)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+            }}
+          >
+            ExpenseAI
+          </h1>
+          <p style={{ color: '#8892a8' }}>Smart expense tracking, powered by intelligence</p>
         </div>
 
         {/* Login Card */}
-        <div className="bg-white rounded-3xl shadow-2xl p-8">
-          <h2 className="text-2xl font-bold text-slate-900 mb-6 text-center">
+        <div
+          className="glass-card-static p-8"
+          style={{
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), 0 0 60px rgba(124, 58, 237, 0.08)',
+          }}
+        >
+          <h2 className="text-2xl font-bold mb-6 text-center" style={{ color: '#e8edf5' }}>
             {isLogin ? 'Welcome back!' : 'Create account'}
           </h2>
 
           {error && (
-            <div className="bg-red-50 text-red-600 px-4 py-3 rounded-xl mb-4 text-sm">
+            <div
+              className="px-4 py-3 rounded-xl mb-4 text-sm"
+              style={{
+                background: 'rgba(239, 68, 68, 0.1)',
+                border: '1px solid rgba(239, 68, 68, 0.2)',
+                color: '#f87171',
+              }}
+            >
               {error}
             </div>
           )}
@@ -93,7 +165,7 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {!isLogin && (
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Name</label>
+                <label className="block text-sm font-medium mb-1" style={{ color: '#8892a8' }}>Name</label>
                 <input
                   type="text"
                   value={form.name}
@@ -106,7 +178,7 @@ export default function LoginPage() {
             )}
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+              <label className="block text-sm font-medium mb-1" style={{ color: '#8892a8' }}>Email</label>
               <input
                 type="email"
                 value={form.email}
@@ -118,7 +190,7 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Password</label>
+              <label className="block text-sm font-medium mb-1" style={{ color: '#8892a8' }}>Password</label>
               <input
                 type="password"
                 value={form.password}
@@ -133,7 +205,8 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="btn-primary w-full py-3 flex items-center justify-center gap-2"
+              className="btn-primary w-full py-3 flex items-center justify-center gap-2 animate-pulse-glow"
+              style={{ marginTop: 8 }}
             >
               {loading ? (
                 <Loader2 className="w-5 h-5 animate-spin" />
@@ -157,14 +230,20 @@ export default function LoginPage() {
                 setIsLogin(!isLogin);
                 setError('');
               }}
-              className="text-purple-600 hover:text-purple-700 font-medium"
+              className="font-medium transition-colors"
+              style={{
+                color: '#a78bfa',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+              }}
             >
               {isLogin ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
             </button>
           </div>
         </div>
 
-        <p className="text-center text-purple-200 text-sm mt-6">
+        <p className="text-center text-sm mt-6" style={{ color: '#5a6478' }}>
           Demo: Register a new account to get started
         </p>
       </div>

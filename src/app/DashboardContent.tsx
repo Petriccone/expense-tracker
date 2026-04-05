@@ -179,8 +179,8 @@ export default function DashboardContent() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-slate-900">Dashboard</h1>
-          <p className="text-slate-500">Welcome back! Here's your financial overview.</p>
+          <h1 className="text-2xl md:text-3xl font-bold gradient-text">Dashboard</h1>
+          <p style={{ color: '#8892a8' }}>Welcome back! Here's your financial overview.</p>
         </div>
         <Link
           href="/add"
@@ -192,52 +192,70 @@ export default function DashboardContent() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 stagger-children">
         {/* Balance */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm card-hover">
+        <div className="glass-card p-6">
           <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
-              <Wallet className="w-6 h-6 text-purple-600" />
+            <div
+              className="w-12 h-12 rounded-xl flex items-center justify-center"
+              style={{
+                background: 'linear-gradient(135deg, rgba(124, 58, 237, 0.15), rgba(6, 182, 212, 0.08))',
+                boxShadow: '0 0 15px rgba(124, 58, 237, 0.15)',
+              }}
+            >
+              <Wallet className="w-6 h-6" style={{ color: '#a78bfa' }} />
             </div>
-            <span className={`flex items-center gap-1 text-sm font-medium ${stats.net >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+            <span className={`flex items-center gap-1 text-sm font-medium ${stats.net >= 0 ? 'text-green-400' : 'text-red-400'}`}>
               {stats.net >= 0 ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
               {Math.abs(stats.percentChange).toFixed(1)}%
             </span>
           </div>
-          <p className="text-slate-500 text-sm">Monthly Balance</p>
-          <p className={`text-2xl font-bold ${stats.net >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+          <p style={{ color: '#8892a8', fontSize: 14 }}>Monthly Balance</p>
+          <p className={`text-2xl font-bold ${stats.net >= 0 ? 'text-green-400' : 'text-red-400'}`}>
             {formatAmount(stats.net)}
           </p>
         </div>
 
         {/* Income */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm card-hover">
+        <div className="glass-card p-6">
           <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-              <TrendingUp className="w-6 h-6 text-green-600" />
+            <div
+              className="w-12 h-12 rounded-xl flex items-center justify-center"
+              style={{
+                background: 'rgba(16, 185, 129, 0.12)',
+                boxShadow: '0 0 15px rgba(16, 185, 129, 0.1)',
+              }}
+            >
+              <TrendingUp className="w-6 h-6 text-green-400" />
             </div>
           </div>
-          <p className="text-slate-500 text-sm">Monthly Income</p>
-          <p className="text-2xl font-bold text-green-600">{formatAmount(stats.income)}</p>
+          <p style={{ color: '#8892a8', fontSize: 14 }}>Monthly Income</p>
+          <p className="text-2xl font-bold text-green-400">{formatAmount(stats.income)}</p>
         </div>
 
         {/* Expenses */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm card-hover">
+        <div className="glass-card p-6">
           <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center">
-              <TrendingDown className="w-6 h-6 text-red-600" />
+            <div
+              className="w-12 h-12 rounded-xl flex items-center justify-center"
+              style={{
+                background: 'rgba(239, 68, 68, 0.12)',
+                boxShadow: '0 0 15px rgba(239, 68, 68, 0.1)',
+              }}
+            >
+              <TrendingDown className="w-6 h-6 text-red-400" />
             </div>
           </div>
-          <p className="text-slate-500 text-sm">Monthly Expenses</p>
-          <p className="text-2xl font-bold text-red-600">{formatAmount(stats.expenses)}</p>
+          <p style={{ color: '#8892a8', fontSize: 14 }}>Monthly Expenses</p>
+          <p className="text-2xl font-bold text-red-400">{formatAmount(stats.expenses)}</p>
         </div>
       </div>
 
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Category Pie Chart */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm">
-          <h2 className="text-lg font-semibold mb-4">Spending by Category</h2>
+        <div className="glass-card-static p-6">
+          <h2 className="text-lg font-semibold mb-4" style={{ color: '#e8edf5' }}>Spending by Category</h2>
           {categoryData.length > 0 ? (
             <div className="chart-container">
               <ResponsiveContainer width="100%" height="100%">
@@ -250,17 +268,29 @@ export default function DashboardContent() {
                     outerRadius={100}
                     paddingAngle={2}
                     dataKey="value"
+                    stroke="none"
                   >
                     {categoryData.map((_, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(value) => formatAmount(Number(value))} />
+                  <Tooltip
+                    formatter={(value) => formatAmount(Number(value))}
+                    contentStyle={{
+                      background: '#151d33',
+                      border: '1px solid rgba(255,255,255,0.08)',
+                      borderRadius: 12,
+                      boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+                      color: '#e8edf5',
+                    }}
+                    itemStyle={{ color: '#e8edf5' }}
+                    labelStyle={{ color: '#8892a8' }}
+                  />
                 </PieChart>
               </ResponsiveContainer>
             </div>
           ) : (
-            <div className="h-64 flex items-center justify-center text-slate-400">
+            <div className="h-64 flex items-center justify-center" style={{ color: '#5a6478' }}>
               No expenses this month
             </div>
           )}
@@ -269,8 +299,14 @@ export default function DashboardContent() {
               const cat = getCategoryInfo(item.name);
               return (
                 <div key={item.name} className="flex items-center gap-2 text-sm">
-                  <span className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }} />
-                  <span className="text-slate-600">{item.name}</span>
+                  <span
+                    className="w-3 h-3 rounded-full"
+                    style={{
+                      backgroundColor: COLORS[index % COLORS.length],
+                      boxShadow: `0 0 6px ${COLORS[index % COLORS.length]}40`,
+                    }}
+                  />
+                  <span style={{ color: '#8892a8' }}>{item.name}</span>
                 </div>
               );
             })}
@@ -278,18 +314,26 @@ export default function DashboardContent() {
         </div>
 
         {/* Monthly Bar Chart */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm">
-          <h2 className="text-lg font-semibold mb-4">Monthly Trend</h2>
+        <div className="glass-card-static p-6">
+          <h2 className="text-lg font-semibold mb-4" style={{ color: '#e8edf5' }}>Monthly Trend</h2>
           {monthlyData.some((m) => m.income > 0 || m.expense > 0) ? (
             <div className="chart-container">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={monthlyData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
-                  <XAxis dataKey="month" stroke="#64748B" fontSize={12} />
-                  <YAxis stroke="#64748B" fontSize={12} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
+                  <XAxis dataKey="month" stroke="#5a6478" fontSize={12} />
+                  <YAxis stroke="#5a6478" fontSize={12} />
                   <Tooltip
                     formatter={(value) => formatAmount(Number(value))}
-                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                    contentStyle={{
+                      background: '#151d33',
+                      border: '1px solid rgba(255,255,255,0.08)',
+                      borderRadius: 12,
+                      boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+                      color: '#e8edf5',
+                    }}
+                    itemStyle={{ color: '#e8edf5' }}
+                    labelStyle={{ color: '#8892a8' }}
                   />
                   <Bar dataKey="income" fill="#10B981" radius={[4, 4, 0, 0]} name="Income" />
                   <Bar dataKey="expense" fill="#EF4444" radius={[4, 4, 0, 0]} name="Expense" />
@@ -297,7 +341,7 @@ export default function DashboardContent() {
               </ResponsiveContainer>
             </div>
           ) : (
-            <div className="h-64 flex items-center justify-center text-slate-400">
+            <div className="h-64 flex items-center justify-center" style={{ color: '#5a6478' }}>
               No data yet
             </div>
           )}
@@ -306,29 +350,40 @@ export default function DashboardContent() {
 
       {/* AI Insights */}
       {insights.length > 0 && (
-        <div className="bg-white rounded-2xl p-6 shadow-sm border-l-4 border-purple-500">
+        <div
+          className="glass-card-static p-6"
+          style={{ borderLeft: '3px solid #7C3AED' }}
+        >
           <div className="flex items-center gap-2 mb-4">
-            <Sparkles className="w-5 h-5 text-purple-600" />
-            <h2 className="text-lg font-semibold">AI Insights</h2>
+            <Sparkles className="w-5 h-5" style={{ color: '#a78bfa', filter: 'drop-shadow(0 0 6px rgba(124, 58, 237, 0.4))' }} />
+            <h2 className="text-lg font-semibold gradient-text">AI Insights</h2>
           </div>
           <div className="space-y-3">
             {insights.map((insight) => (
               <div
                 key={insight.id}
-                className={`p-4 rounded-xl flex items-start gap-3 ${
-                  insight.type === 'warning'
-                    ? 'bg-amber-50 border border-amber-200'
+                className="p-4 rounded-xl flex items-start gap-3"
+                style={{
+                  background: insight.type === 'warning'
+                    ? 'rgba(245, 158, 11, 0.08)'
                     : insight.type === 'tip'
-                    ? 'bg-green-50 border border-green-200'
-                    : 'bg-purple-50 border border-purple-200'
-                }`}
+                    ? 'rgba(16, 185, 129, 0.08)'
+                    : 'rgba(124, 58, 237, 0.08)',
+                  border: `1px solid ${
+                    insight.type === 'warning'
+                      ? 'rgba(245, 158, 11, 0.15)'
+                      : insight.type === 'tip'
+                      ? 'rgba(16, 185, 129, 0.15)'
+                      : 'rgba(124, 58, 237, 0.15)'
+                  }`,
+                }}
               >
-                {insight.type === 'warning' && <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0" />}
-                {insight.type === 'tip' && <Lightbulb className="w-5 h-5 text-green-600 flex-shrink-0" />}
-                {insight.type === 'info' && <Sparkles className="w-5 h-5 text-purple-600 flex-shrink-0" />}
+                {insight.type === 'warning' && <AlertTriangle className="w-5 h-5 text-amber-400 flex-shrink-0" />}
+                {insight.type === 'tip' && <Lightbulb className="w-5 h-5 text-green-400 flex-shrink-0" />}
+                {insight.type === 'info' && <Sparkles className="w-5 h-5 flex-shrink-0" style={{ color: '#a78bfa' }} />}
                 <div>
-                  <p className="font-medium text-slate-900">{insight.title}</p>
-                  <p className="text-sm text-slate-600">{insight.description}</p>
+                  <p className="font-medium" style={{ color: '#e8edf5' }}>{insight.title}</p>
+                  <p className="text-sm" style={{ color: '#8892a8' }}>{insight.description}</p>
                 </div>
               </div>
             ))}
@@ -337,32 +392,46 @@ export default function DashboardContent() {
       )}
 
       {/* Recent Transactions */}
-      <div className="bg-white rounded-2xl p-6 shadow-sm">
+      <div className="glass-card-static p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold">Recent Transactions</h2>
-          <Link href="/transactions" className="text-purple-600 text-sm font-medium hover:text-purple-700">
+          <h2 className="text-lg font-semibold" style={{ color: '#e8edf5' }}>Recent Transactions</h2>
+          <Link
+            href="/transactions"
+            className="text-sm font-medium transition-colors"
+            style={{ color: '#a78bfa' }}
+          >
             View All
           </Link>
         </div>
         {recentTransactions.length > 0 ? (
-          <div className="space-y-3">
+          <div className="space-y-2 stagger-children">
             {recentTransactions.map((transaction) => {
               const cat = getCategoryInfo(transaction.category);
               return (
                 <div
                   key={transaction.id}
-                  className="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 transition-colors"
+                  className="flex items-center justify-between p-3 rounded-xl transition-all duration-200"
+                  style={{
+                    background: 'transparent',
+                    cursor: 'default',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'transparent';
+                  }}
                 >
                   <div className="flex items-center gap-3">
                     <div
                       className="w-10 h-10 rounded-xl flex items-center justify-center text-lg"
-                      style={{ backgroundColor: `${cat.color}20` }}
+                      style={{ backgroundColor: `${cat.color}18` }}
                     >
                       {cat.icon}
                     </div>
                     <div>
-                      <p className="font-medium text-slate-900">{transaction.description}</p>
-                      <p className="text-sm text-slate-500">
+                      <p className="font-medium" style={{ color: '#e8edf5' }}>{transaction.description}</p>
+                      <p className="text-sm" style={{ color: '#5a6478' }}>
                         {new Date(transaction.date).toLocaleDateString('en-US', {
                           month: 'short',
                           day: 'numeric',
@@ -372,7 +441,7 @@ export default function DashboardContent() {
                   </div>
                   <span
                     className={`font-semibold ${
-                      transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
+                      transaction.type === 'income' ? 'text-green-400' : 'text-red-400'
                     }`}
                   >
                     {transaction.type === 'income' ? '+' : '-'}
@@ -383,9 +452,9 @@ export default function DashboardContent() {
             })}
           </div>
         ) : (
-          <div className="text-center py-8 text-slate-400">
+          <div className="text-center py-8" style={{ color: '#5a6478' }}>
             <p>No transactions yet</p>
-            <Link href="/add" className="text-purple-600 font-medium hover:underline mt-2 inline-block">
+            <Link href="/add" className="font-medium mt-2 inline-block" style={{ color: '#a78bfa' }}>
               Add your first transaction
             </Link>
           </div>

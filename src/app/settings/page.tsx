@@ -1,13 +1,89 @@
 'use client';
 
-import { useState } from 'react';
-import { Save, Download, Trash2, Moon, Sun, Euro, DollarSign, Ban } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { Save, Download, Trash2, Moon, Sun, Euro, DollarSign, Ban, Copy, RefreshCw, CheckCircle, XCircle, MessageCircle } from 'lucide-react';
 import { useSettings } from '@/context/AppContext';
+import { supabase } from '@/lib/supabase';
+
+const LINK_TOKEN_KEY = 'telegram-link-token';
+
+function generateToken(): string {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  for (let i = 0; i < 32; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+}
 
 export default function SettingsPage() {
   const { settings, setSettings } = useSettings();
   const [form, setForm] = useState(settings);
   const [saved, setSaved] = useState(false);
+
+  // Telegram link state
+  const [linkToken, setLinkToken] = useState<string>('');
+  const [copied, setCopied] = useState(false);
+  const [connectionStatus, setConnectionStatus] = useState<'checking' | 'connected' | 'not_connected' | 'unavailable'>('checking');
+
+  // Load or generate link token on mount
+  useEffect(() => {
+    const stored = localStorage.getItem(LINK_TOKEN_KEY);
+    if (stored) {
+      setLinkToken(stored);
+    } else {
+      const token = generateToken();
+      localStorage.setItem(LINK_TOKEN_KEY, token);
+      setLinkToken(token);
+    }
+  }, []);
+
+  // Check connection status
+  const checkConnection = useCallback(async () => {
+    if (!supabase || !linkToken) {
+      setConnectionStatus('unavailable');
+      return;
+    }
+    setConnectionStatus('checking');
+    try {
+      const { data, error } = await supabase
+        .from('user_links')
+        .select('id')
+        .eq('link_token', linkToken)
+        .limit(1);
+
+      if (error) {
+        console.error('Connection check error:', error);
+        setConnectionStatus('unavailable');
+        return;
+      }
+      setConnectionStatus(data && data.length > 0 ? 'connected' : 'not_connected');
+    } catch {
+      setConnectionStatus('unavailable');
+    }
+  }, [linkToken]);
+
+  useEffect(() => {
+    if (linkToken) {
+      checkConnection();
+    }
+  }, [linkToken, checkConnection]);
+
+  const handleCopyToken = () => {
+    navigator.clipboard.writeText(linkToken).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
+  const handleRegenerateToken = () => {
+    if (confirm('Are you sure? You will need to re-link your Telegram bot with the new token.')) {
+      const token = generateToken();
+      localStorage.setItem(LINK_TOKEN_KEY, token);
+      setLinkToken(token);
+      setConnectionStatus('not_connected');
+    }
+  };
 
   const handleSave = () => {
     setSettings(form);
@@ -43,45 +119,57 @@ export default function SettingsPage() {
     <div className="max-w-2xl mx-auto space-y-6 animate-fadeIn">
       {/* Header */}
       <div>
-        <h1 className="text-2xl md:text-3xl font-bold text-slate-900">Settings</h1>
-        <p className="text-slate-500">Customize your experience</p>
+        <h1 className="text-2xl md:text-3xl font-bold gradient-text">Settings</h1>
+        <p style={{ color: '#8892a8' }}>Customize your experience</p>
       </div>
 
       {/* Currency */}
-      <div className="bg-white rounded-2xl p-6 shadow-sm">
-        <h2 className="text-lg font-semibold mb-4">Currency</h2>
+      <div className="glass-card-static p-6">
+        <h2 className="text-lg font-semibold mb-4" style={{ color: '#e8edf5' }}>Currency</h2>
         <div className="grid grid-cols-3 gap-3">
           {[
-            { value: 'EUR', label: 'Euro', icon: Euro, symbol: '€' },
+            { value: 'EUR', label: 'Euro', icon: Euro, symbol: '\u20ac' },
             { value: 'USD', label: 'US Dollar', icon: DollarSign, symbol: '$' },
             { value: 'BRL', label: 'Real', icon: Ban, symbol: 'R$' },
           ].map((curr) => (
             <button
               key={curr.value}
               onClick={() => setForm({ ...form, currency: curr.value })}
-              className={`p-4 rounded-xl border-2 transition-all ${
-                form.currency === curr.value
-                  ? 'border-purple-500 bg-purple-50'
-                  : 'border-slate-200 hover:border-purple-200'
-              }`}
+              className="p-4 rounded-xl transition-all"
+              style={{
+                background: form.currency === curr.value
+                  ? 'linear-gradient(135deg, rgba(124, 58, 237, 0.15), rgba(6, 182, 212, 0.08))'
+                  : 'rgba(255, 255, 255, 0.03)',
+                border: form.currency === curr.value
+                  ? '2px solid rgba(124, 58, 237, 0.4)'
+                  : '2px solid rgba(255, 255, 255, 0.06)',
+                boxShadow: form.currency === curr.value
+                  ? '0 0 20px rgba(124, 58, 237, 0.15)'
+                  : 'none',
+                cursor: 'pointer',
+              }}
             >
-              <div className="text-2xl mb-1">{curr.symbol}</div>
-              <div className="text-sm font-medium">{curr.label}</div>
+              <div className="text-2xl mb-1" style={{
+                color: form.currency === curr.value ? '#a78bfa' : '#8892a8',
+              }}>{curr.symbol}</div>
+              <div className="text-sm font-medium" style={{
+                color: form.currency === curr.value ? '#e8edf5' : '#8892a8',
+              }}>{curr.label}</div>
             </button>
           ))}
         </div>
       </div>
 
       {/* Monthly Budget */}
-      <div className="bg-white rounded-2xl p-6 shadow-sm">
-        <h2 className="text-lg font-semibold mb-4">Monthly Budget</h2>
+      <div className="glass-card-static p-6">
+        <h2 className="text-lg font-semibold mb-4" style={{ color: '#e8edf5' }}>Monthly Budget</h2>
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-2">
+          <label className="block text-sm font-medium mb-2" style={{ color: '#8892a8' }}>
             Monthly Expense Limit
           </label>
           <div className="relative">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
-              {form.currency === 'EUR' ? '€' : form.currency === 'USD' ? '$' : 'R$'}
+            <span className="absolute left-4 top-1/2 -translate-y-1/2" style={{ color: '#5a6478' }}>
+              {form.currency === 'EUR' ? '\u20ac' : form.currency === 'USD' ? '$' : 'R$'}
             </span>
             <input
               type="number"
@@ -92,35 +180,48 @@ export default function SettingsPage() {
               className="input-field pl-10"
             />
           </div>
-          <p className="text-sm text-slate-500 mt-2">
+          <p className="text-sm mt-2" style={{ color: '#5a6478' }}>
             Set a limit to get budget warnings when approaching or exceeding it.
           </p>
         </div>
       </div>
 
       {/* Appearance */}
-      <div className="bg-white rounded-2xl p-6 shadow-sm">
-        <h2 className="text-lg font-semibold mb-4">Appearance</h2>
+      <div className="glass-card-static p-6">
+        <h2 className="text-lg font-semibold mb-4" style={{ color: '#e8edf5' }}>Appearance</h2>
         <button
           onClick={() => setForm({ ...form, darkMode: !form.darkMode })}
-          className="w-full flex items-center justify-between p-4 rounded-xl border border-slate-200 hover:border-purple-200 transition-colors"
+          className="w-full flex items-center justify-between p-4 rounded-xl transition-all"
+          style={{
+            background: 'rgba(255, 255, 255, 0.03)',
+            border: '1px solid rgba(255, 255, 255, 0.06)',
+            cursor: 'pointer',
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'rgba(124, 58, 237, 0.3)'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.06)'; }}
         >
           <div className="flex items-center gap-3">
             {form.darkMode ? (
-              <Moon className="w-5 h-5 text-purple-600" />
+              <Moon className="w-5 h-5" style={{ color: '#a78bfa' }} />
             ) : (
-              <Sun className="w-5 h-5 text-purple-600" />
+              <Sun className="w-5 h-5" style={{ color: '#a78bfa' }} />
             )}
             <div className="text-left">
-              <p className="font-medium">Dark Mode</p>
-              <p className="text-sm text-slate-500">
+              <p className="font-medium" style={{ color: '#e8edf5' }}>Dark Mode</p>
+              <p className="text-sm" style={{ color: '#5a6478' }}>
                 {form.darkMode ? 'Currently using dark theme' : 'Currently using light theme'}
               </p>
             </div>
           </div>
-          <div className={`w-12 h-6 rounded-full transition-colors ${
-            form.darkMode ? 'bg-purple-500' : 'bg-slate-200'
-          }`}>
+          <div
+            className="w-12 h-6 rounded-full transition-colors relative"
+            style={{
+              background: form.darkMode
+                ? 'linear-gradient(135deg, #7C3AED, #06B6D4)'
+                : 'rgba(255, 255, 255, 0.1)',
+              boxShadow: form.darkMode ? '0 0 12px rgba(124, 58, 237, 0.3)' : 'none',
+            }}
+          >
             <div className={`w-5 h-5 bg-white rounded-full shadow transform transition-transform ${
               form.darkMode ? 'translate-x-6' : 'translate-x-0.5'
             } mt-0.5`} />
@@ -128,28 +229,142 @@ export default function SettingsPage() {
         </button>
       </div>
 
+      {/* Telegram Bot Integration */}
+      <div className="glass-card-static p-6">
+        <div className="flex items-center gap-3 mb-4">
+          <MessageCircle className="w-5 h-5" style={{ color: '#a78bfa' }} />
+          <h2 className="text-lg font-semibold" style={{ color: '#e8edf5' }}>Telegram Bot</h2>
+        </div>
+
+        {/* Connection Status */}
+        <div className="flex items-center gap-2 mb-4">
+          {connectionStatus === 'checking' && (
+            <span className="text-sm" style={{ color: '#5a6478' }}>Checking connection...</span>
+          )}
+          {connectionStatus === 'connected' && (
+            <>
+              <CheckCircle className="w-4 h-4 text-green-400" />
+              <span className="text-sm text-green-400 font-medium">Connected to Telegram</span>
+            </>
+          )}
+          {connectionStatus === 'not_connected' && (
+            <>
+              <XCircle className="w-4 h-4 text-amber-400" />
+              <span className="text-sm text-amber-400 font-medium">Not linked yet</span>
+            </>
+          )}
+          {connectionStatus === 'unavailable' && (
+            <>
+              <XCircle className="w-4 h-4" style={{ color: '#5a6478' }} />
+              <span className="text-sm" style={{ color: '#5a6478' }}>Supabase not configured</span>
+            </>
+          )}
+        </div>
+
+        {/* Link Token */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-2" style={{ color: '#8892a8' }}>
+            Your Link Token
+          </label>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              readOnly
+              value={linkToken}
+              className="input-field flex-1 font-mono text-sm"
+              style={{ background: 'rgba(255, 255, 255, 0.02)' }}
+            />
+            <button
+              onClick={handleCopyToken}
+              className="px-4 py-2 rounded-xl transition-all flex items-center gap-2"
+              style={{
+                background: 'rgba(255, 255, 255, 0.03)',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
+                color: '#8892a8',
+                cursor: 'pointer',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = 'rgba(124, 58, 237, 0.3)';
+                e.currentTarget.style.background = 'rgba(124, 58, 237, 0.08)';
+                e.currentTarget.style.color = '#a78bfa';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.08)';
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)';
+                e.currentTarget.style.color = '#8892a8';
+              }}
+            >
+              <Copy className="w-4 h-4" />
+              {copied ? 'Copied!' : 'Copy'}
+            </button>
+          </div>
+        </div>
+
+        {/* Instructions */}
+        <div
+          className="rounded-xl p-4 mb-4"
+          style={{
+            background: 'linear-gradient(135deg, rgba(124, 58, 237, 0.08), rgba(6, 182, 212, 0.04))',
+            border: '1px solid rgba(124, 58, 237, 0.15)',
+          }}
+        >
+          <p className="text-sm font-medium mb-2 gradient-text">How to connect:</p>
+          <ol className="text-sm space-y-1 list-decimal list-inside" style={{ color: '#8892a8' }}>
+            <li>Open <span className="font-medium" style={{ color: '#e8edf5' }}>@ExpenseTrackerBot</span> on Telegram</li>
+            <li>Send <code className="px-1.5 py-0.5 rounded text-xs font-mono" style={{ background: 'rgba(124, 58, 237, 0.15)', color: '#c4b5fd' }}>/link YOUR_TOKEN</code></li>
+            <li>Start sending voice messages!</li>
+          </ol>
+        </div>
+
+        {/* Regenerate Token */}
+        <button
+          onClick={handleRegenerateToken}
+          className="flex items-center gap-2 text-sm transition-colors"
+          style={{ color: '#5a6478', background: 'none', border: 'none', cursor: 'pointer' }}
+          onMouseEnter={(e) => { e.currentTarget.style.color = '#a78bfa'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.color = '#5a6478'; }}
+        >
+          <RefreshCw className="w-4 h-4" />
+          Regenerate Token
+        </button>
+      </div>
+
       {/* Data Management */}
-      <div className="bg-white rounded-2xl p-6 shadow-sm">
-        <h2 className="text-lg font-semibold mb-4">Data Management</h2>
+      <div className="glass-card-static p-6">
+        <h2 className="text-lg font-semibold mb-4" style={{ color: '#e8edf5' }}>Data Management</h2>
         <div className="space-y-3">
           <button
             onClick={handleExport}
-            className="w-full flex items-center gap-3 p-4 rounded-xl border border-slate-200 hover:border-purple-200 transition-colors"
+            className="w-full flex items-center gap-3 p-4 rounded-xl transition-all"
+            style={{
+              background: 'rgba(255, 255, 255, 0.03)',
+              border: '1px solid rgba(255, 255, 255, 0.06)',
+              cursor: 'pointer',
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'rgba(124, 58, 237, 0.3)'; e.currentTarget.style.background = 'rgba(124, 58, 237, 0.05)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.06)'; e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)'; }}
           >
-            <Download className="w-5 h-5 text-purple-600" />
+            <Download className="w-5 h-5" style={{ color: '#a78bfa' }} />
             <div className="text-left">
-              <p className="font-medium">Export Data</p>
-              <p className="text-sm text-slate-500">Download all your data as JSON</p>
+              <p className="font-medium" style={{ color: '#e8edf5' }}>Export Data</p>
+              <p className="text-sm" style={{ color: '#5a6478' }}>Download all your data as JSON</p>
             </div>
           </button>
           <button
             onClick={handleClearData}
-            className="w-full flex items-center gap-3 p-4 rounded-xl border border-red-200 hover:border-red-300 hover:bg-red-50 transition-colors"
+            className="w-full flex items-center gap-3 p-4 rounded-xl transition-all"
+            style={{
+              background: 'rgba(239, 68, 68, 0.04)',
+              border: '1px solid rgba(239, 68, 68, 0.15)',
+              cursor: 'pointer',
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.3)'; e.currentTarget.style.background = 'rgba(239, 68, 68, 0.08)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.15)'; e.currentTarget.style.background = 'rgba(239, 68, 68, 0.04)'; }}
           >
-            <Trash2 className="w-5 h-5 text-red-600" />
+            <Trash2 className="w-5 h-5 text-red-400" />
             <div className="text-left">
-              <p className="font-medium text-red-600">Clear All Data</p>
-              <p className="text-sm text-red-400">Permanently delete all transactions</p>
+              <p className="font-medium text-red-400">Clear All Data</p>
+              <p className="text-sm" style={{ color: 'rgba(239, 68, 68, 0.6)' }}>Permanently delete all transactions</p>
             </div>
           </button>
         </div>
@@ -158,14 +373,14 @@ export default function SettingsPage() {
       {/* Save Button */}
       <button
         onClick={handleSave}
-        className="btn-primary w-full py-4 flex items-center justify-center gap-2"
+        className="btn-primary w-full py-4 flex items-center justify-center gap-2 animate-pulse-glow"
       >
         <Save className="w-5 h-5" />
         {saved ? 'Saved!' : 'Save Settings'}
       </button>
 
       {/* Version Info */}
-      <div className="text-center text-sm text-slate-400">
+      <div className="text-center text-sm" style={{ color: '#5a6478' }}>
         <p>ExpenseTracker AI v1.0.0</p>
         <p>Built with Next.js + Tailwind CSS</p>
       </div>

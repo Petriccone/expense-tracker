@@ -39,7 +39,7 @@ export default function AddTransactionPage() {
     }
 
     setIsCategorizing(true);
-    
+
     // Simulate AI categorization with a delay
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
@@ -107,48 +107,61 @@ export default function AddTransactionPage() {
       <div className="flex items-center gap-4 mb-6">
         <Link
           href="/"
-          className="p-2 hover:bg-slate-100 rounded-xl transition-colors"
+          className="p-2 rounded-xl transition-all"
+          style={{ color: '#8892a8' }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
         >
           <ArrowLeft className="w-5 h-5" />
         </Link>
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-slate-900">Add Transaction</h1>
-          <p className="text-slate-500">Record a new expense or income</p>
+          <h1 className="text-2xl md:text-3xl font-bold gradient-text">Add Transaction</h1>
+          <p style={{ color: '#8892a8' }}>Record a new expense or income</p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Type Toggle */}
-        <div className="bg-white rounded-2xl p-2 shadow-sm flex">
+        <div className="glass-card-static p-2 flex">
           <button
             type="button"
             onClick={() => setForm({ ...form, type: 'expense', category: '' })}
-            className={`flex-1 py-3 rounded-xl font-medium transition-all ${
-              form.type === 'expense'
-                ? 'bg-red-500 text-white'
-                : 'text-slate-600 hover:bg-slate-50'
-            }`}
+            className="flex-1 py-3 rounded-xl font-medium transition-all"
+            style={{
+              background: form.type === 'expense'
+                ? 'linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(239, 68, 68, 0.1))'
+                : 'transparent',
+              color: form.type === 'expense' ? '#f87171' : '#5a6478',
+              border: form.type === 'expense' ? '1px solid rgba(239, 68, 68, 0.2)' : '1px solid transparent',
+              boxShadow: form.type === 'expense' ? '0 0 15px rgba(239, 68, 68, 0.1)' : 'none',
+              cursor: 'pointer',
+            }}
           >
             Expense
           </button>
           <button
             type="button"
             onClick={() => setForm({ ...form, type: 'income', category: '' })}
-            className={`flex-1 py-3 rounded-xl font-medium transition-all ${
-              form.type === 'income'
-                ? 'bg-green-500 text-white'
-                : 'text-slate-600 hover:bg-slate-50'
-            }`}
+            className="flex-1 py-3 rounded-xl font-medium transition-all"
+            style={{
+              background: form.type === 'income'
+                ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.1))'
+                : 'transparent',
+              color: form.type === 'income' ? '#34d399' : '#5a6478',
+              border: form.type === 'income' ? '1px solid rgba(16, 185, 129, 0.2)' : '1px solid transparent',
+              boxShadow: form.type === 'income' ? '0 0 15px rgba(16, 185, 129, 0.1)' : 'none',
+              cursor: 'pointer',
+            }}
           >
             Income
           </button>
         </div>
 
         {/* Amount */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm">
-          <label className="block text-sm font-medium text-slate-700 mb-2">Amount</label>
+        <div className="glass-card-static p-6">
+          <label className="block text-sm font-medium mb-2" style={{ color: '#8892a8' }}>Amount</label>
           <div className="relative">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-2xl text-slate-400">
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-2xl" style={{ color: '#5a6478' }}>
               {currencySymbol}
             </span>
             <input
@@ -165,19 +178,20 @@ export default function AddTransactionPage() {
         </div>
 
         {/* Description */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm">
+        <div className="glass-card-static p-6">
           <div className="flex items-center justify-between mb-2">
-            <label className="block text-sm font-medium text-slate-700">Description</label>
+            <label className="block text-sm font-medium" style={{ color: '#8892a8' }}>Description</label>
             <button
               type="button"
               onClick={handleAIAutoCategorize}
               disabled={isCategorizing}
-              className="flex items-center gap-1 text-sm text-purple-600 hover:text-purple-700 font-medium disabled:opacity-50"
+              className="flex items-center gap-1 text-sm font-medium disabled:opacity-50 transition-colors"
+              style={{ color: '#a78bfa', background: 'none', border: 'none', cursor: 'pointer' }}
             >
               {isCategorizing ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
-                <Sparkles className="w-4 h-4" />
+                <Sparkles className="w-4 h-4" style={{ filter: 'drop-shadow(0 0 4px rgba(124, 58, 237, 0.4))' }} />
               )}
               AI Auto-Categorize
             </button>
@@ -191,7 +205,7 @@ export default function AddTransactionPage() {
             required
           />
           {aiSuggestedCategory && (
-            <p className="text-sm text-purple-600 mt-2 flex items-center gap-1">
+            <p className="text-sm mt-2 flex items-center gap-1" style={{ color: '#a78bfa' }}>
               <Sparkles className="w-4 h-4" />
               AI suggested: {aiSuggestedCategory}
             </p>
@@ -199,8 +213,8 @@ export default function AddTransactionPage() {
         </div>
 
         {/* Category */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm">
-          <label className="block text-sm font-medium text-slate-700 mb-2">Category</label>
+        <div className="glass-card-static p-6">
+          <label className="block text-sm font-medium mb-2" style={{ color: '#8892a8' }}>Category</label>
           <select
             value={form.category}
             onChange={(e) => setForm({ ...form, category: e.target.value })}
@@ -217,8 +231,8 @@ export default function AddTransactionPage() {
         </div>
 
         {/* Date */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm">
-          <label className="block text-sm font-medium text-slate-700 mb-2">Date</label>
+        <div className="glass-card-static p-6">
+          <label className="block text-sm font-medium mb-2" style={{ color: '#8892a8' }}>Date</label>
           <input
             type="date"
             value={form.date}
@@ -229,14 +243,15 @@ export default function AddTransactionPage() {
         </div>
 
         {/* Notes */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm">
-          <label className="block text-sm font-medium text-slate-700 mb-2">Notes (optional)</label>
+        <div className="glass-card-static p-6">
+          <label className="block text-sm font-medium mb-2" style={{ color: '#8892a8' }}>Notes (optional)</label>
           <textarea
             rows={3}
             placeholder="Any additional details..."
             value={form.notes}
             onChange={(e) => setForm({ ...form, notes: e.target.value })}
             className="input-field resize-none"
+            style={{ height: 'auto', padding: '12px 16px' }}
           />
         </div>
 

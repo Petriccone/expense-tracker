@@ -57,8 +57,8 @@ export default function CategoriesPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-slate-900">Categories</h1>
-          <p className="text-slate-500">Manage your expense and income categories</p>
+          <h1 className="text-2xl md:text-3xl font-bold gradient-text">Categories</h1>
+          <p style={{ color: '#8892a8' }}>Manage your expense and income categories</p>
         </div>
         <button
           onClick={() => setIsAdding(true)}
@@ -71,10 +71,13 @@ export default function CategoriesPage() {
 
       {/* Add/Edit Form */}
       {isAdding && (
-        <div className="bg-white rounded-2xl p-6 shadow-sm border-2 border-purple-200">
+        <div
+          className="glass-strong p-6 animate-slideUp"
+          style={{ border: '1px solid rgba(124, 58, 237, 0.2)' }}
+        >
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold">
+              <h2 className="text-lg font-semibold" style={{ color: '#e8edf5' }}>
                 {editingId ? 'Edit Category' : 'New Category'}
               </h2>
               <button
@@ -84,7 +87,10 @@ export default function CategoriesPage() {
                   setEditingId(null);
                   setForm({ name: '', icon: '📦', color: '#7C3AED', type: 'expense' });
                 }}
-                className="p-2 hover:bg-slate-100 rounded-lg"
+                className="p-2 rounded-lg transition-colors"
+                style={{ color: '#5a6478', background: 'none', border: 'none', cursor: 'pointer' }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
               >
                 <X className="w-5 h-5" />
               </button>
@@ -92,7 +98,7 @@ export default function CategoriesPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Name</label>
+                <label className="block text-sm font-medium mb-1" style={{ color: '#8892a8' }}>Name</label>
                 <input
                   type="text"
                   value={form.name || ''}
@@ -103,7 +109,7 @@ export default function CategoriesPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Type</label>
+                <label className="block text-sm font-medium mb-1" style={{ color: '#8892a8' }}>Type</label>
                 <select
                   value={form.type || 'expense'}
                   onChange={(e) => setForm({ ...form, type: e.target.value as 'income' | 'expense' })}
@@ -116,16 +122,24 @@ export default function CategoriesPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Icon</label>
+              <label className="block text-sm font-medium mb-2" style={{ color: '#8892a8' }}>Icon</label>
               <div className="flex flex-wrap gap-2">
                 {EMOJI_OPTIONS.map((emoji) => (
                   <button
                     key={emoji}
                     type="button"
                     onClick={() => setForm({ ...form, icon: emoji })}
-                    className={`w-10 h-10 text-xl rounded-lg transition-all ${
-                      form.icon === emoji ? 'bg-purple-100 ring-2 ring-purple-500' : 'bg-slate-50 hover:bg-slate-100'
-                    }`}
+                    className="w-10 h-10 text-xl rounded-lg transition-all"
+                    style={{
+                      background: form.icon === emoji
+                        ? 'linear-gradient(135deg, rgba(124, 58, 237, 0.2), rgba(6, 182, 212, 0.1))'
+                        : 'rgba(255, 255, 255, 0.03)',
+                      border: form.icon === emoji
+                        ? '2px solid rgba(124, 58, 237, 0.4)'
+                        : '2px solid transparent',
+                      boxShadow: form.icon === emoji ? '0 0 12px rgba(124, 58, 237, 0.15)' : 'none',
+                      cursor: 'pointer',
+                    }}
                   >
                     {emoji}
                   </button>
@@ -134,17 +148,22 @@ export default function CategoriesPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Color</label>
+              <label className="block text-sm font-medium mb-2" style={{ color: '#8892a8' }}>Color</label>
               <div className="flex flex-wrap gap-2">
                 {COLOR_OPTIONS.map((color) => (
                   <button
                     key={color}
                     type="button"
                     onClick={() => setForm({ ...form, color })}
-                    className={`w-8 h-8 rounded-lg transition-all ${
-                      form.color === color ? 'ring-2 ring-offset-2 ring-slate-400' : ''
-                    }`}
-                    style={{ backgroundColor: color }}
+                    className="w-8 h-8 rounded-lg transition-all"
+                    style={{
+                      backgroundColor: color,
+                      boxShadow: form.color === color
+                        ? `0 0 0 2px #0a0f1e, 0 0 0 4px ${color}, 0 0 12px ${color}40`
+                        : 'none',
+                      cursor: 'pointer',
+                      border: 'none',
+                    }}
                   />
                 ))}
               </div>
@@ -160,31 +179,49 @@ export default function CategoriesPage() {
       )}
 
       {/* Expense Categories */}
-      <div className="bg-white rounded-2xl p-6 shadow-sm">
-        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-          <span className="w-3 h-3 bg-red-500 rounded-full" />
+      <div className="glass-card-static p-6">
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2" style={{ color: '#e8edf5' }}>
+          <span className="w-3 h-3 bg-red-500 rounded-full" style={{ boxShadow: '0 0 8px rgba(239, 68, 68, 0.4)' }} />
           Expense Categories
         </h2>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
           {expenseCategories.map((cat) => (
             <div
               key={cat.id}
-              className="flex items-center justify-between p-3 rounded-xl border border-slate-200 hover:border-purple-300 transition-colors"
+              className="flex items-center justify-between p-3 rounded-xl transition-all"
+              style={{
+                background: 'rgba(255, 255, 255, 0.02)',
+                border: '1px solid rgba(255, 255, 255, 0.06)',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = 'rgba(124, 58, 237, 0.2)';
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.04)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.06)';
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.02)';
+              }}
             >
               <div className="flex items-center gap-2">
                 <span className="text-2xl">{cat.icon}</span>
-                <span className="font-medium text-slate-700">{cat.name}</span>
+                <span className="font-medium" style={{ color: '#e8edf5' }}>{cat.name}</span>
               </div>
               <div className="flex items-center gap-1">
                 <button
                   onClick={() => handleEdit(cat)}
-                  className="p-1.5 text-slate-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
+                  className="p-1.5 rounded-lg transition-all"
+                  style={{ color: '#5a6478', background: 'none', border: 'none', cursor: 'pointer' }}
+                  onMouseEnter={(e) => { e.currentTarget.style.color = '#a78bfa'; e.currentTarget.style.background = 'rgba(124, 58, 237, 0.1)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.color = '#5a6478'; e.currentTarget.style.background = 'transparent'; }}
                 >
                   <Edit2 className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => handleDelete(cat.id)}
-                  className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                  className="p-1.5 rounded-lg transition-all"
+                  style={{ color: '#5a6478', background: 'none', border: 'none', cursor: 'pointer' }}
+                  onMouseEnter={(e) => { e.currentTarget.style.color = '#f87171'; e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.color = '#5a6478'; e.currentTarget.style.background = 'transparent'; }}
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
@@ -195,31 +232,49 @@ export default function CategoriesPage() {
       </div>
 
       {/* Income Categories */}
-      <div className="bg-white rounded-2xl p-6 shadow-sm">
-        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-          <span className="w-3 h-3 bg-green-500 rounded-full" />
+      <div className="glass-card-static p-6">
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2" style={{ color: '#e8edf5' }}>
+          <span className="w-3 h-3 bg-green-500 rounded-full" style={{ boxShadow: '0 0 8px rgba(16, 185, 129, 0.4)' }} />
           Income Categories
         </h2>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
           {incomeCategories.map((cat) => (
             <div
               key={cat.id}
-              className="flex items-center justify-between p-3 rounded-xl border border-slate-200 hover:border-purple-300 transition-colors"
+              className="flex items-center justify-between p-3 rounded-xl transition-all"
+              style={{
+                background: 'rgba(255, 255, 255, 0.02)',
+                border: '1px solid rgba(255, 255, 255, 0.06)',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = 'rgba(16, 185, 129, 0.2)';
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.04)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.06)';
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.02)';
+              }}
             >
               <div className="flex items-center gap-2">
                 <span className="text-2xl">{cat.icon}</span>
-                <span className="font-medium text-slate-700">{cat.name}</span>
+                <span className="font-medium" style={{ color: '#e8edf5' }}>{cat.name}</span>
               </div>
               <div className="flex items-center gap-1">
                 <button
                   onClick={() => handleEdit(cat)}
-                  className="p-1.5 text-slate-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
+                  className="p-1.5 rounded-lg transition-all"
+                  style={{ color: '#5a6478', background: 'none', border: 'none', cursor: 'pointer' }}
+                  onMouseEnter={(e) => { e.currentTarget.style.color = '#a78bfa'; e.currentTarget.style.background = 'rgba(124, 58, 237, 0.1)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.color = '#5a6478'; e.currentTarget.style.background = 'transparent'; }}
                 >
                   <Edit2 className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => handleDelete(cat.id)}
-                  className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                  className="p-1.5 rounded-lg transition-all"
+                  style={{ color: '#5a6478', background: 'none', border: 'none', cursor: 'pointer' }}
+                  onMouseEnter={(e) => { e.currentTarget.style.color = '#f87171'; e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.color = '#5a6478'; e.currentTarget.style.background = 'transparent'; }}
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>

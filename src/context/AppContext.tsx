@@ -1,7 +1,8 @@
 'use client';
 
-import React, { createContext, useContext, useReducer, useEffect, useState, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, useState, useCallback, useRef, ReactNode } from 'react';
 import { Transaction, Category, Settings, AIInsight, CategoryBudget } from '@/types';
+import { supabase } from '@/lib/supabase';
 import seedData from '../../public/seed-data.json';
 import seedBudgets from '../../public/seed-budgets.json';
 import seedCategories from '../../public/seed-categories.json';
@@ -127,10 +128,84 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 const STORAGE_KEY = 'expense-tracker-data';
+const LINK_TOKEN_KEY = 'telegram-link-token';
+
+// Helper: fetch Telegram transactions from Supabase
+async function fetchSupabaseTransactions(linkToken: string): Promise<Transaction[]> {
+  if (!supabase) return [];
+  try {
+    const { data, error } = await supabase
+      .from('transactions')
+      .select('*')
+      .eq('link_token', linkToken)
+      .eq('source', 'telegram');
+
+    if (error) {
+      console.error('Supabase fetch error:', error);
+      return [];
+    }
+
+    return (data || []).map((row: Record<string, unknown>) => ({
+      id: row.id as string,
+      type: row.type as 'income' | 'expense',
+      amount: Number(row.amount),
+      description: row.description as string,
+      category: row.category as string,
+      date: row.date as string,
+      notes: (row.notes as string) || undefined,
+      createdAt: row.created_at as string,
+    }));
+  } catch (err) {
+    console.error('Supabase fetch failed:', err);
+    return [];
+  }
+}
+
+// Helper: merge transactions by id (dedup)
+function mergeTransactions(local: Transaction[], remote: Transaction[]): Transaction[] {
+  const map = new Map<string, Transaction>();
+  for (const t of local) map.set(t.id, t);
+  for (const t of remote) {
+    if (!map.has(t.id)) map.set(t.id, t);
+  }
+  return Array.from(map.values());
+}
+
+// Helper: save a transaction to Supabase
+async function saveTransactionToSupabase(t: Transaction, linkToken: string, source: string = 'web') {
+  if (!supabase) return;
+  try {
+    await supabase.from('transactions').upsert({
+      id: t.id,
+      link_token: linkToken,
+      type: t.type,
+      amount: t.amount,
+      description: t.description,
+      category: t.category,
+      date: t.date,
+      notes: t.notes || null,
+      source,
+      created_at: t.createdAt,
+    });
+  } catch (err) {
+    console.error('Supabase save failed:', err);
+  }
+}
+
+// Helper: delete a transaction from Supabase
+async function deleteTransactionFromSupabase(id: string) {
+  if (!supabase) return;
+  try {
+    await supabase.from('transactions').delete().eq('id', id);
+  } catch (err) {
+    console.error('Supabase delete failed:', err);
+  }
+}
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(appReducer, initialState);
   const [loaded, setLoaded] = useState(false);
+  const lastSyncRef = useRef<string | null>(null);
 
   // Load from localStorage on mount, seed Budget.xlsx data if no transactions
   useEffect(() => {
@@ -159,18 +234,79 @@ export function AppProvider({ children }: { children: ReactNode }) {
       parsedBudgets = (seedBudgets as unknown as CategoryBudget[]) || [];
     }
 
-    dispatch({
-      type: 'LOAD_STATE',
-      payload: {
-        ...initialState,
-        transactions: loadedTransactions,
-        categories: parsedCategories,
-        settings: parsedSettings,
-        categoryBudgets: parsedBudgets,
-      },
-    });
-    setLoaded(true);
+    // Attempt Supabase merge on mount
+    const linkToken = localStorage.getItem(LINK_TOKEN_KEY);
+    if (linkToken && supabase) {
+      const localTx = loadedTransactions;
+      fetchSupabaseTransactions(linkToken).then((remoteTx) => {
+        const merged = mergeTransactions(localTx, remoteTx);
+        dispatch({
+          type: 'LOAD_STATE',
+          payload: {
+            ...initialState,
+            transactions: merged,
+            categories: parsedCategories,
+            settings: parsedSettings,
+            categoryBudgets: parsedBudgets,
+          },
+        });
+        lastSyncRef.current = new Date().toISOString();
+        setLoaded(true);
+      });
+    } else {
+      dispatch({
+        type: 'LOAD_STATE',
+        payload: {
+          ...initialState,
+          transactions: loadedTransactions,
+          categories: parsedCategories,
+          settings: parsedSettings,
+          categoryBudgets: parsedBudgets,
+        },
+      });
+      setLoaded(true);
+    }
   }, []);
+
+  // Poll Supabase every 30 seconds for new Telegram transactions
+  useEffect(() => {
+    if (!loaded || !supabase) return;
+
+    const interval = setInterval(async () => {
+      const linkToken = localStorage.getItem(LINK_TOKEN_KEY);
+      if (!linkToken) return;
+
+      try {
+        const remoteTx = await fetchSupabaseTransactions(linkToken);
+        if (remoteTx.length > 0) {
+          // We need to check against current state, dispatch new ones
+          // Using a functional approach: read current transaction ids from localStorage
+          const stored = localStorage.getItem(STORAGE_KEY);
+          const currentIds = new Set<string>();
+          if (stored) {
+            try {
+              const parsed = JSON.parse(stored);
+              (parsed.transactions || []).forEach((t: Transaction) => currentIds.add(t.id));
+            } catch {
+              // ignore
+            }
+          }
+
+          for (const tx of remoteTx) {
+            if (!currentIds.has(tx.id)) {
+              dispatch({ type: 'ADD_TRANSACTION', payload: tx });
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Supabase poll error:', err);
+      }
+
+      lastSyncRef.current = new Date().toISOString();
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, [loaded]);
 
   // Save to localStorage on state change (only after initial load)
   useEffect(() => {
@@ -203,9 +339,33 @@ export function useApp() {
 
 export function useTransactions() {
   const { state, dispatch } = useApp();
-  const addTransaction = useCallback((t: Transaction) => dispatch({ type: 'ADD_TRANSACTION', payload: t }), [dispatch]);
-  const updateTransaction = useCallback((t: Transaction) => dispatch({ type: 'UPDATE_TRANSACTION', payload: t }), [dispatch]);
-  const deleteTransaction = useCallback((id: string) => dispatch({ type: 'DELETE_TRANSACTION', payload: id }), [dispatch]);
+
+  const addTransaction = useCallback((t: Transaction) => {
+    dispatch({ type: 'ADD_TRANSACTION', payload: t });
+    // Also save to Supabase if linked
+    const linkToken = localStorage.getItem(LINK_TOKEN_KEY);
+    if (linkToken && supabase) {
+      saveTransactionToSupabase(t, linkToken, 'web');
+    }
+  }, [dispatch]);
+
+  const updateTransaction = useCallback((t: Transaction) => {
+    dispatch({ type: 'UPDATE_TRANSACTION', payload: t });
+    // Also update in Supabase if linked
+    const linkToken = localStorage.getItem(LINK_TOKEN_KEY);
+    if (linkToken && supabase) {
+      saveTransactionToSupabase(t, linkToken, 'web');
+    }
+  }, [dispatch]);
+
+  const deleteTransaction = useCallback((id: string) => {
+    dispatch({ type: 'DELETE_TRANSACTION', payload: id });
+    // Also delete from Supabase if linked
+    if (supabase) {
+      deleteTransactionFromSupabase(id);
+    }
+  }, [dispatch]);
+
   return { transactions: state.transactions, addTransaction, updateTransaction, deleteTransaction };
 }
 

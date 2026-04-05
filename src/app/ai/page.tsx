@@ -189,15 +189,15 @@ export default function AIPage() {
     <div className="flex flex-col h-[calc(100vh-8rem)] animate-fadeIn">
       {/* Header */}
       <div className="mb-4">
-        <h1 className="text-2xl md:text-3xl font-bold text-slate-900 flex items-center gap-2">
-          <Sparkles className="w-6 h-6 text-purple-600" />
+        <h1 className="text-2xl md:text-3xl font-bold gradient-text flex items-center gap-2">
+          <Sparkles className="w-6 h-6" style={{ color: '#a78bfa', filter: 'drop-shadow(0 0 8px rgba(124, 58, 237, 0.4))' }} />
           AI Financial Assistant
         </h1>
-        <p className="text-slate-500">Ask me anything about your finances</p>
+        <p style={{ color: '#8892a8' }}>Ask me anything about your finances</p>
       </div>
 
       {/* Chat Container */}
-      <div className="flex-1 bg-white rounded-2xl shadow-sm overflow-hidden flex flex-col">
+      <div className="flex-1 glass-card-static overflow-hidden flex flex-col">
         {/* Messages */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {messages.map((message) => (
@@ -205,31 +205,55 @@ export default function AIPage() {
               key={message.id}
               className={`flex gap-3 ${message.role === 'user' ? 'flex-row-reverse' : ''}`}
             >
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                message.role === 'assistant' ? 'bg-purple-100' : 'bg-slate-100'
-              }`}>
+              <div
+                className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
+                style={{
+                  background: message.role === 'assistant'
+                    ? 'linear-gradient(135deg, rgba(124, 58, 237, 0.2), rgba(6, 182, 212, 0.1))'
+                    : 'rgba(255, 255, 255, 0.06)',
+                  border: '1px solid ' + (message.role === 'assistant' ? 'rgba(124, 58, 237, 0.2)' : 'rgba(255,255,255,0.08)'),
+                }}
+              >
                 {message.role === 'assistant' ? (
-                  <Bot className="w-4 h-4 text-purple-600" />
+                  <Bot className="w-4 h-4" style={{ color: '#a78bfa' }} />
                 ) : (
-                  <User className="w-4 h-4 text-slate-600" />
+                  <User className="w-4 h-4" style={{ color: '#8892a8' }} />
                 )}
               </div>
-              <div className={`max-w-[80%] rounded-2xl p-4 ${
-                message.role === 'assistant'
-                  ? 'bg-purple-50 text-slate-800'
-                  : 'bg-slate-100 text-slate-800'
-              }`}>
-                <div className="whitespace-pre-wrap text-sm leading-relaxed">{message.content}</div>
+              <div
+                className="max-w-[80%] rounded-2xl p-4"
+                style={{
+                  background: message.role === 'assistant'
+                    ? 'linear-gradient(135deg, rgba(124, 58, 237, 0.08), rgba(6, 182, 212, 0.04))'
+                    : 'rgba(255, 255, 255, 0.04)',
+                  border: '1px solid ' + (message.role === 'assistant' ? 'rgba(124, 58, 237, 0.12)' : 'rgba(255,255,255,0.06)'),
+                }}
+              >
+                <div className="whitespace-pre-wrap text-sm leading-relaxed" style={{ color: '#e8edf5' }}>
+                  {message.content}
+                </div>
               </div>
             </div>
           ))}
           {isLoading && (
             <div className="flex gap-3">
-              <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center">
-                <Bot className="w-4 h-4 text-purple-600" />
+              <div
+                className="w-8 h-8 rounded-full flex items-center justify-center"
+                style={{
+                  background: 'linear-gradient(135deg, rgba(124, 58, 237, 0.2), rgba(6, 182, 212, 0.1))',
+                  border: '1px solid rgba(124, 58, 237, 0.2)',
+                }}
+              >
+                <Bot className="w-4 h-4" style={{ color: '#a78bfa' }} />
               </div>
-              <div className="bg-purple-50 rounded-2xl p-4">
-                <Loader2 className="w-5 h-5 text-purple-600 animate-spin" />
+              <div
+                className="rounded-2xl p-4"
+                style={{
+                  background: 'linear-gradient(135deg, rgba(124, 58, 237, 0.08), rgba(6, 182, 212, 0.04))',
+                  border: '1px solid rgba(124, 58, 237, 0.12)',
+                }}
+              >
+                <Loader2 className="w-5 h-5 animate-spin" style={{ color: '#a78bfa' }} />
               </div>
             </div>
           )}
@@ -237,7 +261,7 @@ export default function AIPage() {
         </div>
 
         {/* Input */}
-        <div className="p-4 border-t border-slate-100">
+        <div className="p-4" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
           <form onSubmit={handleSubmit} className="flex gap-3">
             <input
               type="text"
@@ -260,30 +284,43 @@ export default function AIPage() {
 
       {/* Quick Questions */}
       <div className="mt-4 flex flex-wrap gap-2">
-        <button
-          onClick={() => setInput("What's my monthly summary?")}
-          className="px-4 py-2 bg-white rounded-full text-sm font-medium text-slate-700 shadow-sm hover:shadow-md transition-all border border-slate-200"
-        >
-          📊 Monthly Summary
-        </button>
-        <button
-          onClick={() => setInput("What's my biggest expense?")}
-          className="px-4 py-2 bg-white rounded-full text-sm font-medium text-slate-700 shadow-sm hover:shadow-md transition-all border border-slate-200"
-        >
-          🔝 Biggest Expense
-        </button>
-        <button
-          onClick={() => setInput("Am I over budget?")}
-          className="px-4 py-2 bg-white rounded-full text-sm font-medium text-slate-700 shadow-sm hover:shadow-md transition-all border border-slate-200"
-        >
-          💰 Budget Status
-        </button>
-        <button
-          onClick={() => setInput("How much have I saved this month?")}
-          className="px-4 py-2 bg-white rounded-full text-sm font-medium text-slate-700 shadow-sm hover:shadow-md transition-all border border-slate-200"
-        >
-          ✅ Savings
-        </button>
+        {[
+          { label: 'Monthly Summary', icon: '📊' },
+          { label: 'Biggest Expense', icon: '🔝' },
+          { label: 'Budget Status', icon: '💰' },
+          { label: 'Savings', icon: '✅' },
+        ].map((q) => (
+          <button
+            key={q.label}
+            onClick={() => setInput(
+              q.label === 'Monthly Summary' ? "What's my monthly summary?" :
+              q.label === 'Biggest Expense' ? "What's my biggest expense?" :
+              q.label === 'Budget Status' ? "Am I over budget?" :
+              "How much have I saved this month?"
+            )}
+            className="px-4 py-2 rounded-full text-sm font-medium transition-all"
+            style={{
+              background: 'rgba(255, 255, 255, 0.04)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              color: '#8892a8',
+              cursor: 'pointer',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = 'rgba(124, 58, 237, 0.3)';
+              e.currentTarget.style.background = 'rgba(124, 58, 237, 0.08)';
+              e.currentTarget.style.color = '#c4b5fd';
+              e.currentTarget.style.boxShadow = '0 0 15px rgba(124, 58, 237, 0.1)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
+              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.04)';
+              e.currentTarget.style.color = '#8892a8';
+              e.currentTarget.style.boxShadow = 'none';
+            }}
+          >
+            {q.icon} {q.label}
+          </button>
+        ))}
       </div>
     </div>
   );
