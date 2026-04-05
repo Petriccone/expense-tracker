@@ -12,6 +12,8 @@ import {
   Lightbulb,
   AlertTriangle,
   Sparkles,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import {
   PieChart,
@@ -36,38 +38,47 @@ export default function DashboardContent() {
   const { insights, setInsights } = useInsights();
   const { settings } = useSettings();
 
+  const [selectedMonth, setSelectedMonth] = useState(() => {
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), 1);
+  });
+
+  const navigateMonth = (dir: number) => {
+    setSelectedMonth(prev => new Date(prev.getFullYear(), prev.getMonth() + dir, 1));
+  };
+
+  const monthLabel = selectedMonth.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+
   const currencySymbol = settings.currency === 'EUR' ? '€' : settings.currency === 'USD' ? '$' : 'R$';
 
-  // Calculate stats
+  // Calculate stats for selected month
   const stats = useMemo(() => {
-    const now = new Date();
     const thisMonth = transactions.filter((t) => {
       const d = new Date(t.date);
-      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+      return d.getMonth() === selectedMonth.getMonth() && d.getFullYear() === selectedMonth.getFullYear();
     });
 
     const income = thisMonth.filter((t) => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
     const expenses = thisMonth.filter((t) => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
 
-    // Last month for comparison
+    // Previous month for comparison
+    const prevMonthDate = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() - 1, 1);
     const lastMonth = transactions.filter((t) => {
       const d = new Date(t.date);
-      const lastMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-      return d.getMonth() === lastMonthDate.getMonth() && d.getFullYear() === lastMonthDate.getFullYear();
+      return d.getMonth() === prevMonthDate.getMonth() && d.getFullYear() === prevMonthDate.getFullYear();
     });
     const lastMonthExpenses = lastMonth.filter((t) => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
 
     const percentChange = lastMonthExpenses > 0 ? ((expenses - lastMonthExpenses) / lastMonthExpenses) * 100 : 0;
 
     return { income, expenses, net: income - expenses, percentChange };
-  }, [transactions]);
+  }, [transactions, selectedMonth]);
 
-  // Category breakdown
+  // Category breakdown for selected month
   const categoryData = useMemo(() => {
-    const now = new Date();
     const thisMonth = transactions.filter((t) => {
       const d = new Date(t.date);
-      return t.type === 'expense' && d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+      return t.type === 'expense' && d.getMonth() === selectedMonth.getMonth() && d.getFullYear() === selectedMonth.getFullYear();
     });
 
     const byCategory: Record<string, number> = {};
@@ -76,7 +87,7 @@ export default function DashboardContent() {
     });
 
     return Object.entries(byCategory).map(([name, value]) => ({ name, value }));
-  }, [transactions]);
+  }, [transactions, selectedMonth]);
 
   // Monthly trend (last 6 months)
   const monthlyData = useMemo(() => {
@@ -100,12 +111,16 @@ export default function DashboardContent() {
     return months;
   }, [transactions]);
 
-  // Recent transactions
+  // Recent transactions for selected month
   const recentTransactions = useMemo(() => {
     return [...transactions]
+      .filter((t) => {
+        const d = new Date(t.date);
+        return d.getMonth() === selectedMonth.getMonth() && d.getFullYear() === selectedMonth.getFullYear();
+      })
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
       .slice(0, 8);
-  }, [transactions]);
+  }, [transactions, selectedMonth]);
 
   // Generate AI insights
   useEffect(() => {
@@ -180,15 +195,35 @@ export default function DashboardContent() {
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold gradient-text">Dashboard</h1>
-          <p style={{ color: 'var(--text-secondary)' }}>Welcome back! Here's your financial overview.</p>
+          <p style={{ color: 'var(--text-secondary)' }}>Visão geral das suas finanças.</p>
         </div>
-        <Link
-          href="/add"
-          className="btn-primary flex items-center gap-2 justify-center w-fit"
-        >
-          <Plus className="w-5 h-5" />
-          Add Transaction
-        </Link>
+        <div className="flex items-center gap-3">
+          {/* Month Navigator */}
+          <div className="glass-card-static flex items-center gap-1 px-2 py-1" style={{ borderRadius: 14 }}>
+            <button
+              onClick={() => navigateMonth(-1)}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 6, borderRadius: 8, color: 'var(--text-secondary)', display: 'flex' }}
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+            <span className="text-sm font-semibold min-w-[130px] text-center capitalize" style={{ color: 'var(--text-primary)' }}>
+              {monthLabel}
+            </span>
+            <button
+              onClick={() => navigateMonth(1)}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 6, borderRadius: 8, color: 'var(--text-secondary)', display: 'flex' }}
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          </div>
+          <Link
+            href="/add"
+            className="btn-primary flex items-center gap-2 justify-center"
+          >
+            <Plus className="w-5 h-5" />
+            <span className="hidden md:inline">Add Transaction</span>
+          </Link>
+        </div>
       </div>
 
       {/* Stats Cards */}
