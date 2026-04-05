@@ -4,6 +4,7 @@ import React, { createContext, useContext, useReducer, useEffect, useState, useC
 import { Transaction, Category, Settings, AIInsight, CategoryBudget } from '@/types';
 import seedData from '../../public/seed-data.json';
 import seedBudgets from '../../public/seed-budgets.json';
+import seedCategories from '../../public/seed-categories.json';
 
 interface AppState {
   transactions: Transaction[];
@@ -154,10 +155,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     // If no transactions found, use seed data from Budget.xlsx
     if (loadedTransactions.length === 0) {
       loadedTransactions = (seedData as unknown as Transaction[]) || [];
-    }
-
-    // If no budgets set, use seed budgets from Budget.xlsx
-    if (parsedBudgets.length === 0) {
+      parsedCategories = (seedCategories as unknown as Category[]) || defaultCategories;
       parsedBudgets = (seedBudgets as unknown as CategoryBudget[]) || [];
     }
 

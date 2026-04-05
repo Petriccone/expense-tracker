@@ -1,34 +1,118 @@
 [
   {
     "categoryId": "1",
-    "limit": 328.99
+    "limit": 218.13
   },
   {
     "categoryId": "2",
-    "limit": 340.55
+    "limit": 8.99
   },
   {
     "categoryId": "3",
-    "limit": 1447
+    "limit": 110
   },
   {
     "categoryId": "4",
-    "limit": 54.98
+    "limit": 70.75
   },
   {
     "categoryId": "5",
-    "limit": 706.99
+    "limit": 700
   },
   {
     "categoryId": "6",
-    "limit": 435
+    "limit": 60
   },
   {
     "categoryId": "7",
-    "limit": 50
+    "limit": 25.99
   },
   {
     "categoryId": "8",
-    "limit": 1081.18
+    "limit": 109.26
+  },
+  {
+    "categoryId": "9",
+    "limit": 9.99
+  },
+  {
+    "categoryId": "10",
+    "limit": 6.99
+  },
+  {
+    "categoryId": "11",
+    "limit": 11.99
+  },
+  {
+    "categoryId": "12",
+    "limit": 20
+  },
+  {
+    "categoryId": "13",
+    "limit": 100
+  },
+  {
+    "categoryId": "14",
+    "limit": 50
+  },
+  {
+    "categoryId": "15",
+    "limit": 40
+  },
+  {
+    "categoryId": "16",
+    "limit": 17
+  },
+  {
+    "categoryId": "17",
+    "limit": 85
+  },
+  {
+    "categoryId": "18",
+    "limit": 35
+  },
+  {
+    "categoryId": "19",
+    "limit": 75
+  },
+  {
+    "categoryId": "20",
+    "limit": 20.33
+  },
+  {
+    "categoryId": "21",
+    "limit": 100
+  },
+  {
+    "categoryId": "22",
+    "limit": 200
+  },
+  {
+    "categoryId": "23",
+    "limit": 50
+  },
+  {
+    "categoryId": "24",
+    "limit": 1397
+  },
+  {
+    "categoryId": "25",
+    "limit": 217.65
+  },
+  {
+    "categoryId": "26",
+    "limit": 275.39
+  },
+  {
+    "categoryId": "27",
+    "limit": 20.22
+  },
+  {
+    "categoryId": "28",
+    "limit": 50
+  },
+  {
+    "categoryId": "29",
+    "limit": 50
   }
 ]
