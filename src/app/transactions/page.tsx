@@ -11,6 +11,8 @@ import {
   Trash2,
   X,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import { useTransactions, useCategories, useSettings } from '@/context/AppContext';
 import { Transaction } from '@/types';
@@ -23,10 +25,17 @@ export default function TransactionsPage() {
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<'all' | 'income' | 'expense'>('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
-  const [dateFilter, setDateFilter] = useState('all');
-  const [monthFilter, setMonthFilter] = useState('all');
+  const [selectedMonth, setSelectedMonth] = useState(() => {
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), 1);
+  });
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<Partial<Transaction>>({});
+
+  const navigateMonth = (dir: number) => {
+    setSelectedMonth(prev => new Date(prev.getFullYear(), prev.getMonth() + dir, 1));
+  };
+  const monthLabel = selectedMonth.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
   const [portalRoot, setPortalRoot] = useState<HTMLElement | null>(null);
 
   useEffect(() => {
@@ -53,30 +62,14 @@ export default function TransactionsPage() {
       if (categoryFilter !== 'all' && t.category !== categoryFilter) {
         return false;
       }
-      // Date filter
-      if (dateFilter !== 'all') {
-        const now = new Date();
-        const tDate = new Date(t.date);
-        if (dateFilter === 'today') {
-          if (tDate.toDateString() !== now.toDateString()) return false;
-        } else if (dateFilter === 'week') {
-          const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-          if (tDate < weekAgo) return false;
-        } else if (dateFilter === 'month') {
-          if (tDate.getMonth() !== now.getMonth() || tDate.getFullYear() !== now.getFullYear()) {
-            return false;
-          }
-        }
-      }
-      // Month filter (specific month)
-      if (monthFilter !== 'all') {
-        const tDate = new Date(t.date);
-        const tMonth = `${tDate.getFullYear()}-${String(tDate.getMonth() + 1).padStart(2, '0')}`;
-        if (tMonth !== monthFilter) return false;
+      // Month filter
+      const tDate = new Date(t.date);
+      if (tDate.getMonth() !== selectedMonth.getMonth() || tDate.getFullYear() !== selectedMonth.getFullYear()) {
+        return false;
       }
       return true;
     }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  }, [transactions, search, typeFilter, categoryFilter, dateFilter, monthFilter]);
+  }, [transactions, search, typeFilter, categoryFilter, selectedMonth]);
 
   const getCategoryInfo = (categoryName: string) => {
     return categories.find((c) => c.name === categoryName) || { icon: '📦', color: '#64748B' };
@@ -90,20 +83,6 @@ export default function TransactionsPage() {
 
   const uniqueCategories = [...new Set(transactions.map((t) => t.category))];
 
-  const availableMonths = useMemo(() => {
-    const months = new Set<string>();
-    transactions.forEach((t) => {
-      const d = new Date(t.date);
-      months.add(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
-    });
-    return [...months].sort().reverse();
-  }, [transactions]);
-
-  const formatMonthLabel = (key: string) => {
-    const [year, month] = key.split('-');
-    const d = new Date(parseInt(year), parseInt(month) - 1);
-    return d.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
-  };
 
   return (
     <div className="space-y-6 animate-fadeIn">
@@ -111,12 +90,32 @@ export default function TransactionsPage() {
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold gradient-text">Transactions</h1>
-          <p style={{ color: 'var(--text-secondary)' }}>{transactions.length} total transactions</p>
+          <p style={{ color: 'var(--text-secondary)' }}>{filteredTransactions.length} transactions</p>
         </div>
-        <Link href="/add" className="btn-primary flex items-center gap-2 justify-center w-fit">
-          <Plus className="w-5 h-5" />
-          Add Transaction
-        </Link>
+        <div className="flex items-center gap-3">
+          {/* Month Navigator */}
+          <div className="glass-card-static flex items-center gap-1 px-2 py-1" style={{ borderRadius: 14 }}>
+            <button
+              onClick={() => navigateMonth(-1)}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 6, borderRadius: 8, color: 'var(--text-secondary)', display: 'flex' }}
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+            <span className="text-sm font-semibold min-w-[130px] text-center capitalize" style={{ color: 'var(--text-primary)' }}>
+              {monthLabel}
+            </span>
+            <button
+              onClick={() => navigateMonth(1)}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 6, borderRadius: 8, color: 'var(--text-secondary)', display: 'flex' }}
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          </div>
+          <Link href="/add" className="btn-primary flex items-center gap-2 justify-center">
+            <Plus className="w-5 h-5" />
+            <span className="hidden md:inline">Add Transaction</span>
+          </Link>
+        </div>
       </div>
 
       {/* Filters */}
@@ -157,29 +156,6 @@ export default function TransactionsPage() {
             ))}
           </select>
 
-          {/* Date Filter */}
-          <select
-            value={dateFilter}
-            onChange={(e) => setDateFilter(e.target.value)}
-            className="select-field md:w-40"
-          >
-            <option value="all">All Time</option>
-            <option value="today">Today</option>
-            <option value="week">This Week</option>
-            <option value="month">This Month</option>
-          </select>
-
-          {/* Month Filter */}
-          <select
-            value={monthFilter}
-            onChange={(e) => setMonthFilter(e.target.value)}
-            className="select-field md:w-48"
-          >
-            <option value="all">All Months</option>
-            {availableMonths.map((m) => (
-              <option key={m} value={m}>{formatMonthLabel(m)}</option>
-            ))}
-          </select>
         </div>
       </div>
 
