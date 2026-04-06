@@ -36,7 +36,7 @@ export default function TransactionsPage() {
   const navigateMonth = (dir: number) => {
     setSelectedMonth(prev => new Date(prev.getFullYear(), prev.getMonth() + dir, 1));
   };
-  const monthLabel = selectedMonth.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+  const monthLabel = selectedMonth.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }).replace(/^\w/, c => c.toUpperCase());
   const [portalRoot, setPortalRoot] = useState<HTMLElement | null>(null);
 
   useEffect(() => {
@@ -126,9 +126,9 @@ export default function TransactionsPage() {
 
       {/* Filters */}
       <div className="glass-card-static p-4">
-        <div className="flex flex-col md:flex-row gap-3">
+        <div className="flex flex-col gap-3">
           {/* Search */}
-          <div className="relative flex-1">
+          <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: 'var(--text-muted)' }} />
             <input
               type="text"
@@ -139,49 +139,50 @@ export default function TransactionsPage() {
             />
           </div>
 
-          {/* Type Filter */}
-          <select
-            value={typeFilter}
-            onChange={(e) => setTypeFilter(e.target.value as any)}
-            className="select-field md:w-40"
-          >
-            <option value="all">All Types</option>
-            <option value="income">Income</option>
-            <option value="expense">Expense</option>
-          </select>
-
-          {/* Category Filter */}
-          <select
-            value={categoryFilter}
-            onChange={(e) => setCategoryFilter(e.target.value)}
-            className="select-field md:w-48"
-          >
-            <option value="all">All Categories</option>
-            {uniqueCategories.map((cat) => (
-              <option key={cat} value={cat}>{cat}</option>
-            ))}
-          </select>
-
-          {/* Day Filter */}
-          <input
-            type="date"
-            value={dayFilter}
-            onChange={(e) => setDayFilter(e.target.value)}
-            className="input-field md:w-44"
-            style={{ colorScheme: 'var(--color-scheme)' }}
-          />
-          {dayFilter && (
-            <button
-              onClick={() => setDayFilter('')}
-              className="p-2 rounded-lg transition-colors"
-              style={{ color: 'var(--text-muted)' }}
-              onMouseEnter={(e) => { e.currentTarget.style.color = '#f87171'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-muted)'; }}
-              title="Clear date filter"
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+            {/* Type Filter */}
+            <select
+              value={typeFilter}
+              onChange={(e) => setTypeFilter(e.target.value as any)}
+              className="select-field"
             >
-              <X className="w-4 h-4" />
-            </button>
-          )}
+              <option value="all">All Types</option>
+              <option value="income">Income</option>
+              <option value="expense">Expense</option>
+            </select>
+
+            {/* Category Filter */}
+            <select
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+              className="select-field"
+            >
+              <option value="all">All Categories</option>
+              {uniqueCategories.map((cat) => (
+                <option key={cat} value={cat}>{cat}</option>
+              ))}
+            </select>
+
+            {/* Day Filter */}
+            <div className="relative col-span-2 md:col-span-2 flex gap-2">
+              <input
+                type="date"
+                value={dayFilter}
+                onChange={(e) => setDayFilter(e.target.value)}
+                className="input-field flex-1"
+                style={{ colorScheme: 'dark' }}
+              />
+              {dayFilter && (
+                <button
+                  onClick={() => setDayFilter('')}
+                  className="px-3 rounded-lg transition-colors flex items-center"
+                  style={{ color: 'var(--text-muted)', background: 'var(--bg-input)' }}
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
