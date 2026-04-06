@@ -125,61 +125,67 @@ export default function TransactionsPage() {
       </div>
 
       {/* Filters */}
-      <div className="glass-card-static p-4">
+      <div className="glass-card-static p-4" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
         {/* Search */}
-        <div className="relative" style={{ marginBottom: 10 }}>
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: 'var(--text-muted)' }} />
+        <div className="relative" style={{ gridColumn: '1 / -1' }}>
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'var(--text-muted)' }} />
           <input
             type="text"
-            placeholder="Search transactions..."
+            placeholder="Search..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="input-field pl-10"
+            className="input-field"
+            style={{ paddingLeft: 36 }}
           />
         </div>
 
-        {/* Filter row */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-          <select
-            value={typeFilter}
-            onChange={(e) => setTypeFilter(e.target.value as any)}
-            className="select-field"
-          >
-            <option value="all">All Types</option>
-            <option value="income">Income</option>
-            <option value="expense">Expense</option>
-          </select>
+        <select
+          value={typeFilter}
+          onChange={(e) => setTypeFilter(e.target.value as any)}
+          className="select-field"
+        >
+          <option value="all">All Types</option>
+          <option value="income">Income</option>
+          <option value="expense">Expense</option>
+        </select>
 
-          <select
-            value={categoryFilter}
-            onChange={(e) => setCategoryFilter(e.target.value)}
-            className="select-field"
-          >
-            <option value="all">All Categories</option>
-            {uniqueCategories.map((cat) => (
-              <option key={cat} value={cat}>{cat}</option>
-            ))}
-          </select>
+        <select
+          value={categoryFilter}
+          onChange={(e) => setCategoryFilter(e.target.value)}
+          className="select-field"
+        >
+          <option value="all">All Categories</option>
+          {uniqueCategories.map((cat) => (
+            <option key={cat} value={cat}>{cat}</option>
+          ))}
+        </select>
 
-          {/* Day Filter */}
-          <div style={{ gridColumn: '1 / -1', display: 'flex', gap: 8 }}>
-            <input
-              type="date"
-              value={dayFilter}
-              onChange={(e) => setDayFilter(e.target.value)}
-              className="input-field"
-              style={{ colorScheme: 'dark', flex: 1 }}
-            />
-            {dayFilter && (
-              <button
-                onClick={() => setDayFilter('')}
-                className="rounded-lg flex items-center justify-center"
-                style={{ color: 'var(--text-muted)', background: 'var(--bg-input)', padding: '0 12px' }}
-              >
-                <X className="w-4 h-4" />
-              </button>
-            )}
-          </div>
+        {/* Day Filter */}
+        <div style={{ gridColumn: '1 / -1', display: 'flex', gap: 8, position: 'relative' }}>
+          <input
+            type="date"
+            value={dayFilter}
+            onChange={(e) => setDayFilter(e.target.value)}
+            className="input-field"
+            style={{ colorScheme: 'dark', flex: 1, color: dayFilter ? 'var(--text-primary)' : 'transparent' }}
+          />
+          {!dayFilter && (
+            <span style={{
+              position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)',
+              color: 'var(--text-muted)', fontSize: 14, pointerEvents: 'none',
+            }}>
+              Filter by date...
+            </span>
+          )}
+          {dayFilter && (
+            <button
+              onClick={() => setDayFilter('')}
+              className="rounded-lg flex items-center justify-center"
+              style={{ color: 'var(--text-muted)', background: 'var(--bg-input)', padding: '0 12px' }}
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
         </div>
       </div>
 
