@@ -1,0 +1,1397 @@
+[
+  {
+    "id": "seed-1",
+    "type": "expense",
+    "amount": 218.13,
+    "description": "Insurance",
+    "category": "Insurance",
+    "date": "2025-11-15",
+    "createdAt": "2026-04-05T01:02:56.156Z"
+  },
+  {
+    "id": "seed-2",
+    "type": "expense",
+    "amount": 115.81,
+    "description": "Pay Later",
+    "category": "Pay Later",
+    "date": "2025-11-15",
+    "createdAt": "2026-04-05T01:02:56.156Z"
+  },
+  {
+    "id": "seed-3",
+    "type": "expense",
+    "amount": 8.99,
+    "description": "Deliveroo",
+    "category": "Deliveroo",
+    "date": "2025-11-15",
+    "createdAt": "2026-04-05T01:02:56.156Z"
+  },
+  {
+    "id": "seed-4",
+    "type": "expense",
+    "amount": 110,
+    "description": "Ultra Plan",
+    "category": "Ultra Plan",
+    "date": "2025-11-15",
+    "createdAt": "2026-04-05T01:02:56.156Z"
+  },
+  {
+    "id": "seed-5",
+    "type": "expense",
+    "amount": 100,
+    "description": "Phone",
+    "category": "Phone",
+    "date": "2025-11-15",
+    "createdAt": "2026-04-05T01:02:56.156Z"
+  },
+  {
+    "id": "seed-6",
+    "type": "expense",
+    "amount": 600,
+    "description": "Shop",
+    "category": "Shop",
+    "date": "2025-11-15",
+    "createdAt": "2026-04-05T01:02:56.156Z"
+  },
+  {
+    "id": "seed-7",
+    "type": "expense",
+    "amount": 92.77,
+    "description": "Pay Later",
+    "category": "Pay Later",
+    "date": "2025-11-15",
+    "createdAt": "2026-04-05T01:02:56.156Z"
+  },
+  {
+    "id": "seed-8",
+    "type": "expense",
+    "amount": 95,
+    "description": "Eye Lashes",
+    "category": "Eye Lashes",
+    "date": "2025-11-15",
+    "createdAt": "2026-04-05T01:02:56.156Z"
+  },
+  {
+    "id": "seed-9",
+    "type": "expense",
+    "amount": 35,
+    "description": "Hair Cut",
+    "category": "Hair Cut",
+    "date": "2025-11-15",
+    "createdAt": "2026-04-05T01:02:56.156Z"
+  },
+  {
+    "id": "seed-10",
+    "type": "expense",
+    "amount": 50,
+    "description": "Nail",
+    "category": "Nail",
+    "date": "2025-11-15",
+    "createdAt": "2026-04-05T01:02:56.156Z"
+  },
+  {
+    "id": "seed-11",
+    "type": "expense",
+    "amount": 200,
+    "description": "Fuel",
+    "category": "Fuel",
+    "date": "2025-11-15",
+    "createdAt": "2026-04-05T01:02:56.156Z"
+  },
+  {
+    "id": "seed-12",
+    "type": "expense",
+    "amount": 15,
+    "description": "Rental",
+    "category": "Rental",
+    "date": "2025-11-15",
+    "createdAt": "2026-04-05T01:02:56.156Z"
+  },
+  {
+    "id": "seed-13",
+    "type": "expense",
+    "amount": 218.13,
+    "description": "Insurance",
+    "category": "Insurance",
+    "date": "2025-12-15",
+    "createdAt": "2026-04-05T01:02:56.156Z"
+  },
+  {
+    "id": "seed-14",
+    "type": "expense",
+    "amount": 8.99,
+    "description": "Deliveroo",
+    "category": "Deliveroo",
+    "date": "2025-12-15",
+    "createdAt": "2026-04-05T01:02:56.156Z"
+  },
+  {
+    "id": "seed-15",
+    "type": "expense",
+    "amount": 110,
+    "description": "Ultra Plan",
+    "category": "Ultra Plan",
+    "date": "2025-12-15",
+    "createdAt": "2026-04-05T01:02:56.156Z"
+  },
+  {
+    "id": "seed-16",
+    "type": "expense",
+    "amount": 100,
+    "description": "Phone",
+    "category": "Phone",
+    "date": "2025-12-15",
+    "createdAt": "2026-04-05T01:02:56.156Z"
+  },
+  {
+    "id": "seed-17",
+    "type": "expense",
+    "amount": 150,
+    "description": "Shop",
+    "category": "Shop",
+    "date": "2025-12-15",
+    "createdAt": "2026-04-05T01:02:56.156Z"
+  },
+  {
+    "id": "seed-18",
+    "type": "expense",
+    "amount": 240,
+    "description": "Elitricity",
+    "category": "Elitricity",
+    "date": "2025-12-15",
+    "createdAt": "2026-04-05T01:02:56.156Z"
+  },
+  {
+    "id": "seed-19",
+    "type": "expense",
+    "amount": 109.26,
+    "description": "Loan",
+    "category": "Loan",
+    "date": "2025-12-15",
+    "createdAt": "2026-04-05T01:02:56.156Z"
+  },
+  {
+    "id": "seed-20",
+    "type": "expense",
+    "amount": 95,
+    "description": "Eye Lashes",
+    "category": "Eye Lashes",
+    "date": "2025-12-15",
+    "createdAt": "2026-04-05T01:02:56.156Z"
+  },
+  {
+    "id": "seed-21",
+    "type": "expense",
+    "amount": 35,
+    "description": "Hair Cut",
+    "category": "Hair Cut",
+    "date": "2025-12-15",
+    "createdAt": "2026-04-05T01:02:56.156Z"
+  },
+  {
+    "id": "seed-22",
+    "type": "expense",
+    "amount": 95,
+    "description": "Nail",
+    "category": "Nail",
+    "date": "2025-12-15",
+    "createdAt": "2026-04-05T01:02:56.156Z"
+  },
+  {
+    "id": "seed-23",
+    "type": "expense",
+    "amount": 65,
+    "description": "Toll",
+    "category": "Toll",
+    "date": "2025-12-15",
+    "createdAt": "2026-04-05T01:02:56.156Z"
+  },
+  {
+    "id": "seed-24",
+    "type": "expense",
+    "amount": 50,
+    "description": "Fuel",
+    "category": "Fuel",
+    "date": "2025-12-15",
+    "createdAt": "2026-04-05T01:02:56.156Z"
+  },
+  {
+    "id": "seed-25",
+    "type": "expense",
+    "amount": 60,
+    "description": "Cleaner",
+    "category": "Cleaner",
+    "date": "2025-12-15",
+    "createdAt": "2026-04-05T01:02:56.156Z"
+  },
+  {
+    "id": "seed-26",
+    "type": "expense",
+    "amount": 1300,
+    "description": "Rental",
+    "category": "Rental",
+    "date": "2025-12-15",
+    "createdAt": "2026-04-05T01:02:56.156Z"
+  },
+  {
+    "id": "seed-27",
+    "type": "expense",
+    "amount": 192.77,
+    "description": "Pay Later",
+    "category": "Pay Later",
+    "date": "2025-12-15",
+    "createdAt": "2026-04-05T01:02:56.156Z"
+  },
+  {
+    "id": "seed-28",
+    "type": "expense",
+    "amount": 234.21,
+    "description": "Nu Bank",
+    "category": "Nu Bank",
+    "date": "2025-12-15",
+    "createdAt": "2026-04-05T01:02:56.156Z"
+  },
+  {
+    "id": "seed-29",
+    "type": "expense",
+    "amount": 60,
+    "description": "Rafa's Doctor",
+    "category": "Rafa's Doctor",
+    "date": "2025-12-15",
+    "createdAt": "2026-04-05T01:02:56.156Z"
+  },
+  {
+    "id": "seed-30",
+    "type": "expense",
+    "amount": 500,
+    "description": "Joao",
+    "category": "Joao",
+    "date": "2025-12-15",
+    "createdAt": "2026-04-05T01:02:56.156Z"
+  },
+  {
+    "id": "seed-31",
+    "type": "income",
+    "amount": 2579.91,
+    "description": "Rafaela",
+    "category": "Salary",
+    "date": "2025-12-15",
+    "createdAt": "2026-04-05T01:02:56.156Z"
+  },
+  {
+    "id": "seed-32",
+    "type": "income",
+    "amount": 3185,
+    "description": "Rafael",
+    "category": "Salary",
+    "date": "2025-12-15",
+    "createdAt": "2026-04-05T01:02:56.156Z"
+  },
+  {
+    "id": "seed-33",
+    "type": "income",
+    "amount": 320,
+    "description": "Deliveroo",
+    "category": "Freelance",
+    "date": "2025-12-15",
+    "createdAt": "2026-04-05T01:02:56.156Z"
+  },
+  {
+    "id": "seed-34",
+    "type": "expense",
+    "amount": 218.13,
+    "description": "Insurance",
+    "category": "Insurance",
+    "date": "2026-01-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-35",
+    "type": "expense",
+    "amount": 8.99,
+    "description": "Deliveroo",
+    "category": "Deliveroo",
+    "date": "2026-01-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-36",
+    "type": "expense",
+    "amount": 110,
+    "description": "Ultra Plan",
+    "category": "Ultra Plan",
+    "date": "2026-01-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-37",
+    "type": "expense",
+    "amount": 70.75,
+    "description": "Phone",
+    "category": "Phone",
+    "date": "2026-01-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-38",
+    "type": "expense",
+    "amount": 554.15,
+    "description": "Shop",
+    "category": "Shop",
+    "date": "2026-01-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-39",
+    "type": "expense",
+    "amount": 109.26,
+    "description": "Loan",
+    "category": "Loan",
+    "date": "2026-01-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-40",
+    "type": "expense",
+    "amount": 9.99,
+    "description": "Apple",
+    "category": "Apple",
+    "date": "2026-01-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-41",
+    "type": "expense",
+    "amount": 85,
+    "description": "Eye Lashes",
+    "category": "Eye Lashes",
+    "date": "2026-01-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-42",
+    "type": "expense",
+    "amount": 35,
+    "description": "Hair Cut",
+    "category": "Hair Cut",
+    "date": "2026-01-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-43",
+    "type": "expense",
+    "amount": 55,
+    "description": "Nail",
+    "category": "Nail",
+    "date": "2026-01-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-44",
+    "type": "expense",
+    "amount": 30,
+    "description": "Toll",
+    "category": "Toll",
+    "date": "2026-01-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-45",
+    "type": "expense",
+    "amount": 200,
+    "description": "Fuel",
+    "category": "Fuel",
+    "date": "2026-01-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-46",
+    "type": "expense",
+    "amount": 1397,
+    "description": "Rental",
+    "category": "Rental",
+    "date": "2026-01-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-47",
+    "type": "expense",
+    "amount": 192.77,
+    "description": "Pay Later",
+    "category": "Pay Later",
+    "date": "2026-01-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-48",
+    "type": "expense",
+    "amount": 336.35,
+    "description": "Credit Card",
+    "category": "Credit Card",
+    "date": "2026-01-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-49",
+    "type": "expense",
+    "amount": 150,
+    "description": "Car Fix",
+    "category": "Car Fix",
+    "date": "2026-01-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-50",
+    "type": "expense",
+    "amount": 55,
+    "description": "Consulta GP",
+    "category": "Consulta GP",
+    "date": "2026-01-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-51",
+    "type": "expense",
+    "amount": 25.99,
+    "description": "Youtube",
+    "category": "Youtube",
+    "date": "2026-01-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-52",
+    "type": "expense",
+    "amount": 49.1,
+    "description": "Divisão Natal",
+    "category": "Divisão Natal",
+    "date": "2026-01-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-53",
+    "type": "expense",
+    "amount": 100,
+    "description": "NCT",
+    "category": "NCT",
+    "date": "2026-01-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-54",
+    "type": "expense",
+    "amount": 111,
+    "description": "TAX",
+    "category": "TAX",
+    "date": "2026-01-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-55",
+    "type": "expense",
+    "amount": 500,
+    "description": "Joao",
+    "category": "Joao",
+    "date": "2026-01-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-56",
+    "type": "income",
+    "amount": 2755.19,
+    "description": "Rafaela",
+    "category": "Salary",
+    "date": "2026-01-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-57",
+    "type": "income",
+    "amount": 3300,
+    "description": "Rafael",
+    "category": "Salary",
+    "date": "2026-01-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-58",
+    "type": "income",
+    "amount": 140,
+    "description": "Dinheiro",
+    "category": "Other Income",
+    "date": "2026-01-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-59",
+    "type": "expense",
+    "amount": 218.13,
+    "description": "Insurance",
+    "category": "Insurance",
+    "date": "2026-02-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-60",
+    "type": "expense",
+    "amount": 8.99,
+    "description": "Deliveroo",
+    "category": "Deliveroo",
+    "date": "2026-02-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-61",
+    "type": "expense",
+    "amount": 110,
+    "description": "Ultra Plan",
+    "category": "Ultra Plan",
+    "date": "2026-02-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-62",
+    "type": "expense",
+    "amount": 70.75,
+    "description": "Phone",
+    "category": "Phone",
+    "date": "2026-02-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-63",
+    "type": "expense",
+    "amount": 666.83,
+    "description": "Shop",
+    "category": "Shop",
+    "date": "2026-02-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-64",
+    "type": "expense",
+    "amount": 150,
+    "description": "Elitricity",
+    "category": "Elitricity",
+    "date": "2026-02-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-65",
+    "type": "expense",
+    "amount": 25.99,
+    "description": "Youtube",
+    "category": "Youtube",
+    "date": "2026-02-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-66",
+    "type": "expense",
+    "amount": 109.26,
+    "description": "Loan",
+    "category": "Loan",
+    "date": "2026-02-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-67",
+    "type": "expense",
+    "amount": 9.99,
+    "description": "Apple",
+    "category": "Apple",
+    "date": "2026-02-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-68",
+    "type": "expense",
+    "amount": 6.99,
+    "description": "Amazon",
+    "category": "Amazon",
+    "date": "2026-02-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-69",
+    "type": "expense",
+    "amount": 11.99,
+    "description": "Spotify",
+    "category": "Spotify",
+    "date": "2026-02-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-70",
+    "type": "expense",
+    "amount": 20,
+    "description": "Wifi",
+    "category": "Wifi",
+    "date": "2026-02-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-71",
+    "type": "expense",
+    "amount": 17,
+    "description": "Netflix",
+    "category": "Netflix",
+    "date": "2026-02-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-72",
+    "type": "expense",
+    "amount": 85,
+    "description": "Eye Lashes",
+    "category": "Eye Lashes",
+    "date": "2026-02-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-73",
+    "type": "expense",
+    "amount": 35,
+    "description": "Hair Cut",
+    "category": "Hair Cut",
+    "date": "2026-02-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-74",
+    "type": "expense",
+    "amount": 75,
+    "description": "Nail",
+    "category": "Nail",
+    "date": "2026-02-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-75",
+    "type": "expense",
+    "amount": 77.53,
+    "description": "Toll",
+    "category": "Toll",
+    "date": "2026-02-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-76",
+    "type": "expense",
+    "amount": 100,
+    "description": "Fuel",
+    "category": "Fuel",
+    "date": "2026-02-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-77",
+    "type": "expense",
+    "amount": 80,
+    "description": "Gym",
+    "category": "Gym",
+    "date": "2026-02-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-78",
+    "type": "expense",
+    "amount": 100,
+    "description": "Cleaner",
+    "category": "Cleaner",
+    "date": "2026-02-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-79",
+    "type": "expense",
+    "amount": 1397,
+    "description": "Rental",
+    "category": "Rental",
+    "date": "2026-02-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-80",
+    "type": "expense",
+    "amount": 258.28,
+    "description": "Pay Later",
+    "category": "Pay Later",
+    "date": "2026-02-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-81",
+    "type": "expense",
+    "amount": 336.35,
+    "description": "Credit Card",
+    "category": "Credit Card",
+    "date": "2026-02-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-82",
+    "type": "expense",
+    "amount": 300,
+    "description": "Mounjaro",
+    "category": "Mounjaro",
+    "date": "2026-02-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-83",
+    "type": "expense",
+    "amount": 25,
+    "description": "Santaninha",
+    "category": "Santaninha",
+    "date": "2026-02-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-84",
+    "type": "expense",
+    "amount": 35,
+    "description": "AirTag",
+    "category": "AirTag",
+    "date": "2026-02-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-85",
+    "type": "expense",
+    "amount": 40,
+    "description": "Leap Card",
+    "category": "Leap Card",
+    "date": "2026-02-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-86",
+    "type": "expense",
+    "amount": 40,
+    "description": "Eyebrowns",
+    "category": "Eyebrows",
+    "date": "2026-02-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-87",
+    "type": "expense",
+    "amount": 50,
+    "description": "AI",
+    "category": "AI",
+    "date": "2026-02-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-88",
+    "type": "income",
+    "amount": 2960.31,
+    "description": "Rafaela",
+    "category": "Salary",
+    "date": "2026-02-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-89",
+    "type": "income",
+    "amount": 2867.77,
+    "description": "Rafael",
+    "category": "Salary",
+    "date": "2026-02-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-90",
+    "type": "income",
+    "amount": 320,
+    "description": "Deliveroo",
+    "category": "Freelance",
+    "date": "2026-02-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-91",
+    "type": "expense",
+    "amount": 218.13,
+    "description": "Insurance",
+    "category": "Insurance",
+    "date": "2026-03-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-92",
+    "type": "expense",
+    "amount": 8.99,
+    "description": "Deliveroo",
+    "category": "Deliveroo",
+    "date": "2026-03-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-93",
+    "type": "expense",
+    "amount": 55,
+    "description": "Ultra Plan",
+    "category": "Ultra Plan",
+    "date": "2026-03-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-94",
+    "type": "expense",
+    "amount": 20,
+    "description": "Phone",
+    "category": "Phone",
+    "date": "2026-03-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-95",
+    "type": "expense",
+    "amount": 459.77,
+    "description": "Shop",
+    "category": "Shop",
+    "date": "2026-03-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-96",
+    "type": "expense",
+    "amount": 150,
+    "description": "Elitricity",
+    "category": "Elitricity",
+    "date": "2026-03-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-97",
+    "type": "expense",
+    "amount": 25.99,
+    "description": "Youtube",
+    "category": "Youtube",
+    "date": "2026-03-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-98",
+    "type": "expense",
+    "amount": 109.26,
+    "description": "Loan",
+    "category": "Loan",
+    "date": "2026-03-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-99",
+    "type": "expense",
+    "amount": 9.99,
+    "description": "Apple",
+    "category": "Apple",
+    "date": "2026-03-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-100",
+    "type": "expense",
+    "amount": 6.99,
+    "description": "Amazon",
+    "category": "Amazon",
+    "date": "2026-03-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-101",
+    "type": "expense",
+    "amount": 11.99,
+    "description": "Spotify",
+    "category": "Spotify",
+    "date": "2026-03-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-102",
+    "type": "expense",
+    "amount": 20,
+    "description": "Wifi",
+    "category": "Wifi",
+    "date": "2026-03-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-103",
+    "type": "expense",
+    "amount": 20,
+    "description": "Leap Card",
+    "category": "Leap Card",
+    "date": "2026-03-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-104",
+    "type": "expense",
+    "amount": 50,
+    "description": "AI",
+    "category": "AI",
+    "date": "2026-03-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-105",
+    "type": "expense",
+    "amount": 40,
+    "description": "Eyebrows",
+    "category": "Eyebrows",
+    "date": "2026-03-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-106",
+    "type": "expense",
+    "amount": 17,
+    "description": "Netflix",
+    "category": "Netflix",
+    "date": "2026-03-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-107",
+    "type": "expense",
+    "amount": 85,
+    "description": "Eye Lashes",
+    "category": "Eye Lashes",
+    "date": "2026-03-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-108",
+    "type": "expense",
+    "amount": 35,
+    "description": "Hair Cut",
+    "category": "Hair Cut",
+    "date": "2026-03-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-109",
+    "type": "expense",
+    "amount": 75,
+    "description": "Nail",
+    "category": "Nail",
+    "date": "2026-03-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-110",
+    "type": "expense",
+    "amount": 30,
+    "description": "Toll",
+    "category": "Toll",
+    "date": "2026-03-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-111",
+    "type": "expense",
+    "amount": 150,
+    "description": "Fuel",
+    "category": "Fuel",
+    "date": "2026-03-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-112",
+    "type": "expense",
+    "amount": 200,
+    "description": "Gym",
+    "category": "Gym",
+    "date": "2026-03-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-113",
+    "type": "expense",
+    "amount": 80,
+    "description": "Cleaner",
+    "category": "Cleaner",
+    "date": "2026-03-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-114",
+    "type": "expense",
+    "amount": 1397,
+    "description": "Rental",
+    "category": "Rental",
+    "date": "2026-03-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-115",
+    "type": "expense",
+    "amount": 264.7,
+    "description": "Pay Later",
+    "category": "Pay Later",
+    "date": "2026-03-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-116",
+    "type": "expense",
+    "amount": 443.86,
+    "description": "Credit Card",
+    "category": "Credit Card",
+    "date": "2026-03-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-117",
+    "type": "expense",
+    "amount": 389,
+    "description": "Car Fix",
+    "category": "Car Fix",
+    "date": "2026-03-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-118",
+    "type": "expense",
+    "amount": 17,
+    "description": "Car Wash",
+    "category": "Car Wash",
+    "date": "2026-03-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-119",
+    "type": "income",
+    "amount": 2500,
+    "description": "Rafaela",
+    "category": "Salary",
+    "date": "2026-03-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-120",
+    "type": "income",
+    "amount": 2867.77,
+    "description": "Rafael",
+    "category": "Salary",
+    "date": "2026-03-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-121",
+    "type": "income",
+    "amount": 500,
+    "description": "Cash",
+    "category": "Other Income",
+    "date": "2026-03-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-122",
+    "type": "income",
+    "amount": 240,
+    "description": "Deliveroo",
+    "category": "Freelance",
+    "date": "2026-03-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-123",
+    "type": "expense",
+    "amount": 218.13,
+    "description": "Insurance",
+    "category": "Insurance",
+    "date": "2026-04-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-124",
+    "type": "expense",
+    "amount": 8.99,
+    "description": "Deliveroo",
+    "category": "Deliveroo",
+    "date": "2026-04-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-125",
+    "type": "expense",
+    "amount": 110,
+    "description": "Ultra Plan",
+    "category": "Ultra Plan",
+    "date": "2026-04-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-126",
+    "type": "expense",
+    "amount": 70.75,
+    "description": "Phone",
+    "category": "Phone",
+    "date": "2026-04-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-127",
+    "type": "expense",
+    "amount": 700,
+    "description": "Shop",
+    "category": "Shop",
+    "date": "2026-04-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-128",
+    "type": "expense",
+    "amount": 60,
+    "description": "Elitricity",
+    "category": "Elitricity",
+    "date": "2026-04-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-129",
+    "type": "expense",
+    "amount": 25.99,
+    "description": "Youtube",
+    "category": "Youtube",
+    "date": "2026-04-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-130",
+    "type": "expense",
+    "amount": 109.26,
+    "description": "Loan",
+    "category": "Loan",
+    "date": "2026-04-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-131",
+    "type": "expense",
+    "amount": 9.99,
+    "description": "Apple",
+    "category": "Apple",
+    "date": "2026-04-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-132",
+    "type": "expense",
+    "amount": 6.99,
+    "description": "Amazon",
+    "category": "Amazon",
+    "date": "2026-04-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-133",
+    "type": "expense",
+    "amount": 11.99,
+    "description": "Spotify",
+    "category": "Spotify",
+    "date": "2026-04-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-134",
+    "type": "expense",
+    "amount": 20,
+    "description": "Wifi",
+    "category": "Wifi",
+    "date": "2026-04-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-135",
+    "type": "expense",
+    "amount": 100,
+    "description": "Leap Card",
+    "category": "Leap Card",
+    "date": "2026-04-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-136",
+    "type": "expense",
+    "amount": 50,
+    "description": "AI",
+    "category": "AI",
+    "date": "2026-04-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-137",
+    "type": "expense",
+    "amount": 40,
+    "description": "Eyebrows",
+    "category": "Eyebrows",
+    "date": "2026-04-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-138",
+    "type": "expense",
+    "amount": 17,
+    "description": "Netflix",
+    "category": "Netflix",
+    "date": "2026-04-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-139",
+    "type": "expense",
+    "amount": 85,
+    "description": "Eye Lashes",
+    "category": "Eye Lashes",
+    "date": "2026-04-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-140",
+    "type": "expense",
+    "amount": 35,
+    "description": "Hair Cut",
+    "category": "Hair Cut",
+    "date": "2026-04-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-141",
+    "type": "expense",
+    "amount": 75,
+    "description": "Nail",
+    "category": "Nail",
+    "date": "2026-04-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-142",
+    "type": "expense",
+    "amount": 20.33,
+    "description": "Toll",
+    "category": "Toll",
+    "date": "2026-04-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-143",
+    "type": "expense",
+    "amount": 100,
+    "description": "Fuel",
+    "category": "Fuel",
+    "date": "2026-04-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-144",
+    "type": "expense",
+    "amount": 200,
+    "description": "Gym",
+    "category": "Gym",
+    "date": "2026-04-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-145",
+    "type": "expense",
+    "amount": 50,
+    "description": "Cleaner",
+    "category": "Cleaner",
+    "date": "2026-04-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-146",
+    "type": "expense",
+    "amount": 1397,
+    "description": "Rental",
+    "category": "Rental",
+    "date": "2026-04-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-147",
+    "type": "expense",
+    "amount": 217.65,
+    "description": "Pay Later",
+    "category": "Pay Later",
+    "date": "2026-04-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-148",
+    "type": "expense",
+    "amount": 275.39,
+    "description": "Credit Card",
+    "category": "Credit Card",
+    "date": "2026-04-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-149",
+    "type": "expense",
+    "amount": 20.22,
+    "description": "Car Fix",
+    "category": "Car Fix",
+    "date": "2026-04-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-150",
+    "type": "expense",
+    "amount": 50,
+    "description": "Van Rental",
+    "category": "Van Rental",
+    "date": "2026-04-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-151",
+    "type": "expense",
+    "amount": 50,
+    "description": "Car Wash",
+    "category": "Car Wash",
+    "date": "2026-04-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-152",
+    "type": "income",
+    "amount": 2706,
+    "description": "Rafaela",
+    "category": "Salary",
+    "date": "2026-04-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-153",
+    "type": "income",
+    "amount": 2101,
+    "description": "Rafael",
+    "category": "Salary",
+    "date": "2026-04-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-154",
+    "type": "income",
+    "amount": 300,
+    "description": "Cash",
+    "category": "Other Income",
+    "date": "2026-04-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  },
+  {
+    "id": "seed-155",
+    "type": "income",
+    "amount": 320,
+    "description": "Deliveroo",
+    "category": "Freelance",
+    "date": "2026-04-15",
+    "createdAt": "2026-04-05T01:02:56.157Z"
+  }
+]

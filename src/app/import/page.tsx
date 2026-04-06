@@ -149,20 +149,35 @@ export default function ImportPage() {
     <div className="max-w-2xl mx-auto space-y-6 animate-fadeIn">
       {/* Header */}
       <div className="flex items-center gap-4 mb-6">
-        <Link href="/" className="p-2 hover:bg-slate-100 rounded-xl transition-colors">
+        <Link
+          href="/"
+          className="p-2 rounded-xl transition-all"
+          style={{ color: 'var(--text-secondary)' }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--hover-bg)'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+        >
           <ArrowLeft className="w-5 h-5" />
         </Link>
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-slate-900">Import Data</h1>
-          <p className="text-slate-500">Upload your expense spreadsheet</p>
+          <h1 className="text-2xl md:text-3xl font-bold gradient-text">Import Data</h1>
+          <p style={{ color: 'var(--text-secondary)' }}>Upload your expense spreadsheet</p>
         </div>
       </div>
 
       {/* Upload Area */}
-      <div className="bg-white rounded-2xl p-8 shadow-sm">
+      <div className="glass-card-static p-8">
         <div
           onClick={() => fileInputRef.current?.click()}
-          className="border-2 border-dashed border-slate-200 rounded-xl p-8 text-center cursor-pointer hover:border-purple-400 hover:bg-purple-50/50 transition-all"
+          className="border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all"
+          style={{ borderColor: 'var(--dashed-border)' }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.borderColor = 'rgba(124, 58, 237, 0.3)';
+            e.currentTarget.style.background = 'rgba(124, 58, 237, 0.04)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+            e.currentTarget.style.background = 'transparent';
+          }}
         >
           <input
             ref={fileInputRef}
@@ -174,27 +189,41 @@ export default function ImportPage() {
 
           {loading ? (
             <div className="py-8">
-              <Loader2 className="w-12 h-12 text-purple-600 mx-auto animate-spin" />
-              <p className="mt-4 text-slate-600">Processing your file...</p>
+              <Loader2 className="w-12 h-12 mx-auto animate-spin" style={{ color: '#a78bfa' }} />
+              <p className="mt-4" style={{ color: 'var(--text-secondary)' }}>Processing your file...</p>
             </div>
           ) : (
             <>
-              <FileSpreadsheet className="w-12 h-12 text-purple-600 mx-auto mb-4" />
-              <p className="text-lg font-medium text-slate-700">Click to upload your spreadsheet</p>
-              <p className="text-sm text-slate-500 mt-2">Supports .csv files</p>
+              <FileSpreadsheet className="w-12 h-12 mx-auto mb-4" style={{ color: '#a78bfa', filter: 'drop-shadow(0 0 8px rgba(124, 58, 237, 0.3))' }} />
+              <p className="text-lg font-medium" style={{ color: 'var(--text-primary)' }}>Click to upload your spreadsheet</p>
+              <p className="text-sm mt-2" style={{ color: 'var(--text-muted)' }}>Supports .csv files</p>
             </>
           )}
         </div>
 
         {error && (
-          <div className="mt-4 bg-red-50 text-red-600 px-4 py-3 rounded-xl text-sm flex items-center gap-2">
+          <div
+            className="mt-4 px-4 py-3 rounded-xl text-sm flex items-center gap-2"
+            style={{
+              background: 'rgba(239, 68, 68, 0.08)',
+              border: '1px solid rgba(239, 68, 68, 0.15)',
+              color: '#f87171',
+            }}
+          >
             <AlertCircle className="w-4 h-4" />
             {error}
           </div>
         )}
 
         {success && preview.length > 0 && (
-          <div className="mt-4 bg-green-50 text-green-600 px-4 py-3 rounded-xl text-sm flex items-center gap-2">
+          <div
+            className="mt-4 px-4 py-3 rounded-xl text-sm flex items-center gap-2"
+            style={{
+              background: 'rgba(16, 185, 129, 0.08)',
+              border: '1px solid rgba(16, 185, 129, 0.15)',
+              color: '#34d399',
+            }}
+          >
             <Check className="w-4 h-4" />
             Found {preview.length} transactions to import
           </div>
@@ -203,9 +232,9 @@ export default function ImportPage() {
 
       {/* Preview */}
       {preview.length > 0 && (
-        <div className="bg-white rounded-2xl p-6 shadow-sm">
+        <div className="glass-card-static p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold">Preview</h2>
+            <h2 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>Preview</h2>
             <button onClick={handleImport} className="btn-primary">
               Import All ({preview.length})
             </button>
@@ -213,18 +242,22 @@ export default function ImportPage() {
 
           <div className="space-y-2 max-h-64 overflow-y-auto">
             {preview.slice(0, 10).map((t, i) => (
-              <div key={i} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+              <div
+                key={i}
+                className="flex items-center justify-between p-3 rounded-lg"
+                style={{ background: 'var(--bg-input)' }}
+              >
                 <div>
-                  <p className="font-medium text-slate-800">{t.description}</p>
-                  <p className="text-sm text-slate-500">{t.date} - {t.category}</p>
+                  <p className="font-medium" style={{ color: 'var(--text-primary)' }}>{t.description}</p>
+                  <p className="text-sm" style={{ color: 'var(--text-muted)' }}>{t.date} - {t.category}</p>
                 </div>
-                <span className={t.type === 'income' ? 'text-green-600 font-medium' : 'text-red-600 font-medium'}>
+                <span className={t.type === 'income' ? 'text-green-400 font-medium' : 'text-red-400 font-medium'}>
                   {t.type === 'income' ? '+' : '-'}{currencySymbol}{t.amount.toFixed(2)}
                 </span>
               </div>
             ))}
             {preview.length > 10 && (
-              <p className="text-center text-slate-500 text-sm py-2">
+              <p className="text-center text-sm py-2" style={{ color: 'var(--text-muted)' }}>
                 ...and {preview.length - 10} more
               </p>
             )}
@@ -233,22 +266,31 @@ export default function ImportPage() {
       )}
 
       {/* Instructions */}
-      <div className="bg-white rounded-2xl p-6 shadow-sm">
-        <h2 className="text-lg font-semibold mb-4">CSV Format</h2>
-        <p className="text-slate-600 text-sm mb-4">Your CSV should have columns like:</p>
-        <div className="bg-slate-50 rounded-xl p-4 text-sm font-mono">
-          <div className="grid grid-cols-4 gap-2 text-slate-600 mb-2 font-semibold">
-            <span>Date</span>
-            <span>Description</span>
-            <span>Amount</span>
-            <span>Category</span>
-          </div>
-          <div className="grid grid-cols-4 gap-2 text-slate-500">
-            <span>2026-04-03</span>
-            <span>Supermarket</span>
-            <span>45.50</span>
-            <span>Food</span>
-          </div>
+      <div className="glass-card-static p-6">
+        <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>CSV Format</h2>
+        <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>Your CSV should have columns like:</p>
+        <div
+          className="rounded-xl p-4 text-xs font-mono overflow-x-auto"
+          style={{ background: 'var(--bg-input)', border: '1px solid var(--border-color)' }}
+        >
+          <table className="w-full">
+            <thead>
+              <tr style={{ color: 'var(--text-secondary)' }} className="font-semibold">
+                <td className="pr-3 pb-2">Date</td>
+                <td className="pr-3 pb-2">Description</td>
+                <td className="pr-3 pb-2">Amount</td>
+                <td className="pb-2">Category</td>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style={{ color: 'var(--text-muted)' }}>
+                <td className="pr-3">2026-04-03</td>
+                <td className="pr-3">Supermarket</td>
+                <td className="pr-3">45.50</td>
+                <td>Food</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

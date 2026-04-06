@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import {
   Plus,
@@ -26,6 +27,11 @@ export default function TransactionsPage() {
   const [monthFilter, setMonthFilter] = useState('all');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<Partial<Transaction>>({});
+  const [portalRoot, setPortalRoot] = useState<HTMLElement | null>(null);
+
+  useEffect(() => {
+    setPortalRoot(document.body);
+  }, []);
 
   const currencySymbol = settings.currency === 'EUR' ? '€' : settings.currency === 'USD' ? '$' : 'R$';
 
@@ -104,8 +110,8 @@ export default function TransactionsPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-slate-900">Transactions</h1>
-          <p className="text-slate-500">{transactions.length} total transactions</p>
+          <h1 className="text-2xl md:text-3xl font-bold gradient-text">Transactions</h1>
+          <p style={{ color: 'var(--text-secondary)' }}>{transactions.length} total transactions</p>
         </div>
         <Link href="/add" className="btn-primary flex items-center gap-2 justify-center w-fit">
           <Plus className="w-5 h-5" />
@@ -114,11 +120,11 @@ export default function TransactionsPage() {
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-2xl p-4 shadow-sm">
+      <div className="glass-card-static p-4">
         <div className="flex flex-col md:flex-row gap-3">
           {/* Search */}
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: 'var(--text-muted)' }} />
             <input
               type="text"
               placeholder="Search transactions..."
@@ -178,26 +184,31 @@ export default function TransactionsPage() {
       </div>
 
       {/* Transactions List */}
-      <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+      <div className="glass-card-static overflow-hidden">
         {filteredTransactions.length > 0 ? (
-          <div className="divide-y divide-slate-100">
-            {filteredTransactions.map((transaction) => {
+          <div style={{ borderColor: 'var(--border-color)' }}>
+            {filteredTransactions.map((transaction, index) => {
               const cat = getCategoryInfo(transaction.category);
               return (
                 <div
                   key={transaction.id}
-                  className="flex items-center justify-between p-4 hover:bg-slate-50 transition-colors"
+                  className="flex items-center justify-between p-4 transition-all duration-200"
+                  style={{
+                    borderBottom: index < filteredTransactions.length - 1 ? '1px solid var(--border-color)' : 'none',
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--hover-bg)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
                 >
                   <div className="flex items-center gap-4">
                     <div
                       className="w-12 h-12 rounded-xl flex items-center justify-center text-xl"
-                      style={{ backgroundColor: `${cat.color}20` }}
+                      style={{ backgroundColor: `${cat.color}18` }}
                     >
                       {cat.icon}
                     </div>
                     <div>
-                      <p className="font-medium text-slate-900">{transaction.description}</p>
-                      <div className="flex items-center gap-2 text-sm text-slate-500">
+                      <p className="font-medium" style={{ color: 'var(--text-primary)' }}>{transaction.description}</p>
+                      <div className="flex items-center gap-2 text-sm" style={{ color: 'var(--text-muted)' }}>
                         <span>{transaction.category}</span>
                         <span>•</span>
                         <span>
@@ -213,7 +224,7 @@ export default function TransactionsPage() {
                   <div className="flex items-center gap-4">
                     <span
                       className={`text-lg font-semibold ${
-                        transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
+                        transaction.type === 'income' ? 'text-green-400' : 'text-red-400'
                       }`}
                     >
                       {transaction.type === 'income' ? '+' : '-'}
@@ -225,13 +236,19 @@ export default function TransactionsPage() {
                           setEditingId(transaction.id);
                           setEditForm(transaction);
                         }}
-                        className="p-2 text-slate-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
+                        className="p-2 rounded-lg transition-all"
+                        style={{ color: 'var(--text-muted)' }}
+                        onMouseEnter={(e) => { e.currentTarget.style.color = '#a78bfa'; e.currentTarget.style.background = 'rgba(124, 58, 237, 0.1)'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.color = '#5a6478'; e.currentTarget.style.background = 'transparent'; }}
                       >
                         <Edit2 className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => handleDelete(transaction.id)}
-                        className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        className="p-2 rounded-lg transition-all"
+                        style={{ color: 'var(--text-muted)' }}
+                        onMouseEnter={(e) => { e.currentTarget.style.color = '#f87171'; e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.color = '#5a6478'; e.currentTarget.style.background = 'transparent'; }}
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -242,29 +259,41 @@ export default function TransactionsPage() {
             })}
           </div>
         ) : (
-          <div className="text-center py-12 text-slate-400">
+          <div className="text-center py-12" style={{ color: 'var(--text-muted)' }}>
             <p className="text-lg">No transactions found</p>
             <p className="text-sm mt-1">Try adjusting your filters</p>
           </div>
         )}
       </div>
 
-      {/* Edit Modal */}
-      {editingId && editForm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-md">
+      {/* Edit Modal - rendered via portal to escape stacking context */}
+      {editingId && editForm && portalRoot && createPortal(
+        <div
+          className="fixed inset-0 flex items-center justify-center p-4"
+          style={{ background: 'var(--modal-overlay)', backdropFilter: 'blur(8px)', zIndex: 9999 }}
+          onClick={(e) => { if (e.target === e.currentTarget) setEditingId(null); }}
+        >
+          <div
+            className="glass-strong p-6 w-full max-w-md animate-slideUp"
+            style={{
+              boxShadow: '0 16px 64px rgba(0, 0, 0, 0.5), 0 0 40px rgba(124, 58, 237, 0.1)',
+            }}
+          >
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold">Edit Transaction</h2>
+              <h2 className="text-xl font-semibold" style={{ color: 'var(--text-primary)' }}>Edit Transaction</h2>
               <button
                 onClick={() => setEditingId(null)}
-                className="p-2 hover:bg-slate-100 rounded-lg"
+                className="p-2 rounded-lg transition-colors"
+                style={{ color: 'var(--text-muted)' }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--hover-bg)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Description</label>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Description</label>
                 <input
                   type="text"
                   value={editForm.description || ''}
@@ -273,7 +302,7 @@ export default function TransactionsPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Amount</label>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Amount</label>
                 <input
                   type="number"
                   step="0.01"
@@ -283,7 +312,7 @@ export default function TransactionsPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Type</label>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Type</label>
                 <select
                   value={editForm.type || 'expense'}
                   onChange={(e) => setEditForm({ ...editForm, type: e.target.value as 'income' | 'expense' })}
@@ -294,7 +323,7 @@ export default function TransactionsPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Category</label>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Category</label>
                 <select
                   value={editForm.category || ''}
                   onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
@@ -306,12 +335,13 @@ export default function TransactionsPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Date</label>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Date</label>
                 <input
                   type="date"
                   value={editForm.date || ''}
                   onChange={(e) => setEditForm({ ...editForm, date: e.target.value })}
                   className="input-field"
+                  style={{ colorScheme: 'var(--color-scheme)' }}
                 />
               </div>
               <div className="flex gap-3 pt-4">
@@ -338,7 +368,8 @@ export default function TransactionsPage() {
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        portalRoot
       )}
     </div>
   );

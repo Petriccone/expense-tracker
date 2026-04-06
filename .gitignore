@@ -9,3 +9,5 @@ build
 tsconfig.tsbuildinfo
 out
 .netlify
+.playwright-mcp/
+.claude/

@@ -131,13 +131,21 @@ export default function ReportsPage() {
     URL.revokeObjectURL(url);
   };
 
+  const tooltipStyle = {
+    background: 'var(--tooltip-bg)',
+    border: '1px solid var(--glass-border)',
+    borderRadius: 12,
+    boxShadow: 'var(--tooltip-shadow)',
+    color: 'var(--text-primary)',
+  };
+
   return (
     <div className="space-y-6 animate-fadeIn">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-slate-900">Reports</h1>
-          <p className="text-slate-500">Analyze your spending patterns</p>
+          <h1 className="text-2xl md:text-3xl font-bold gradient-text">Reports</h1>
+          <p style={{ color: 'var(--text-secondary)' }}>Analyze your spending patterns</p>
         </div>
         <div className="flex items-center gap-3">
           <select
@@ -157,39 +165,44 @@ export default function ReportsPage() {
       </div>
 
       {/* Summary Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-2xl p-4 shadow-sm">
-          <p className="text-sm text-slate-500">Total Income</p>
-          <p className="text-xl font-bold text-green-600">{formatAmount(stats.income)}</p>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 stagger-children">
+        <div className="glass-card p-4">
+          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Total Income</p>
+          <p className="text-xl font-bold text-green-400">{formatAmount(stats.income)}</p>
         </div>
-        <div className="bg-white rounded-2xl p-4 shadow-sm">
-          <p className="text-sm text-slate-500">Total Expenses</p>
-          <p className="text-xl font-bold text-red-600">{formatAmount(stats.expenses)}</p>
+        <div className="glass-card p-4">
+          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Total Expenses</p>
+          <p className="text-xl font-bold text-red-400">{formatAmount(stats.expenses)}</p>
         </div>
-        <div className="bg-white rounded-2xl p-4 shadow-sm">
-          <p className="text-sm text-slate-500">Net</p>
-          <p className={`text-xl font-bold ${stats.net >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+        <div className="glass-card p-4">
+          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Net</p>
+          <p className={`text-xl font-bold ${stats.net >= 0 ? 'text-green-400' : 'text-red-400'}`}>
             {formatAmount(stats.net)}
           </p>
         </div>
-        <div className="bg-white rounded-2xl p-4 shadow-sm">
-          <p className="text-sm text-slate-500">Transactions</p>
-          <p className="text-xl font-bold text-slate-900">{filteredTransactions.length}</p>
+        <div className="glass-card p-4">
+          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Transactions</p>
+          <p className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>{filteredTransactions.length}</p>
         </div>
       </div>
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Monthly Trend */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm">
-          <h2 className="text-lg font-semibold mb-4">Income vs Expenses (Year)</h2>
+        <div className="glass-card-static p-6">
+          <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Income vs Expenses (Year)</h2>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={monthlyData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
-                <XAxis dataKey="month" stroke="#64748B" fontSize={12} />
-                <YAxis stroke="#64748B" fontSize={12} />
-                <Tooltip formatter={(value) => formatAmount(Number(value))} />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />
+                <XAxis dataKey="month" stroke="var(--text-muted)" fontSize={12} />
+                <YAxis stroke="var(--text-muted)" fontSize={12} />
+                <Tooltip
+                  formatter={(value) => formatAmount(Number(value))}
+                  contentStyle={tooltipStyle}
+                  itemStyle={{ color: 'var(--text-primary)' }}
+                  labelStyle={{ color: 'var(--text-secondary)' }}
+                />
                 <Bar dataKey="income" fill="#10B981" name="Income" radius={[4, 4, 0, 0]} />
                 <Bar dataKey="expense" fill="#EF4444" name="Expense" radius={[4, 4, 0, 0]} />
               </BarChart>
@@ -198,8 +211,8 @@ export default function ReportsPage() {
         </div>
 
         {/* Category Breakdown */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm">
-          <h2 className="text-lg font-semibold mb-4">Expenses by Category</h2>
+        <div className="glass-card-static p-6">
+          <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Expenses by Category</h2>
           {categoryData.length > 0 ? (
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
@@ -210,6 +223,7 @@ export default function ReportsPage() {
                     cy="50%"
                     outerRadius={80}
                     dataKey="value"
+                    stroke="none"
                     label={({ name, percent }) => `${name} (${((percent || 0) * 100).toFixed(0)}%)`}
                     labelLine={false}
                   >
@@ -217,12 +231,17 @@ export default function ReportsPage() {
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(value) => formatAmount(Number(value))} />
+                  <Tooltip
+                    formatter={(value) => formatAmount(Number(value))}
+                    contentStyle={tooltipStyle}
+                    itemStyle={{ color: 'var(--text-primary)' }}
+                    labelStyle={{ color: 'var(--text-secondary)' }}
+                  />
                 </PieChart>
               </ResponsiveContainer>
             </div>
           ) : (
-            <div className="h-64 flex items-center justify-center text-slate-400">
+            <div className="h-64 flex items-center justify-center" style={{ color: 'var(--text-muted)' }}>
               No expense data
             </div>
           )}
@@ -230,37 +249,44 @@ export default function ReportsPage() {
       </div>
 
       {/* Category Table */}
-      <div className="bg-white rounded-2xl p-6 shadow-sm">
-        <h2 className="text-lg font-semibold mb-4">Category Breakdown</h2>
+      <div className="glass-card-static p-6">
+        <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Category Breakdown</h2>
         {categoryData.length > 0 ? (
           <div className="space-y-3">
             {categoryData.map((cat, index) => {
               const percentage = (cat.value / stats.expenses) * 100;
               return (
                 <div key={cat.name} className="flex items-center gap-4">
-                  <div className="w-4 h-4 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }} />
+                  <div
+                    className="w-4 h-4 rounded-full"
+                    style={{
+                      backgroundColor: COLORS[index % COLORS.length],
+                      boxShadow: `0 0 6px ${COLORS[index % COLORS.length]}40`,
+                    }}
+                  />
                   <div className="flex-1">
                     <div className="flex items-center justify-between mb-1">
-                      <span className="font-medium">{cat.name}</span>
-                      <span className="text-slate-600">{formatAmount(cat.value)}</span>
+                      <span className="font-medium" style={{ color: 'var(--text-primary)' }}>{cat.name}</span>
+                      <span style={{ color: 'var(--text-secondary)' }}>{formatAmount(cat.value)}</span>
                     </div>
-                    <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                    <div className="h-2 rounded-full overflow-hidden" style={{ background: 'var(--bg-input)' }}>
                       <div
-                        className="h-full rounded-full"
+                        className="h-full rounded-full transition-all duration-500"
                         style={{
                           width: `${percentage}%`,
                           backgroundColor: COLORS[index % COLORS.length],
+                          boxShadow: `0 0 8px ${COLORS[index % COLORS.length]}30`,
                         }}
                       />
                     </div>
                   </div>
-                  <span className="text-sm text-slate-500 w-12 text-right">{percentage.toFixed(1)}%</span>
+                  <span className="text-sm w-12 text-right" style={{ color: 'var(--text-muted)' }}>{percentage.toFixed(1)}%</span>
                 </div>
               );
             })}
           </div>
         ) : (
-          <p className="text-center text-slate-400 py-8">No data available</p>
+          <p className="text-center py-8" style={{ color: 'var(--text-muted)' }}>No data available</p>
         )}
       </div>
     </div>
