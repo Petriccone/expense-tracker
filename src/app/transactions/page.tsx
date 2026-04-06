@@ -23,6 +23,7 @@ export default function TransactionsPage() {
   const [typeFilter, setTypeFilter] = useState<'all' | 'income' | 'expense'>('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [dateFilter, setDateFilter] = useState('all');
+  const [monthFilter, setMonthFilter] = useState('all');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<Partial<Transaction>>({});
 
@@ -61,9 +62,15 @@ export default function TransactionsPage() {
           }
         }
       }
+      // Month filter (specific month)
+      if (monthFilter !== 'all') {
+        const tDate = new Date(t.date);
+        const tMonth = `${tDate.getFullYear()}-${String(tDate.getMonth() + 1).padStart(2, '0')}`;
+        if (tMonth !== monthFilter) return false;
+      }
       return true;
     }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  }, [transactions, search, typeFilter, categoryFilter, dateFilter]);
+  }, [transactions, search, typeFilter, categoryFilter, dateFilter, monthFilter]);
 
   const getCategoryInfo = (categoryName: string) => {
     return categories.find((c) => c.name === categoryName) || { icon: '📦', color: '#64748B' };
@@ -76,6 +83,21 @@ export default function TransactionsPage() {
   };
 
   const uniqueCategories = [...new Set(transactions.map((t) => t.category))];
+
+  const availableMonths = useMemo(() => {
+    const months = new Set<string>();
+    transactions.forEach((t) => {
+      const d = new Date(t.date);
+      months.add(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
+    });
+    return [...months].sort().reverse();
+  }, [transactions]);
+
+  const formatMonthLabel = (key: string) => {
+    const [year, month] = key.split('-');
+    const d = new Date(parseInt(year), parseInt(month) - 1);
+    return d.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+  };
 
   return (
     <div className="space-y-6 animate-fadeIn">
@@ -139,6 +161,18 @@ export default function TransactionsPage() {
             <option value="today">Today</option>
             <option value="week">This Week</option>
             <option value="month">This Month</option>
+          </select>
+
+          {/* Month Filter */}
+          <select
+            value={monthFilter}
+            onChange={(e) => setMonthFilter(e.target.value)}
+            className="select-field md:w-48"
+          >
+            <option value="all">All Months</option>
+            {availableMonths.map((m) => (
+              <option key={m} value={m}>{formatMonthLabel(m)}</option>
+            ))}
           </select>
         </div>
       </div>
