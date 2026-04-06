@@ -262,6 +262,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const localTx = loadedTransactions;
       fetchSupabaseTransactions(linkToken).then((remoteTx) => {
         const merged = mergeTransactions(localTx, remoteTx);
+        // Pre-populate syncedIdsRef so polling doesn't re-add these
+        merged.forEach((t) => syncedIdsRef.current.add(t.id));
         dispatch({
           type: 'LOAD_STATE',
           payload: {

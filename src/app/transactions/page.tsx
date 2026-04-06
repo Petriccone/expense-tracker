@@ -25,6 +25,7 @@ export default function TransactionsPage() {
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<'all' | 'income' | 'expense'>('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
+  const [dayFilter, setDayFilter] = useState('');
   const [selectedMonth, setSelectedMonth] = useState(() => {
     const now = new Date();
     return new Date(now.getFullYear(), now.getMonth(), 1);
@@ -62,14 +63,19 @@ export default function TransactionsPage() {
       if (categoryFilter !== 'all' && t.category !== categoryFilter) {
         return false;
       }
-      // Month filter
-      const tDate = new Date(t.date);
-      if (tDate.getMonth() !== selectedMonth.getMonth() || tDate.getFullYear() !== selectedMonth.getFullYear()) {
-        return false;
+      // Day filter (exact date match)
+      if (dayFilter) {
+        if (t.date !== dayFilter) return false;
+      } else {
+        // Month filter (only when no day filter)
+        const tDate = new Date(t.date);
+        if (tDate.getMonth() !== selectedMonth.getMonth() || tDate.getFullYear() !== selectedMonth.getFullYear()) {
+          return false;
+        }
       }
       return true;
     }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  }, [transactions, search, typeFilter, categoryFilter, selectedMonth]);
+  }, [transactions, search, typeFilter, categoryFilter, selectedMonth, dayFilter]);
 
   const getCategoryInfo = (categoryName: string) => {
     return categories.find((c) => c.name === categoryName) || { icon: '📦', color: '#64748B' };
@@ -156,6 +162,26 @@ export default function TransactionsPage() {
             ))}
           </select>
 
+          {/* Day Filter */}
+          <input
+            type="date"
+            value={dayFilter}
+            onChange={(e) => setDayFilter(e.target.value)}
+            className="input-field md:w-44"
+            style={{ colorScheme: 'var(--color-scheme)' }}
+          />
+          {dayFilter && (
+            <button
+              onClick={() => setDayFilter('')}
+              className="p-2 rounded-lg transition-colors"
+              style={{ color: 'var(--text-muted)' }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = '#f87171'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-muted)'; }}
+              title="Clear date filter"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
         </div>
       </div>
 
