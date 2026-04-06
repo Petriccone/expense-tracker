@@ -144,29 +144,34 @@ export default function BudgetPage() {
 
         {/* Month Navigator */}
         <div
-          className="glass-card-static flex items-center gap-2 px-2 py-1"
-          style={{ borderRadius: 14 }}
+          className="flex items-center justify-center gap-3 self-start md:self-auto"
+          style={{
+            background: 'var(--glass-bg)',
+            border: '1px solid var(--glass-border)',
+            borderRadius: 12,
+            padding: '6px 8px',
+          }}
         >
           <button
             onClick={() => navigateMonth(-1)}
-            className="p-2 rounded-lg transition-colors"
+            className="w-8 h-8 flex items-center justify-center rounded-lg transition-colors"
             style={{ color: 'var(--text-secondary)' }}
             onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--hover-bg)'; }}
             onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
           >
-            <ChevronLeft className="w-5 h-5" />
+            <ChevronLeft className="w-4 h-4" />
           </button>
-          <span className="text-sm font-semibold min-w-[140px] text-center" style={{ color: 'var(--text-primary)' }}>
+          <span className="text-sm font-semibold min-w-[120px] text-center" style={{ color: 'var(--text-primary)' }}>
             {monthLabel}
           </span>
           <button
             onClick={() => navigateMonth(1)}
-            className="p-2 rounded-lg transition-colors"
+            className="w-8 h-8 flex items-center justify-center rounded-lg transition-colors"
             style={{ color: 'var(--text-secondary)' }}
             onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--hover-bg)'; }}
             onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
           >
-            <ChevronRight className="w-5 h-5" />
+            <ChevronRight className="w-4 h-4" />
           </button>
         </div>
       </div>

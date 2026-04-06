@@ -44,6 +44,15 @@ function getStoredDarkMode(): boolean {
     const stored = localStorage.getItem('expense-tracker-data');
     if (stored) {
       const parsed = JSON.parse(stored);
+      // Migrate existing users to dark mode default
+      if (!localStorage.getItem('dark-mode-migrated')) {
+        if (parsed.settings) {
+          parsed.settings.darkMode = true;
+          localStorage.setItem('expense-tracker-data', JSON.stringify(parsed));
+        }
+        localStorage.setItem('dark-mode-migrated', '1');
+        return true;
+      }
       if (parsed.settings && typeof parsed.settings.darkMode === 'boolean') {
         return parsed.settings.darkMode;
       }
@@ -51,7 +60,7 @@ function getStoredDarkMode(): boolean {
   } catch {
     // ignore
   }
-  return false;
+  return true;
 }
 
 function Sidebar() {

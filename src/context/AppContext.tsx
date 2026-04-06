@@ -50,7 +50,7 @@ const defaultCategories: Category[] = [
 const defaultSettings: Settings = {
   currency: 'EUR',
   monthlyBudget: 2000,
-  darkMode: false,
+  darkMode: true,
 };
 
 const initialState: AppState = {
@@ -225,6 +225,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
         loadedTransactions = parsed.transactions || [];
         parsedCategories = parsed.categories || defaultCategories;
         parsedSettings = { ...defaultSettings, ...parsed.settings };
+        // Migrate existing users to dark mode
+        if (!localStorage.getItem('dark-mode-migrated')) {
+          parsedSettings.darkMode = true;
+          localStorage.setItem('dark-mode-migrated', '1');
+        }
         parsedBudgets = parsed.categoryBudgets || [];
         // Restore link token if saved
         if (parsed.linkToken && !localStorage.getItem(LINK_TOKEN_KEY)) {
