@@ -1,3 +1,3 @@
-:HL["/expense-tracker/_next/static/chunks/15v83~k-vz0ln.css","style"]
+:HL["/expense-tracker/_next/static/chunks/0oz_hvl92d4~t.css","style"]
 :HL["https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap","style"]
-0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"budget","param":null,"prefetchHints":0,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}}}},"staleTime":300,"buildId":"GjFKEXG4wBmK4HzpFAT2q"}
+0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"budget","param":null,"prefetchHints":0,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}}}},"staleTime":300,"buildId":"FXuHkogEFVyUz7-3bogH3"}
