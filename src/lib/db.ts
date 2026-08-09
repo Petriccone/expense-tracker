@@ -1,18 +1,14 @@
-// Server-side SQLite client. Stores TrueLayer tokens + cached transactions
-// so the user doesn't re-authorize every time. Lives at /data on Dokploy
-// (mounted as a persistent volume) or ./data locally.
-//
+// Server-side SQLite via Node 22's built-in `node:sqlite` (experimental).
+// Lives at /data on Dokploy (mounted as a volume) or ./data locally.
 // In serverless/edge runtimes this would not work — but Dokploy runs the
-// Next.js server in a long-lived container, so a file-backed SQLite is fine.
+// Next.js server in a long-lived container, so a file-backed DB is fine.
 
-import Database from 'better-sqlite3';
+import { DatabaseSync } from 'node:sqlite';
 import path from 'node:path';
 import fs from 'node:fs';
-import os from 'node:os';
 import crypto from 'node:crypto';
 
 function resolveDataDir(): string {
-  // Allow override via env; default to /data in container, ./data locally.
   if (process.env.PETRICCO_DATA_DIR) return process.env.PETRICCO_DATA_DIR;
   if (process.env.NODE_ENV === 'production') return '/data';
   return path.join(process.cwd(), 'data');
@@ -24,9 +20,6 @@ function dbPath(): string {
   return path.join(dir, 'expense-tracker.db');
 }
 
-// Encryption helpers — refresh tokens at rest are encrypted with a key
-// derived from TRUELAYER_CLIENT_SECRET (good enough to keep them out of a
-// casual file dump; not a substitute for a real KMS).
 function encryptionKey(): Buffer {
   const secret = process.env.TRUELAYER_CLIENT_SECRET || 'fallback-key-do-not-use';
   return crypto.createHash('sha256').update(secret).digest();
@@ -50,18 +43,19 @@ function decrypt(payload: string): string {
   return Buffer.concat([decipher.update(ct), decipher.final()]).toString('utf8');
 }
 
-let _db: Database.Database | null = null;
+let _db: DatabaseSync | null = null;
 
-export function getDb(): Database.Database {
+export function getDb(): DatabaseSync {
   if (_db) return _db;
-  _db = new Database(dbPath());
-  _db.pragma('journal_mode = WAL');
-  _db.pragma('foreign_keys = ON');
+  const path = dbPath();
+  _db = new DatabaseSync(path);
+  _db.exec('PRAGMA journal_mode = WAL;');
+  _db.exec('PRAGMA foreign_keys = ON;');
   migrate(_db);
   return _db;
 }
 
-function migrate(db: Database.Database): void {
+function migrate(db: DatabaseSync): void {
   db.exec(`
     CREATE TABLE IF NOT EXISTS truelayer_connections (
       id              INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -103,6 +97,14 @@ function migrate(db: Database.Database): void {
   `);
 }
 
+// node:sqlite uses positional placeholders (?), not named.
+// Helpers below unwrap statement results so route handlers can keep their
+// row-shape code untouched from the better-sqlite3 era.
+
+function toRow(stmt: { all(...a: unknown[]): unknown[] }, args: unknown[] = []): unknown[][] {
+  return stmt.all(...args) as unknown[][];
+}
+
 export interface TruelayerConnection {
   id: number;
   user_id: string;
@@ -136,7 +138,45 @@ export interface TruelayerTransaction {
   category: string | null;
 }
 
-// Repository helpers — keep SQL out of the route handlers.
+// node:sqlite returns positionally-indexed arrays. We type them as readonly
+// tuples for clarity at the call sites, then unwrap into named records.
+
+function rowToConnection(r: ReadonlyArray<unknown>): TruelayerConnection {
+  return {
+    id: r[0] as number,
+    user_id: r[1] as string,
+    provider_id: r[2] as string,
+    access_token: r[3] as string,
+    refresh_token: r[4] as string,
+    expires_at: r[5] as number,
+    created_at: r[6] as number,
+  };
+}
+function rowToAccount(r: ReadonlyArray<unknown>): TruelayerAccount {
+  return {
+    id: r[0] as number,
+    truelayer_id: r[1] as string,
+    display_name: r[2] as string | null,
+    account_type: r[3] as string | null,
+    currency: r[4] as string | null,
+    balance: r[5] as number | null,
+  };
+}
+function rowToTransaction(r: ReadonlyArray<unknown>): TruelayerTransaction {
+  return {
+    id: r[0] as string,
+    account_id: r[1] as number,
+    amount: r[2] as number,
+    currency: r[3] as string | null,
+    description: r[4] as string,
+    raw_description: r[5] as string | null,
+    posted_at: r[6] as number,
+    transaction_type: r[7] as string | null,
+    categorised: r[8] as number,
+    imported_at: r[9] as number,
+    category: r[10] as string | null,
+  };
+}
 
 export function saveConnection(input: {
   user_id: string;
@@ -146,7 +186,8 @@ export function saveConnection(input: {
   expires_at: number;
 }): TruelayerConnection {
   const db = getDb();
-  const stmt = db.prepare(`
+  // Upsert via INSERT ... ON CONFLICT (sqlite supports it).
+  db.prepare(`
     INSERT INTO truelayer_connections
       (user_id, provider_id, access_token, refresh_token, expires_at, created_at)
     VALUES (?, ?, ?, ?, ?, ?)
@@ -154,29 +195,28 @@ export function saveConnection(input: {
       access_token = excluded.access_token,
       refresh_token = excluded.refresh_token,
       expires_at = excluded.expires_at
-    RETURNING *
-  `);
-  return stmt.get(
+  `).run(
     input.user_id,
     input.provider_id,
     encrypt(input.access_token),
     encrypt(input.refresh_token),
     input.expires_at,
     Date.now(),
-  ) as TruelayerConnection;
+  );
+  const rows = toRow(db.prepare(
+    'SELECT id, user_id, provider_id, access_token, refresh_token, expires_at, created_at FROM truelayer_connections WHERE user_id = ? AND provider_id = ?'
+  ), [input.user_id, input.provider_id]);
+  return rowToConnection(rows[0]);
 }
 
 export function getConnection(user_id: string, provider_id: string): TruelayerConnection | null {
   const db = getDb();
-  const row = db.prepare(
-    'SELECT * FROM truelayer_connections WHERE user_id = ? AND provider_id = ?'
-  ).get(user_id, provider_id) as TruelayerConnection | undefined;
-  if (!row) return null;
-  return {
-    ...row,
-    access_token: decrypt(row.access_token),
-    refresh_token: decrypt(row.refresh_token),
-  };
+  const rows = toRow(db.prepare(
+    'SELECT id, user_id, provider_id, access_token, refresh_token, expires_at, created_at FROM truelayer_connections WHERE user_id = ? AND provider_id = ?'
+  ), [user_id, provider_id]);
+  if (!rows[0]) return null;
+  const r = rowToConnection(rows[0]);
+  return { ...r, access_token: decrypt(r.access_token), refresh_token: decrypt(r.refresh_token) };
 }
 
 export function upsertAccount(input: {
@@ -188,7 +228,7 @@ export function upsertAccount(input: {
   balance: number | null;
 }): TruelayerAccount {
   const db = getDb();
-  const stmt = db.prepare(`
+  db.prepare(`
     INSERT INTO truelayer_accounts
       (connection_id, truelayer_id, display_name, account_type, currency, balance)
     VALUES (?, ?, ?, ?, ?, ?)
@@ -197,29 +237,32 @@ export function upsertAccount(input: {
       account_type = excluded.account_type,
       currency = excluded.currency,
       balance = excluded.balance
-    RETURNING *
-  `);
-  return stmt.get(
+  `).run(
     input.connection_id,
     input.truelayer_id,
     input.display_name,
     input.account_type,
     input.currency,
     input.balance,
-  ) as TruelayerAccount;
+  );
+  const rows = toRow(db.prepare(
+    'SELECT id, connection_id, truelayer_id, display_name, account_type, currency, balance FROM truelayer_accounts WHERE truelayer_id = ?'
+  ), [input.truelayer_id]);
+  return rowToAccount(rows[0]);
 }
 
 export function listAccounts(connection_id: number): TruelayerAccount[] {
   const db = getDb();
-  return db.prepare(
-    'SELECT * FROM truelayer_accounts WHERE connection_id = ?'
-  ).all(connection_id) as TruelayerAccount[];
+  return toRow(db.prepare(
+    'SELECT id, connection_id, truelayer_id, display_name, account_type, currency, balance FROM truelayer_accounts WHERE connection_id = ?'
+  ), [connection_id]).map(rowToAccount);
 }
 
-export function upsertTransactions(rows: Array<TruelayerTransaction>): {
+export function upsertTransactions(rows: TruelayerTransaction[]): {
   inserted: number;
   duplicates: number;
 } {
+  if (rows.length === 0) return { inserted: 0, duplicates: 0 };
   const db = getDb();
   const stmt = db.prepare(`
     INSERT OR IGNORE INTO truelayer_transactions
@@ -227,27 +270,26 @@ export function upsertTransactions(rows: Array<TruelayerTransaction>): {
        posted_at, transaction_type, categorised, imported_at, category)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
-  const insertMany = db.transaction((batch: typeof rows) => {
-    let inserted = 0;
-    for (const r of batch) {
-      const info = stmt.run(
-        r.id,
-        r.account_id!,
-        r.amount,
-        r.currency,
-        r.description,
-        r.raw_description,
-        r.posted_at,
-        r.transaction_type,
-        r.categorised,
-        Date.now(),
-        r.category,
-      );
-      if (info.changes > 0) inserted++;
+  let inserted = 0;
+  const now = Date.now();
+  for (const r of rows) {
+    const res = stmt.run(
+      r.id,
+      r.account_id,
+      r.amount,
+      r.currency,
+      r.description,
+      r.raw_description,
+      r.posted_at,
+      r.transaction_type,
+      r.categorised,
+      now,
+      r.category,
+    );
+    if ((res as { changes?: number }).changes && (res as { changes?: number }).changes! > 0) {
+      inserted++;
     }
-    return inserted;
-  });
-  const inserted = insertMany(rows);
+  }
   return { inserted, duplicates: rows.length - inserted };
 }
 
@@ -270,16 +312,16 @@ export function listTransactions(opts: {
   const where = conds.length ? `WHERE ${conds.join(' AND ')}` : '';
   const limit = opts.limit ?? 500;
   params.push(limit);
-  return db.prepare(
-    `SELECT * FROM truelayer_transactions ${where} ORDER BY posted_at DESC LIMIT ?`
-  ).all(...params) as TruelayerTransaction[];
+  return toRow(db.prepare(
+    `SELECT id, account_id, amount, currency, description, raw_description, posted_at, transaction_type, categorised, imported_at, category FROM truelayer_transactions ${where} ORDER BY posted_at DESC LIMIT ?`
+  ), params).map(rowToTransaction);
 }
 
 export function dbInfo(): { path: string; size: number; tables: string[] } {
   const db = getDb();
   const tables = db.prepare(
     "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name"
-  ).all().map((r: any) => r.name);
+  ).all().map((r: unknown) => (r as Record<string, unknown>).name as string);
   const path = dbPath();
   let size = 0;
   try {
