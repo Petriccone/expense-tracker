@@ -15,11 +15,11 @@ import {
 const ENV = process.env.TRUELAYER_ENV === 'live' ? 'live' : 'sandbox';
 const BASE = ENV === 'live'
   ? 'https://api.truelayer.com'
-  : 'https://api.truelayersandbox.com';
+  : 'https://api.truelayer-sandbox.com';
 
 const AUTH = ENV === 'live'
   ? 'https://auth.truelayer.com'
-  : 'https://auth.truelayersandbox.com';
+  : 'https://auth.truelayer-sandbox.com';
 
 export interface TokenResponse {
   access_token: string;
