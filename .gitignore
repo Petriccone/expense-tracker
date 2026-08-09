@@ -11,3 +11,4 @@ out
 .netlify
 .playwright-mcp/
 .claude/
+data/
