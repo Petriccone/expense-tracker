@@ -31,15 +31,16 @@ export interface TokenResponse {
 
 export function buildAuthUrl(state: string, redirectUri: string): string {
   const client_id = required('TRUELAYER_CLIENT_ID');
-  const scope = encodeURIComponent('info accounts balance cards transactions offline_access');
+  // URLSearchParams already percent-encodes each value; don't pre-encode
+  // `scope` or spaces become %2520 and TrueLayer rejects the whole request
+  // with "Invalid scope" (as we just hit in the live sandbox test).
   const params = new URLSearchParams({
     response_type: 'code',
     client_id,
     redirect_uri: redirectUri,
-    scope,
+    scope: 'info accounts balance cards transactions offline_access',
     state,
     providers: 'uk-revolut uk-barclays uk-lloyds uk-monzo uk-starling uk-natwest uk-revolut-business',
-    // 'uk-revolut' covers the personal account. Adjust if you use other banks.
   });
   return `${AUTH}/?${params.toString()}`;
 }
