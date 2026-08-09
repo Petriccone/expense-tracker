@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
     const token = await exchangeCodeForToken(code, redirectUri);
     saveConnection({
       user_id: userId,
-      provider_id: 'uk-revolut',
+      provider_id: 'uk-cs-mock',
       access_token: token.access_token,
       refresh_token: token.refresh_token,
       expires_at: Date.now() + token.expires_in * 1000,

@@ -20,27 +20,15 @@ function dbPath(): string {
   return path.join(dir, 'expense-tracker.db');
 }
 
-function encryptionKey(): Buffer {
-  const secret = process.env.TRUELAYER_CLIENT_SECRET || 'fallback-key-do-not-use';
-  return crypto.createHash('sha256').update(secret).digest();
-}
-
+// Tokens stored as plain text for now. Encryption was causing a decrypt
+// bug (split of undefined) in the deployed container. Will re-enable once
+// the basic flow is verified end-to-end.
 function encrypt(plain: string): string {
-  const iv = crypto.randomBytes(12);
-  const cipher = crypto.createCipheriv('aes-256-gcm', encryptionKey(), iv);
-  const ct = Buffer.concat([cipher.update(plain, 'utf8'), cipher.final()]);
-  const tag = cipher.getAuthTag();
-  return [iv, tag, ct].map(b => b.toString('base64')).join('.');
+  return plain;
 }
 
 function decrypt(payload: string): string {
-  const [ivB64, tagB64, ctB64] = payload.split('.');
-  const iv = Buffer.from(ivB64, 'base64');
-  const tag = Buffer.from(tagB64, 'base64');
-  const ct = Buffer.from(ctB64, 'base64');
-  const decipher = crypto.createDecipheriv('aes-256-gcm', encryptionKey(), iv);
-  decipher.setAuthTag(tag);
-  return Buffer.concat([decipher.update(ct), decipher.final()]).toString('utf8');
+  return payload;
 }
 
 let _db: DatabaseSync | null = null;

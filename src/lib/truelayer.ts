@@ -113,7 +113,7 @@ export interface TLTransaction {
   transaction_category: string | null;
 }
 
-async function getValidToken(user_id: string, provider_id: string = 'uk-revolut'): Promise<{
+async function getValidToken(user_id: string, provider_id: string = 'uk-cs-mock'): Promise<{
   access_token: string;
 }> {
   const conn = await import('./db').then(m => m.getConnection(user_id, provider_id));
@@ -185,7 +185,7 @@ export async function syncAll(user_id: string): Promise<SyncResult> {
     });
   }
   // Re-fetch with proper connection_id by re-running the upsert (cheaper: do it inline).
-  const conn = (await import('./db')).getConnection(user_id, 'uk-revolut')!;
+  const conn = (await import('./db')).getConnection(user_id, 'uk-cs-mock')!;
   for (const a of accounts) {
     upsertAccount({
       connection_id: conn.id,
