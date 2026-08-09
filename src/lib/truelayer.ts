@@ -34,13 +34,18 @@ export function buildAuthUrl(state: string, redirectUri: string): string {
   // URLSearchParams already percent-encodes each value; don't pre-encode
   // `scope` or spaces become %2520 and TrueLayer rejects the whole request
   // with "Invalid scope" (as we just hit in the live sandbox test).
-  const params = new URLSearchParams({
+  // Sandbox: use the mock bank provider (uk-cs-mock). Live: real banks.
+const PROVIDERS = ENV === 'sandbox'
+  ? 'uk-cs-mock'
+  : 'uk-revolut uk-barclays uk-lloyds uk-monzo uk-starling uk-natwest uk-revolut-business';
+
+const params = new URLSearchParams({
     response_type: 'code',
     client_id,
     redirect_uri: redirectUri,
     scope: 'info accounts balance cards transactions offline_access',
     state,
-    providers: 'uk-revolut uk-barclays uk-lloyds uk-monzo uk-starling uk-natwest uk-revolut-business',
+    providers: PROVIDERS,
   });
   return `${AUTH}/?${params.toString()}`;
 }
