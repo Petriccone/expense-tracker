@@ -5,17 +5,18 @@ import { NextRequest, NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
 
 export async function GET(_req: NextRequest) {
+  // Unauthenticated endpoint — don't return internal filesystem paths
+  // (cwd, PETRICCO_DATA_DIR), only presence/config flags.
   return NextResponse.json({
     ok: true,
     node: process.version,
     platform: process.platform,
     arch: process.arch,
-    cwd: process.cwd(),
     env: {
-      PETRICCO_DATA_DIR: process.env.PETRICCO_DATA_DIR || null,
-      TRUELAYER_ENV: process.env.TRUELAYER_ENV || null,
-      TRUELAYER_CLIENT_ID: process.env.TRUELAYER_CLIENT_ID ? 'set' : 'missing',
-      TRUELAYER_CLIENT_SECRET: process.env.TRUELAYER_CLIENT_SECRET ? 'set' : 'missing',
+      PETRICCO_DATA_DIR: process.env.PETRICCO_DATA_DIR ? 'set' : 'missing',
+      GOCARDLESS_SECRET_ID: process.env.GOCARDLESS_SECRET_ID ? 'set' : 'missing',
+      GOCARDLESS_SECRET_KEY: process.env.GOCARDLESS_SECRET_KEY ? 'set' : 'missing',
+      TRUELAYER_TOKEN_ENC_KEY: process.env.TRUELAYER_TOKEN_ENC_KEY ? 'set' : 'missing',
     },
   });
 }

@@ -4,13 +4,14 @@ import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { AppProvider } from '@/context/AppContext';
-import { LayoutDashboard, Receipt, Tags, BarChart3, Bot, Settings, Upload, Target, Menu, X } from 'lucide-react';
+import Logo from '@/components/Logo';
+import { Receipt, Tags, BarChart3, Bot, Settings, Upload, Target, Landmark, Menu, X } from 'lucide-react';
 
 const sidebarItems = [
-  { href: '/', icon: LayoutDashboard, label: 'Home' },
-  { href: '/transactions', icon: Receipt, label: 'Transactions' },
+  { href: '/budget', icon: Target, label: 'Orçamento' },
+  { href: '/transactions', icon: Receipt, label: 'Transações' },
+  { href: '/banco', icon: Landmark, label: 'Banco' },
   { href: '/categories', icon: Tags, label: 'Categories' },
-  { href: '/budget', icon: Target, label: 'Budget' },
   { href: '/reports', icon: BarChart3, label: 'Reports' },
   { href: '/import', icon: Upload, label: 'Import' },
   { href: '/ai', icon: Bot, label: 'AI' },
@@ -18,9 +19,9 @@ const sidebarItems = [
 ];
 
 const mobileNavItems = [
-  { href: '/', icon: LayoutDashboard, label: 'Home' },
+  { href: '/budget', icon: Target, label: 'Orçamento' },
   { href: '/transactions', icon: Receipt, label: 'Tx' },
-  { href: '/budget', icon: Target, label: 'Budget' },
+  { href: '/banco', icon: Landmark, label: 'Banco' },
   { href: '/import', icon: Upload, label: 'Import' },
   { href: '/ai', icon: Bot, label: 'AI' },
 ];
@@ -80,9 +81,10 @@ function Sidebar() {
         display: 'flex', alignItems: 'center', gap: 12, padding: '4px 12px 24px',
         borderBottom: '1px solid var(--border-color)', marginBottom: 16,
       }}>
-        <img src="/expense-tracker/icon.svg" alt="ExpensesAI" style={{
-          width: 40, height: 40, borderRadius: 14,
+        <Logo size={40} style={{
+          borderRadius: 14,
           boxShadow: '0 0 20px rgba(124, 58, 237, 0.3)',
+          flexShrink: 0,
         }} />
         <span style={{
           fontWeight: 700, fontSize: 20,
@@ -286,9 +288,10 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
         }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <img src="/expense-tracker/icon.svg" alt="ExpensesAI" style={{
-                width: 34, height: 34, borderRadius: 12,
+              <Logo size={34} style={{
+                borderRadius: 12,
                 boxShadow: '0 0 16px rgba(124, 58, 237, 0.3)',
+                flexShrink: 0,
               }} />
               <span style={{
                 fontWeight: 700, fontSize: 18,

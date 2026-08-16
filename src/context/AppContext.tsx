@@ -1,9 +1,7 @@
 'use client';
 
-import React, { createContext, useContext, useReducer, useEffect, useState, useCallback, useRef, ReactNode } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, useState, useCallback, ReactNode } from 'react';
 import { Transaction, Category, Settings, AIInsight, CategoryBudget } from '@/types';
-import { supabase } from '@/lib/supabase';
-import seedData from '../../public/seed-data.json';
 import seedBudgets from '../../public/seed-budgets.json';
 import seedCategories from '../../public/seed-categories.json';
 
@@ -132,89 +130,68 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 const STORAGE_KEY = 'expense-tracker-data';
 const LINK_TOKEN_KEY = 'telegram-link-token';
 const DEFAULT_LINK_TOKEN = 'nDV8UVVnOIHmrJNEIvIlfn6n2CzJL2VA';
+const TRANSACTIONS_POLL_MS = 60_000;
 
-// Helper: fetch Telegram transactions from Supabase
-async function fetchSupabaseTransactions(linkToken: string): Promise<Transaction[]> {
-  if (!supabase) return [];
+// Helper: load transactions from the read API (SQLite — bank sync via
+// TrueLayer + manual entries), the app's single source of truth for
+// transaction data. See docs/2026-08-14-m1-real-bank-autosync-design.md.
+async function fetchApiTransactions(): Promise<Transaction[]> {
   try {
-    const { data, error } = await supabase
-      .from('transactions')
-      .select('*')
-      .eq('link_token', linkToken)
-      .eq('source', 'telegram');
-
-    if (error) {
-      console.error('Supabase fetch error:', error);
+    const res = await fetch('/api/transactions?limit=1000');
+    if (!res.ok) {
+      console.error('Transactions fetch failed:', res.status);
       return [];
     }
-
-    return (data || []).map((row: Record<string, unknown>) => ({
-      id: row.id as string,
-      type: row.type as 'income' | 'expense',
-      amount: Number(row.amount),
-      description: row.description as string,
-      category: row.category as string,
-      date: row.date as string,
-      notes: (row.notes as string) || undefined,
-      createdAt: row.created_at as string,
-    }));
+    return (await res.json()) as Transaction[];
   } catch (err) {
-    console.error('Supabase fetch failed:', err);
+    console.error('Transactions fetch failed:', err);
     return [];
   }
 }
 
-// Helper: merge transactions by id (dedup)
-function mergeTransactions(local: Transaction[], remote: Transaction[]): Transaction[] {
-  const map = new Map<string, Transaction>();
-  for (const t of local) map.set(t.id, t);
-  for (const t of remote) {
-    if (!map.has(t.id)) map.set(t.id, t);
-  }
-  return Array.from(map.values());
-}
-
-// Helper: save a transaction to Supabase
-async function saveTransactionToSupabase(t: Transaction, linkToken: string, source: string = 'web') {
-  if (!supabase) return;
+// Helper: persist a manually-added transaction (Add form, CSV import) to
+// SQLite so it survives reload.
+async function saveManualTransaction(t: Transaction) {
   try {
-    await supabase.from('transactions').upsert({
-      id: t.id,
-      link_token: linkToken,
-      type: t.type,
-      amount: t.amount,
-      description: t.description,
-      category: t.category,
-      date: t.date,
-      notes: t.notes || null,
-      source,
-      created_at: t.createdAt,
+    await fetch('/api/transactions/manual', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(t),
     });
   } catch (err) {
-    console.error('Supabase save failed:', err);
+    console.error('Manual transaction save failed:', err);
   }
 }
 
-// Helper: delete a transaction from Supabase
-async function deleteTransactionFromSupabase(id: string) {
-  if (!supabase) return;
+async function updateManualTransactionApi(t: Transaction) {
   try {
-    await supabase.from('transactions').delete().eq('id', id);
+    await fetch(`/api/transactions/manual/${encodeURIComponent(t.id)}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(t),
+    });
   } catch (err) {
-    console.error('Supabase delete failed:', err);
+    console.error('Manual transaction update failed:', err);
+  }
+}
+
+async function deleteManualTransactionApi(id: string) {
+  try {
+    await fetch(`/api/transactions/manual/${encodeURIComponent(id)}`, { method: 'DELETE' });
+  } catch (err) {
+    console.error('Manual transaction delete failed:', err);
   }
 }
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(appReducer, initialState);
   const [loaded, setLoaded] = useState(false);
-  const lastSyncRef = useRef<string | null>(null);
-  const syncedIdsRef = useRef<Set<string>>(new Set());
 
-  // Load from localStorage on mount, seed Budget.xlsx data if no transactions
+  // Load UI prefs (categories/settings/budgets) from localStorage on mount.
+  // Transactions are NOT sourced from localStorage anymore — they load from
+  // the read API below (bank sync + manual entries in SQLite).
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
-    let loadedTransactions: Transaction[] = [];
     let parsedSettings = defaultSettings;
     let parsedCategories = defaultCategories;
     let parsedBudgets: CategoryBudget[] = [];
@@ -222,7 +199,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (stored) {
       try {
         const parsed = JSON.parse(stored);
-        loadedTransactions = parsed.transactions || [];
         parsedCategories = parsed.categories || defaultCategories;
         parsedSettings = { ...defaultSettings, ...parsed.settings };
         // Migrate existing users to dark mode
@@ -235,18 +211,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
         if (parsed.linkToken && !localStorage.getItem(LINK_TOKEN_KEY)) {
           localStorage.setItem(LINK_TOKEN_KEY, parsed.linkToken);
         }
-        // Ensure link token always exists
-        if (!localStorage.getItem(LINK_TOKEN_KEY)) {
-          localStorage.setItem(LINK_TOKEN_KEY, DEFAULT_LINK_TOKEN);
-        }
       } catch (e) {
         console.error('Failed to load from localStorage', e);
       }
-    }
-
-    // If no transactions found, use seed data from Budget.xlsx
-    if (loadedTransactions.length === 0) {
-      loadedTransactions = (seedData as unknown as Transaction[]) || [];
+    } else {
+      // First-ever visit: seed categories/budgets from Rafa's Budget.xlsx import.
       parsedCategories = (seedCategories as unknown as Category[]) || defaultCategories;
       parsedBudgets = (seedBudgets as unknown as CategoryBudget[]) || [];
     }
@@ -256,104 +225,62 @@ export function AppProvider({ children }: { children: ReactNode }) {
       localStorage.setItem(LINK_TOKEN_KEY, DEFAULT_LINK_TOKEN);
     }
 
-    // Attempt Supabase merge on mount
-    const linkToken = localStorage.getItem(LINK_TOKEN_KEY);
-    if (linkToken && supabase) {
-      const localTx = loadedTransactions;
-      fetchSupabaseTransactions(linkToken).then((remoteTx) => {
-        const merged = mergeTransactions(localTx, remoteTx);
-        // Pre-populate syncedIdsRef so polling doesn't re-add these
-        merged.forEach((t) => syncedIdsRef.current.add(t.id));
-        dispatch({
-          type: 'LOAD_STATE',
-          payload: {
-            ...initialState,
-            transactions: merged,
-            categories: parsedCategories,
-            settings: parsedSettings,
-            categoryBudgets: parsedBudgets,
-          },
-        });
-        lastSyncRef.current = new Date().toISOString();
-        setLoaded(true);
-      });
-    } else {
-      dispatch({
-        type: 'LOAD_STATE',
-        payload: {
-          ...initialState,
-          transactions: loadedTransactions,
-          categories: parsedCategories,
-          settings: parsedSettings,
-          categoryBudgets: parsedBudgets,
-        },
-      });
-      setLoaded(true);
-    }
+    dispatch({
+      type: 'LOAD_STATE',
+      payload: {
+        ...initialState,
+        transactions: [],
+        categories: parsedCategories,
+        settings: parsedSettings,
+        categoryBudgets: parsedBudgets,
+      },
+    });
+    setLoaded(true);
   }, []);
 
-  // Poll Supabase for new Telegram transactions + sync on app focus
+  // Load transactions from the read API on mount, then refresh periodically
+  // (replaces the old 15s Supabase/Telegram poll) + on focus, so a bank
+  // auto-sync or a manual add from another tab shows up without a hard reload.
   useEffect(() => {
-    if (!loaded || !supabase) return;
+    if (!loaded) return;
 
-    // Initialize synced IDs from current state
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        (parsed.transactions || []).forEach((t: Transaction) => syncedIdsRef.current.add(t.id));
-      } catch { /* ignore */ }
-    }
-
-    const syncFromSupabase = async () => {
-      const linkToken = localStorage.getItem(LINK_TOKEN_KEY);
-      if (!linkToken) return;
-
-      try {
-        const remoteTx = await fetchSupabaseTransactions(linkToken);
-        for (const tx of remoteTx) {
-          if (!syncedIdsRef.current.has(tx.id)) {
-            syncedIdsRef.current.add(tx.id);
-            dispatch({ type: 'ADD_TRANSACTION', payload: tx });
-          }
-        }
-      } catch (err) {
-        console.error('Supabase poll error:', err);
-      }
-      lastSyncRef.current = new Date().toISOString();
+    const refreshTransactions = async () => {
+      const transactions = await fetchApiTransactions();
+      dispatch({ type: 'SET_TRANSACTIONS', payload: transactions });
     };
 
-    // Poll every 15 seconds
-    const interval = setInterval(syncFromSupabase, 15000);
+    refreshTransactions();
 
-    // Also sync when app comes back to focus (user switches back to the app)
-    const handleFocus = () => syncFromSupabase();
+    const interval = setInterval(refreshTransactions, TRANSACTIONS_POLL_MS);
+    const handleFocus = () => refreshTransactions();
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') refreshTransactions();
+    };
     window.addEventListener('focus', handleFocus);
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible') syncFromSupabase();
-    });
+    document.addEventListener('visibilitychange', handleVisibility);
 
     return () => {
       clearInterval(interval);
       window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibility);
     };
   }, [loaded]);
 
-  // Save to localStorage on state change (only after initial load)
+  // Save UI prefs to localStorage on change (only after initial load).
+  // Transactions are persisted server-side (SQLite), not here.
   useEffect(() => {
     if (!loaded) return;
     const linkToken = localStorage.getItem(LINK_TOKEN_KEY) || '';
     localStorage.setItem(
       STORAGE_KEY,
       JSON.stringify({
-        transactions: state.transactions,
         categories: state.categories,
         settings: state.settings,
         categoryBudgets: state.categoryBudgets,
         linkToken,
       })
     );
-  }, [state.transactions, state.categories, state.settings, state.categoryBudgets, loaded]);
+  }, [state.categories, state.settings, state.categoryBudgets, loaded]);
 
   return (
     <AppContext.Provider value={{ state, dispatch }}>
@@ -375,28 +302,18 @@ export function useTransactions() {
 
   const addTransaction = useCallback((t: Transaction) => {
     dispatch({ type: 'ADD_TRANSACTION', payload: t });
-    // Also save to Supabase if linked
-    const linkToken = localStorage.getItem(LINK_TOKEN_KEY);
-    if (linkToken && supabase) {
-      saveTransactionToSupabase(t, linkToken, 'web');
-    }
+    // Persist to SQLite (manual_transactions) so it survives reload.
+    saveManualTransaction(t);
   }, [dispatch]);
 
   const updateTransaction = useCallback((t: Transaction) => {
     dispatch({ type: 'UPDATE_TRANSACTION', payload: t });
-    // Also update in Supabase if linked
-    const linkToken = localStorage.getItem(LINK_TOKEN_KEY);
-    if (linkToken && supabase) {
-      saveTransactionToSupabase(t, linkToken, 'web');
-    }
+    updateManualTransactionApi(t);
   }, [dispatch]);
 
   const deleteTransaction = useCallback((id: string) => {
     dispatch({ type: 'DELETE_TRANSACTION', payload: id });
-    // Also delete from Supabase if linked
-    if (supabase) {
-      deleteTransactionFromSupabase(id);
-    }
+    deleteManualTransactionApi(id);
   }, [dispatch]);
 
   return { transactions: state.transactions, addTransaction, updateTransaction, deleteTransaction };

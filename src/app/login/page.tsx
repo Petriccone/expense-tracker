@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { LogIn, UserPlus, Loader2, Wallet } from 'lucide-react';
+import Logo from '@/components/Logo';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -122,7 +123,7 @@ export default function LoginPage() {
               backdropFilter: 'blur(12px)',
             }}
           >
-            <img src="/expense-tracker/icon.svg" alt="ExpensesAI" style={{ width: 48, height: 48, borderRadius: 12 }} />
+            <Logo size={48} style={{ borderRadius: 12 }} />
           </div>
           <h1
             className="text-4xl font-bold mb-2"

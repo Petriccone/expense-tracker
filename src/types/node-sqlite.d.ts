@@ -7,6 +7,7 @@ declare module 'node:sqlite' {
     run(...params: unknown[]): { changes?: number; lastInsertRowid?: number };
     all(...params: any[]): unknown[];
     get(...params: any[]): unknown | undefined;
+    setReturnArrays(enabled: boolean): void;
     sourceSQL: string;
   }
 

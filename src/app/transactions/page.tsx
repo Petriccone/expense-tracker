@@ -195,6 +195,7 @@ export default function TransactionsPage() {
           <div style={{ borderColor: 'var(--border-color)' }}>
             {filteredTransactions.map((transaction, index) => {
               const cat = getCategoryInfo(transaction.category);
+              const isBank = transaction.source === 'bank';
               return (
                 <div
                   key={transaction.id}
@@ -224,6 +225,12 @@ export default function TransactionsPage() {
                             year: 'numeric',
                           })}
                         </span>
+                        {isBank && (
+                          <>
+                            <span>•</span>
+                            <span title="Sincronizado do banco — não pode ser editado aqui">do banco — só leitura</span>
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -236,33 +243,44 @@ export default function TransactionsPage() {
                       {transaction.type === 'income' ? '+' : '-'}
                       {formatAmount(transaction.amount)}
                     </span>
-                    <div className="flex items-center gap-1">
-                      <button
-                        onClick={() => {
-                          setEditingId(transaction.id);
-                          setEditForm(transaction);
-                        }}
-                        className="p-2 rounded-lg transition-all"
-                        style={{ color: 'var(--text-muted)' }}
-                        onMouseEnter={(e) => { e.currentTarget.style.color = '#a78bfa'; e.currentTarget.style.background = 'rgba(124, 58, 237, 0.1)'; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.color = '#5a6478'; e.currentTarget.style.background = 'transparent'; }}
-                      >
-                        <Edit2 className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(transaction.id)}
-                        className="p-2 rounded-lg transition-all"
-                        style={{ color: 'var(--text-muted)' }}
-                        onMouseEnter={(e) => { e.currentTarget.style.color = '#f87171'; e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)'; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.color = '#5a6478'; e.currentTarget.style.background = 'transparent'; }}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
+                    {!isBank && (
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => {
+                            setEditingId(transaction.id);
+                            setEditForm(transaction);
+                          }}
+                          className="p-2 rounded-lg transition-all"
+                          style={{ color: 'var(--text-muted)' }}
+                          onMouseEnter={(e) => { e.currentTarget.style.color = '#a78bfa'; e.currentTarget.style.background = 'rgba(124, 58, 237, 0.1)'; }}
+                          onMouseLeave={(e) => { e.currentTarget.style.color = '#5a6478'; e.currentTarget.style.background = 'transparent'; }}
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(transaction.id)}
+                          className="p-2 rounded-lg transition-all"
+                          style={{ color: 'var(--text-muted)' }}
+                          onMouseEnter={(e) => { e.currentTarget.style.color = '#f87171'; e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)'; }}
+                          onMouseLeave={(e) => { e.currentTarget.style.color = '#5a6478'; e.currentTarget.style.background = 'transparent'; }}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               );
             })}
+          </div>
+        ) : transactions.length === 0 ? (
+          <div className="text-center py-12" style={{ color: 'var(--text-muted)' }}>
+            <p className="text-lg">No transactions yet</p>
+            <p className="text-sm mt-1">
+              <Link href="/connections" style={{ color: '#a78bfa' }}>Connect your bank</Link>
+              {' '}to sync transactions automatically, or{' '}
+              <Link href="/add" style={{ color: '#a78bfa' }}>add one by hand</Link>.
+            </p>
           </div>
         ) : (
           <div className="text-center py-12" style={{ color: 'var(--text-muted)' }}>

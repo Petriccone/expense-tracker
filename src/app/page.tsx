@@ -1,7 +1,7 @@
-'use client';
+import { redirect } from 'next/navigation';
 
-import DashboardContent from './DashboardContent';
-
+// Budget is the app's primary landing now — see
+// docs/2026-08-15-budget-model-redesign-design.md.
 export default function Home() {
-  return <DashboardContent />;
+  redirect('/budget');
 }

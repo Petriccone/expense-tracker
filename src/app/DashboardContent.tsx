@@ -489,9 +489,15 @@ export default function DashboardContent() {
         ) : (
           <div className="text-center py-8" style={{ color: 'var(--text-muted)' }}>
             <p>No transactions yet</p>
-            <Link href="/add" className="font-medium mt-2 inline-block" style={{ color: '#a78bfa' }}>
-              Add your first transaction
-            </Link>
+            <p className="text-sm mt-1">Connect your bank to sync transactions automatically, or add one by hand.</p>
+            <div className="flex items-center justify-center gap-4 mt-3">
+              <Link href="/connections" className="font-medium" style={{ color: '#a78bfa' }}>
+                Connect your bank
+              </Link>
+              <Link href="/add" className="font-medium" style={{ color: '#a78bfa' }}>
+                Add a transaction
+              </Link>
+            </div>
           </div>
         )}
       </div>

@@ -7,6 +7,9 @@ export interface Transaction {
   date: string;
   notes?: string;
   createdAt: string;
+  // 'bank' rows come from TrueLayer sync and are read-only in the UI —
+  // editing/deleting them via /api/transactions/manual/{id} is a no-op.
+  source?: 'bank' | 'manual';
 }
 
 export interface Category {

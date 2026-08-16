@@ -20,15 +20,74 @@ function dbPath(): string {
   return path.join(dir, 'expense-tracker.db');
 }
 
-// Tokens stored as plain text for now. Encryption was causing a decrypt
-// bug (split of undefined) in the deployed container. Will re-enable once
-// the basic flow is verified end-to-end.
+// TrueLayer access/refresh tokens are real bank credentials — encrypt them
+// at rest with AES-256-GCM, keyed by TRUELAYER_TOKEN_ENC_KEY (32 bytes,
+// hex or base64). Stored payload shape: "iv:tag:ciphertext" (all base64).
+//
+// If the key is missing: in production this is a hard error (never write
+// bank tokens in plaintext); in dev it falls back to plaintext so local
+// work isn't blocked, with a one-time warning.
+const ENC_ALGORITHM = 'aes-256-gcm';
+
+function loadEncKey(): Buffer | null {
+  const raw = process.env.TRUELAYER_TOKEN_ENC_KEY;
+  if (!raw) return null;
+  const key = /^[0-9a-fA-F]{64}$/.test(raw)
+    ? Buffer.from(raw, 'hex')
+    : Buffer.from(raw, 'base64');
+  if (key.length !== 32) {
+    throw new Error(
+      'TRUELAYER_TOKEN_ENC_KEY must decode to 32 bytes (64 hex chars, or base64)'
+    );
+  }
+  return key;
+}
+
+let _encKey: Buffer | null | undefined;
+let _warnedNoKey = false;
+
+function encKey(): Buffer | null {
+  if (_encKey !== undefined) return _encKey;
+  _encKey = loadEncKey();
+  if (!_encKey) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error(
+        'TRUELAYER_TOKEN_ENC_KEY is not set — refusing to store bank tokens in plaintext in production.'
+      );
+    }
+    if (!_warnedNoKey) {
+      console.warn(
+        '[truelayer] TRUELAYER_TOKEN_ENC_KEY not set — storing tokens in PLAINTEXT (dev only, not for production).'
+      );
+      _warnedNoKey = true;
+    }
+  }
+  return _encKey;
+}
+
 function encrypt(plain: string): string {
-  return plain;
+  const key = encKey();
+  if (!key) return plain;
+  const iv = crypto.randomBytes(12);
+  const cipher = crypto.createCipheriv(ENC_ALGORITHM, key, iv);
+  const ciphertext = Buffer.concat([cipher.update(plain, 'utf8'), cipher.final()]);
+  const tag = cipher.getAuthTag();
+  return `${iv.toString('base64')}:${tag.toString('base64')}:${ciphertext.toString('base64')}`;
 }
 
 function decrypt(payload: string): string {
-  return payload;
+  const parts = payload.split(':');
+  if (parts.length !== 3) return payload; // legacy/dev plaintext row
+  const key = encKey();
+  if (!key) return payload;
+  // No try/catch here on purpose: a GCM auth-tag failure means wrong key,
+  // corruption, or tampering — fail loud rather than silently returning
+  // ciphertext/garbage as if it were a valid bank token.
+  const [ivB64, tagB64, ctB64] = parts;
+  const decipher = crypto.createDecipheriv(ENC_ALGORITHM, key, Buffer.from(ivB64, 'base64'));
+  decipher.setAuthTag(Buffer.from(tagB64, 'base64'));
+  const plain = Buffer.concat([decipher.update(Buffer.from(ctB64, 'base64')), decipher.final()]);
+  return plain.toString('utf8');
 }
 
 let _db: DatabaseSync | null = null;
@@ -89,7 +148,13 @@ function migrate(db: DatabaseSync): void {
 // Helpers below unwrap statement results so route handlers can keep their
 // row-shape code untouched from the better-sqlite3 era.
 
-function toRow(stmt: { all(...a: unknown[]): unknown[] }, args: unknown[] = []): unknown[][] {
+function toRow(
+  stmt: { all(...a: unknown[]): unknown[]; setReturnArrays(v: boolean): void },
+  args: unknown[] = [],
+): unknown[][] {
+  // node:sqlite returns named objects by default; the row* mappers below
+  // index positionally, so force array-shaped rows.
+  stmt.setReturnArrays(true);
   return stmt.all(...args) as unknown[][];
 }
 
