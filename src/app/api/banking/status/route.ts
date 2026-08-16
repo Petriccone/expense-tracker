@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { initBankSchema, getLatestSession, getLastSyncAt, countTransactions } from '@/lib/bank-store';
+import { getLatestSession, getLastSyncAt, countTransactions } from '@/lib/bank-store';
+import { ensureBankReady } from '../_ready';
 
 // GET /api/banking/status — connection summary for a future "Banco" page
 // (wave 2b) and for manual checks in the meantime.
@@ -7,7 +8,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(_req: NextRequest) {
   try {
-    initBankSchema();
+    ensureBankReady();
     const session = getLatestSession();
     return NextResponse.json({
       ok: true,

@@ -319,22 +319,59 @@ export function getMonthByYM(year: number, month: number): BudgetMonth | null {
 
 const MAX_MONTHS = 600;
 
-export function createNextMonth(): BudgetMonth {
+// Copy a template month's categories + incomes into an already-inserted target
+// month: same names/groups/planned amounts and income labels/amounts/kinds, but
+// FRESH per-month UUIDs (category ids are per-month — see the file header) and
+// spent reset to 0. The caller owns the surrounding BEGIN/COMMIT.
+function copyTemplateContents(
+  db: ReturnType<typeof getDb>,
+  templateMonthId: string,
+  targetMonthId: string,
+): void {
+  const cats = db
+    .prepare(`${CATEGORY_SELECT} WHERE month_id = ? ORDER BY "group" ASC, sort_order ASC`)
+    .all(templateMonthId) as unknown as CategoryRow[];
+  const catStmt = db.prepare(
+    'INSERT INTO budget_categories (id, month_id, "group", name, planned, spent, sort_order) VALUES (?, ?, ?, ?, ?, 0, ?)',
+  );
+  for (const c of cats) {
+    catStmt.run(crypto.randomUUID(), targetMonthId, c.grp, c.name, c.planned, c.sort_order);
+  }
+
+  const incs = db
+    .prepare(`${INCOME_SELECT} WHERE month_id = ? ORDER BY sort_order ASC`)
+    .all(templateMonthId) as unknown as IncomeRow[];
+  const incStmt = db.prepare(
+    'INSERT INTO budget_incomes (id, month_id, label, amount, kind, sort_order) VALUES (?, ?, ?, ?, ?, ?)',
+  );
+  for (const i of incs) {
+    incStmt.run(crypto.randomUUID(), targetMonthId, i.label, i.amount, i.kind, i.sort_order);
+  }
+}
+
+// Create a specific (year, month) budget month, seeding its categories + incomes
+// from an existing template month (fresh per-month UUIDs, spent reset to 0).
+// `save` defaults to the TEMPLATE's save; pass { save: 0 } to start the month at
+// zero (the carry-forward path does). Throws if (year, month) already exists or
+// the MAX_MONTHS cap is reached — callers that backfill a range (the one-off
+// backfill script) catch the "already exists" throw to stay idempotent.
+//
+// Unlike createNextMonth this can create a month BEFORE the earliest one, which
+// is what the month backfill needs (POST /api/budget/months only goes forward).
+export function createMonthFromTemplate(
+  templateMonthId: string,
+  year: number,
+  month: number,
+  opts: { save?: number } = {},
+): BudgetMonth {
   const db = ready();
-  const latest = db
-    .prepare(`${MONTH_SELECT} ORDER BY year DESC, month DESC LIMIT 1`)
-    .get() as MonthRow | undefined;
-  if (!latest) throw new Error('budget: no month to carry forward from');
+  const template = db.prepare(`${MONTH_SELECT} WHERE id = ?`).get(templateMonthId) as
+    | MonthRow
+    | undefined;
+  if (!template) throw new Error(`budget: template month ${templateMonthId} not found`);
 
   const count = db.prepare('SELECT COUNT(*) AS n FROM budget_months').get() as { n: number };
   if (count.n >= MAX_MONTHS) throw new Error('budget: month limit reached');
-
-  let year = latest.year;
-  let month = latest.month + 1;
-  if (month > 12) {
-    month = 1;
-    year += 1;
-  }
 
   const clash = db
     .prepare('SELECT id FROM budget_months WHERE year = ? AND month = ?')
@@ -345,33 +382,14 @@ export function createNextMonth(): BudgetMonth {
     );
   }
 
+  const save = round2(opts.save ?? template.save);
   const newId = crypto.randomUUID();
   db.exec('BEGIN');
   try {
     db.prepare(
-      'INSERT INTO budget_months (id, year, month, save, note, created_at) VALUES (?, ?, ?, 0, NULL, ?)',
-    ).run(newId, year, month, new Date().toISOString());
-
-    const cats = db
-      .prepare(`${CATEGORY_SELECT} WHERE month_id = ? ORDER BY "group" ASC, sort_order ASC`)
-      .all(latest.id) as unknown as CategoryRow[];
-    const catStmt = db.prepare(
-      'INSERT INTO budget_categories (id, month_id, "group", name, planned, spent, sort_order) VALUES (?, ?, ?, ?, ?, 0, ?)',
-    );
-    for (const c of cats) {
-      catStmt.run(crypto.randomUUID(), newId, c.grp, c.name, c.planned, c.sort_order);
-    }
-
-    const incs = db
-      .prepare(`${INCOME_SELECT} WHERE month_id = ? ORDER BY sort_order ASC`)
-      .all(latest.id) as unknown as IncomeRow[];
-    const incStmt = db.prepare(
-      'INSERT INTO budget_incomes (id, month_id, label, amount, kind, sort_order) VALUES (?, ?, ?, ?, ?, ?)',
-    );
-    for (const i of incs) {
-      incStmt.run(crypto.randomUUID(), newId, i.label, i.amount, i.kind, i.sort_order);
-    }
-
+      'INSERT INTO budget_months (id, year, month, save, note, created_at) VALUES (?, ?, ?, ?, NULL, ?)',
+    ).run(newId, year, month, save, new Date().toISOString());
+    copyTemplateContents(db, templateMonthId, newId);
     db.exec('COMMIT');
   } catch (err) {
     db.exec('ROLLBACK');
@@ -380,6 +398,25 @@ export function createNextMonth(): BudgetMonth {
 
   const m = db.prepare(`${MONTH_SELECT} WHERE id = ?`).get(newId) as MonthRow;
   return hydrateMonth(db, m);
+}
+
+export function createNextMonth(): BudgetMonth {
+  const db = ready();
+  const latest = db
+    .prepare(`${MONTH_SELECT} ORDER BY year DESC, month DESC LIMIT 1`)
+    .get() as MonthRow | undefined;
+  if (!latest) throw new Error('budget: no month to carry forward from');
+
+  let year = latest.year;
+  let month = latest.month + 1;
+  if (month > 12) {
+    month = 1;
+    year += 1;
+  }
+
+  // Carry-forward starts the new month at save = 0 (the running "Total Saving"
+  // is cumulative — a fresh month hasn't saved yet).
+  return createMonthFromTemplate(latest.id, year, month, { save: 0 });
 }
 
 export function updateMonth(

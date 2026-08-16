@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { initBankSchema, bankSpentByCategory } from '@/lib/bank-store';
+import { bankSpentByCategory } from '@/lib/bank-store';
+import { ensureBankReady } from '../_ready';
 
 // GET /api/banking/spent?year=YYYY&month=M — the bank-derived contribution to
 // "gasto" per category for one month (SUM(abs(amount)) of booked,
@@ -11,7 +12,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
   try {
-    initBankSchema();
+    ensureBankReady();
     const url = new URL(req.url);
     const yearParam = url.searchParams.get('year');
     const monthParam = url.searchParams.get('month');

@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireCronSecret } from '@/lib/api-auth';
-import { initBankSchema, listBankTransactions } from '@/lib/bank-store';
+import { listBankTransactions } from '@/lib/bank-store';
 import { runCategorization } from '@/lib/categorize';
+import { runAttribution } from '@/lib/attribution';
+import { ensureBankReady } from '../_ready';
 
 // POST /api/banking/categorize — machine/cron endpoint (gated by the shared
 // x-cron-secret, same guard as /api/banking/sync), also callable manually.
@@ -37,7 +39,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    initBankSchema();
+    ensureBankReady();
     const months = distinctUncategorizedMonths();
 
     let assigned = 0;
@@ -48,7 +50,17 @@ export async function POST(req: NextRequest) {
       needsReview += res.needsReview;
     }
 
-    return NextResponse.json({ ok: true, months: months.length, assigned, needsReview });
+    // Best-effort intelligence pass after (re)categorization: de-dup internal
+    // transfers + plan-aware month attribution. Non-fatal — a failure here
+    // never fails the categorize run.
+    let attributedMoves = 0;
+    try {
+      attributedMoves = runAttribution().length;
+    } catch (err) {
+      console.error('[banking] post-categorize attribution failed', err instanceof Error ? err.message : err);
+    }
+
+    return NextResponse.json({ ok: true, months: months.length, assigned, needsReview, attributedMoves });
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'unknown_error';
     return NextResponse.json({ ok: false, error: msg }, { status: 500 });

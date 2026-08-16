@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { initBankSchema, listBankTransactions } from '@/lib/bank-store';
+import { listBankTransactions } from '@/lib/bank-store';
 import { toTransactionApiShape } from '../_shape';
+import { ensureBankReady } from '../_ready';
 
 // GET /api/banking/transactions?month=YYYY-MM&status=uncategorized|all — the
 // review queue (status=uncategorized, the default UI view) and the full list
@@ -10,7 +11,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
   try {
-    initBankSchema();
+    ensureBankReady();
     const url = new URL(req.url);
     const month = url.searchParams.get('month') ?? undefined;
     if (month !== undefined && !/^\d{4}-\d{2}$/.test(month)) {

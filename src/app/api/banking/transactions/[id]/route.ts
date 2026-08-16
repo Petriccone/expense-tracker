@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { initBankSchema, getTransactionById, setTransactionCategory, setTransactionIgnored } from '@/lib/bank-store';
+import { getTransactionById, setTransactionCategory, setTransactionIgnored } from '@/lib/bank-store';
 import { getMonthByYM } from '@/lib/budget-store';
 import { toTransactionApiShape } from '../../_shape';
+import { ensureBankReady } from '../../_ready';
 
 // PATCH /api/banking/transactions/[id] — manual review actions. body is
 // EITHER {categoryId} (assign) OR {ignored: true|false} (the "não-é-gasto"
@@ -23,7 +24,7 @@ export const dynamic = 'force-dynamic';
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    initBankSchema();
+    ensureBankReady();
     const { id } = await params;
 
     let body: unknown;

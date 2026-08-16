@@ -1,23 +1,47 @@
-// Bank-transaction categorization: rules-first, optional LLM fallback.
-// See docs/2026-08-15-agent-and-bank-automation-design.md (wave 2b,
-// RESOLVED section).
+// Bank-transaction categorization: deterministic label-match, with an optional
+// LLM fallback left dormant behind it.
+// See docs/2026-08-15-agent-and-bank-automation-design.md (wave 2b, RESOLVED
+// section).
+//
+// The couple budget by MOVING labeled money out of their joint account —
+// "MacBook To RAFAELA", "Credit card To RAFAELA", "Pay later El", "Gym From
+// RAFAEL", ... — so the transfer's LABEL literally IS the budget line, and that
+// labeled allocation IS the expense. The ONLY categorization path is matchLabel:
+// it resolves a transaction's label directly to a category of the transaction's
+// own month. Merchant card charges (Tesco, Vercel, ...) are the couple SPENDING
+// already-allocated money, not new expenses — their labels match no category
+// name, so they stay uncategorized and the attribution layer marks them
+// unallocated (see src/lib/attribution.ts). There are deliberately NO
+// merchant-keyword rules any more (a "Tesco" charge must NOT count as Shop — the
+// "Shop" allocation already counts; counting Tesco too would double).
+//
+// The LLM path stays as an OPTIONAL, dormant fallback (only reached when a label
+// injection is provided or OPENAI_API_KEY is set — neither is wired in prod).
 //
 // SECURITY: bank `description`/`counterparty` come from the ASPSP (Revolut)
 // and are UNTRUSTED — an indirect prompt-injection surface (a merchant name
-// could contain text crafted to look like an instruction). The LLM path
-// tells the model to treat them as data only, but the real defense is that
-// suggestCategory NEVER trusts the model's raw answer: it validates the
-// returned id against the allowlist of THIS month's real budget category
-// ids and discards (-> 'none') anything that doesn't match exactly. The
-// model's output can only ever select among ids we already handed it —
-// it can't cause any other action.
+// could contain text crafted to look like an instruction). Every path here
+// only ever selects among THIS month's real category ids: matchLabel compares
+// the (normalized) label against that month's actual category names and can
+// only ever return one of their ids; the LLM path NEVER trusts the model's
+// raw answer — it validates the returned id against the allowlist of this
+// month's ids and discards (-> 'none') anything that doesn't match exactly.
+// Neither the label text nor the model's output can cause any other action.
 
 import OpenAI from 'openai';
 import { getMonth, getMonthByYM, listMonths } from '@/lib/budget-store';
 import type { BudgetCategory } from '@/types/budget';
-import { listBankTransactions, setTransactionCategory } from './bank-store';
+import {
+  listBankTransactions,
+  setTransactionCategory,
+  normalizeLabel,
+  getAccountHolderTokens,
+  listBankCategoryRules,
+  matchBankCategoryRule,
+  DEFAULT_HOLDER_TOKENS,
+} from './bank-store';
 
-export type SuggestSource = 'rule' | 'llm' | 'none';
+export type SuggestSource = 'label' | 'rule' | 'llm' | 'none';
 
 export interface SuggestResult {
   categoryId: string | null;
@@ -30,35 +54,17 @@ export interface CategorizeTxInput {
   counterparty: string | null;
 }
 
-// Confidence assigned on a rule hit / LLM pick — surfaced to the UI (the
-// review queue's "confiança X%"). Anything with no rule/LLM hit (or with no
+// Confidence assigned on a label hit / LLM pick — surfaced to the UI (the
+// review queue's "confiança X%"). Anything with no hit (or with no
 // month/categories to match against) is treated as 'none' -> review queue.
+// A label match is the most certain signal (the label IS the budget line), so
+// it ranks above both the rule fallback and the (dormant) LLM.
+const LABEL_CONFIDENCE = 0.95;
+// An explicit counterparty rule is certain about the COUNTERPARTY but one step
+// removed from the budget line itself (it maps to a category NAME, resolved
+// per-month) — ranked below a label hit, above the (dormant) LLM guess.
 const RULE_CONFIDENCE = 0.9;
 const LLM_CONFIDENCE = 0.6;
-
-// ----- rules -----
-
-// keyword -> budget category NAME (must match a real category in the target
-// month, matched accent/case-insensitively — see findCategoryByName).
-// category: null means "recognized but deliberately not a spend" (Revolut
-// top-ups are self-transfers between own accounts, not an expense) — matched
-// but never assigned, and never handed to the LLM either.
-interface Rule {
-  keywords: string[];
-  category: string | null;
-}
-
-const RULES: Rule[] = [
-  { keywords: ['tesco', 'dunnes', 'lidl', 'aldi', 'supervalu', 'super valu'], category: 'Shop' },
-  { keywords: ['circle k', 'applegreen', 'fuel', 'petrol'], category: 'Fuel' },
-  { keywords: ['revolut'], category: null },
-  { keywords: ['netflix'], category: 'Netflix' },
-  { keywords: ['spotify'], category: 'Spotify' },
-  { keywords: ['youtube'], category: 'Youtube' },
-  { keywords: ['gym', 'leisure'], category: 'Gym' },
-  { keywords: ['leap', 'transport', 'irish rail', 'dublin bus'], category: 'Leap Card' },
-  { keywords: ['pharmacy', 'boots', 'chemist'], category: 'Pills' },
-];
 
 function normalize(s: string): string {
   return s
@@ -67,28 +73,94 @@ function normalize(s: string): string {
     .toLowerCase();
 }
 
-function findCategoryByName(categories: BudgetCategory[], name: string): BudgetCategory | undefined {
-  const target = normalize(name);
-  return categories.find((c) => normalize(c.name) === target);
+// ----- label -> category-name match (primary) -----
+//
+// normalizeLabel (the transfer-marker + person-tag + holder-name stripper) is
+// shared with attribution.ts — see bank-store.ts. Category names, by contrast,
+// are only case/accent-folded (normName): they never carry those tokens.
+
+// Normalize (collapse whitespace, trim) a category name for comparison.
+function normName(name: string): string {
+  return normalize(name).replace(/\s+/g, ' ').trim();
 }
 
-function matchRule(haystack: string, monthCategories: BudgetCategory[]): SuggestResult | null {
-  for (const rule of RULES) {
-    if (!rule.keywords.some((k) => haystack.includes(normalize(k)))) continue;
-    if (rule.category === null) {
-      return { categoryId: null, confidence: 0, source: 'none' };
+function levenshtein(a: string, b: string): number {
+  const m = a.length;
+  const n = b.length;
+  if (m === 0) return n;
+  if (n === 0) return m;
+  const row = Array.from({ length: n + 1 }, (_, j) => j);
+  for (let i = 1; i <= m; i++) {
+    let diag = row[0];
+    row[0] = i;
+    for (let j = 1; j <= n; j++) {
+      const tmp = row[j];
+      row[j] = Math.min(
+        row[j] + 1, // deletion
+        row[j - 1] + 1, // insertion
+        diag + (a[i - 1] === b[j - 1] ? 0 : 1), // substitution
+      );
+      diag = tmp;
     }
-    const cat = findCategoryByName(monthCategories, rule.category);
-    if (cat) {
-      return { categoryId: cat.id, confidence: RULE_CONFIDENCE, source: 'rule' };
+  }
+  return row[n];
+}
+
+// Same-word spelling variants only (Rafa's "Electricity" vs the budget's
+// "Eletricity"): require a shared 3-char prefix AND a tiny edit distance, so
+// this can never bridge two genuinely different categories.
+function fuzzySpellingMatch(label: string, name: string): boolean {
+  if (label.length < 4 || name.length < 4) return false;
+  if (label.slice(0, 3) !== name.slice(0, 3)) return false;
+  const maxDist = Math.max(label.length, name.length) <= 6 ? 1 : 2;
+  return levenshtein(label, name) <= maxDist;
+}
+
+function isBoundary(s: string, idx: number): boolean {
+  return idx >= s.length || s[idx] === ' ';
+}
+
+// Does the normalized label resolve to this normalized category name? Exact,
+// or a word-boundary prefix in EITHER direction (so "credit card" matches
+// "Credit Card", and a bare "credit" would still match "Credit Card"), or a
+// light spelling-variant fuzzy.
+function labelMatchesName(label: string, name: string): boolean {
+  if (!label || !name) return false;
+  if (label === name) return true;
+  if (label.startsWith(name) && isBoundary(label, name.length)) return true;
+  if (name.startsWith(label) && isBoundary(name, label.length)) return true;
+  return fuzzySpellingMatch(label, name);
+}
+
+// Primary path: match the transaction's label (description, then counterparty)
+// against THIS month's real category names. Picks the LONGEST matching name so
+// a short name can't eat a longer one ("Credit" wouldn't win over "Credit
+// Card"). Non-expense transfers ("Salary El", "Savings", ...) match no expense
+// category name, so they correctly stay uncategorized.
+function matchLabel(
+  tx: CategorizeTxInput,
+  categories: BudgetCategory[],
+  holderTokens: readonly string[],
+): SuggestResult | null {
+  const sources = [tx.description, tx.counterparty].filter(Boolean) as string[];
+  for (const raw of sources) {
+    const label = normalizeLabel(raw, holderTokens);
+    if (!label) continue;
+    let best: BudgetCategory | undefined;
+    let bestLen = -1;
+    for (const c of categories) {
+      const name = normName(c.name);
+      if (name.length > bestLen && labelMatchesName(label, name)) {
+        best = c;
+        bestLen = name.length;
+      }
     }
-    // Keyword matched but this month has no category by that name (renamed,
-    // deleted, ...) — keep checking the remaining rules instead of giving up.
+    if (best) return { categoryId: best.id, confidence: LABEL_CONFIDENCE, source: 'label' };
   }
   return null;
 }
 
-// ----- LLM fallback -----
+// ----- LLM fallback (dormant) -----
 
 export interface LlmAllowlistEntry {
   id: string;
@@ -154,6 +226,14 @@ export const defaultLlmCategorizer: LlmCategorizer = async ({ description, count
 
 export interface SuggestDeps {
   llm?: LlmCategorizer;
+  // Account-holder name tokens stripped from a labeled transfer before matching
+  // (see bank-store's normalizeLabel). Defaults to DEFAULT_HOLDER_TOKENS so the
+  // pure/unit path needs no DB; runCategorization passes the configured set.
+  holderTokens?: readonly string[];
+  // Counterparty → category rules (see bank-store's bank_category_rules).
+  // Defaults to EMPTY so the pure path stays DB-free; runCategorization loads
+  // the real set (same pattern as holderTokens above).
+  rules?: ReadonlyArray<{ match_field?: string; pattern: string; category_name: string }>;
 }
 
 export async function suggestCategory(
@@ -165,12 +245,46 @@ export async function suggestCategory(
     return { categoryId: null, confidence: 0, source: 'none' };
   }
 
-  const haystack = normalize(`${tx.description} ${tx.counterparty ?? ''}`);
+  // 1. Label -> category-name match (primary, deterministic, and the only path
+  // that assigns a category from the transfer itself. The label of a labeled
+  // transfer IS the budget line. A merchant card charge (Tesco, Vercel, ...)
+  // matches no category name, so it stays uncategorized here and attribution
+  // marks it unallocated — it must NOT count as spend (the labeled allocation
+  // already does).
+  const holderTokens = deps.holderTokens ?? DEFAULT_HOLDER_TOKENS;
+  const labelResult = matchLabel(tx, monthCategories, holderTokens);
+  if (labelResult) return labelResult;
 
-  const ruleResult = matchRule(haystack, monthCategories);
-  if (ruleResult) return ruleResult;
+  // 2. Counterparty-rule fallback (explicit, human-authored exceptions — see
+  // bank-store's bank_category_rules). The couple can declare that ONE exact
+  // external counterparty's charge IS a category's expense (e.g. "Clúid
+  // Housing Association" → Rental — the rent is paid by direct debit, no
+  // labeled transfer fronts it). The row's counterparty is normalized with the
+  // SAME shared normalizer the stored pattern used; on a hit the rule's
+  // category NAME is resolved against this month's real categories — the same
+  // resolution the label path uses — so a rule can still only ever return one
+  // of this month's ids. Rules are a FALLBACK: a label hit always wins.
+  const rules = deps.rules ?? [];
+  if (rules.length > 0 && tx.counterparty) {
+    const rule = matchBankCategoryRule(tx.counterparty, { holderTokens, rules });
+    if (rule) {
+      const label = normName(rule.category_name);
+      if (label) {
+        let best: BudgetCategory | undefined;
+        let bestLen = -1;
+        for (const c of monthCategories) {
+          const name = normName(c.name);
+          if (name.length > bestLen && labelMatchesName(label, name)) {
+            best = c;
+            bestLen = name.length;
+          }
+        }
+        if (best) return { categoryId: best.id, confidence: RULE_CONFIDENCE, source: 'rule' };
+      }
+    }
+  }
 
-  // deps.llm is the test injection point — when provided it's used
+  // 3. LLM fallback (dormant). deps.llm is the test injection point — when provided it's used
   // regardless of OPENAI_API_KEY, so the LLM path is fully mockable without
   // network or env setup. Without an injection, only run the real
   // (OpenAI-backed) implementation if a key is configured — otherwise
@@ -235,13 +349,19 @@ export async function runCategorization(
   const budgetMonth = getMonthByYM(year, month);
   const categories = budgetMonth?.categories ?? [];
 
+  // Strip the couple's real (configured) holder names during the sweep, so a
+  // customized name list stays consistent with attribution's de-dup.
+  const holderTokens = deps.holderTokens ?? getAccountHolderTokens();
+  // Counterparty rules for the fallback path (empty table → no rule pass).
+  const rules = deps.rules ?? listBankCategoryRules();
+
   let assigned = 0;
   let needsReview = 0;
   for (const tx of uncategorized) {
     const result = await suggestCategory(
       { description: tx.description, counterparty: tx.counterparty },
       categories,
-      deps,
+      { ...deps, holderTokens, rules },
     );
     if (result.categoryId) {
       setTransactionCategory(tx.id, result.categoryId, result.confidence);

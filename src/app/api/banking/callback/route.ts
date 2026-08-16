@@ -5,7 +5,8 @@ import {
   getTransactions,
   mapTransactionBatch,
 } from '@/lib/enablebanking';
-import { initBankSchema, getPendingState, clearPendingState, saveSession, upsertTransactions, setLastSyncAt } from '@/lib/bank-store';
+import { getPendingState, clearPendingState, saveSession, upsertTransactions, setLastSyncAt } from '@/lib/bank-store';
+import { ensureBankReady } from '../_ready';
 
 // GET /api/banking/callback?code=...&state=...
 // Enable Banking redirects the user here after they consent at their bank.
@@ -67,7 +68,7 @@ async function runBackfill(accountUids: string[]): Promise<void> {
 
 export async function GET(req: NextRequest) {
   try {
-    initBankSchema();
+    ensureBankReady();
 
     const url = new URL(req.url);
     const code = url.searchParams.get('code');

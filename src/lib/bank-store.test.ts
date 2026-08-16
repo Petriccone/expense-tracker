@@ -26,8 +26,18 @@ import {
   setTransactionCategory,
   setTransactionIgnored,
   bankSpentByCategory,
+  bankSpentAnomalies,
+  applyDedupDecisions,
+  applyMonthAttributions,
+  listUnallocated,
+  setJointAccountUids,
+  addBankCategoryRule,
+  listBankCategoryRules,
+  removeBankCategoryRule,
   type BankTransactionInput,
 } from './bank-store';
+import { initBudgetSchema, seedBudgetIfEmpty, createNextMonth, getMonthByYM } from './budget-store';
+import { getDb } from './db';
 
 // getDb() (src/lib/db.ts) memoizes its connection at module scope on first
 // use, so point PETRICCO_DATA_DIR at an isolated temp dir before the first
@@ -398,6 +408,9 @@ describe('bank-store (DB-backed, real SQLite)', () => {
   });
 
   it('bankSpentByCategory sums only booked + categorized transactions in-month, rounded to 2dp', () => {
+    // The joint-only model: bankSpentByCategory scopes to the joint account
+    // uid(s). These rows live on 'acc-spent', so mark it the joint account.
+    setJointAccountUids(['acc-spent']);
     upsertTransactions([
       {
         id: 'tx-spent-1',
@@ -457,5 +470,171 @@ describe('bank-store (DB-backed, real SQLite)', () => {
     const spent = bankSpentByCategory(2026, 11);
     expect(spent['cat-shop-id']).toBeCloseTo(15.01, 2);
     expect(Object.keys(spent)).toEqual(['cat-shop-id']);
+  });
+
+  // ----- wave 2d: unallocated (allocation-only model) -----
+
+  it('applyDedupDecisions persists the unallocated flag; listUnallocated returns only those rows, filterable by month', () => {
+    upsertTransactions([
+      {
+        id: 'un-tesco',
+        account_uid: 'acc-un',
+        amount: -14.35,
+        currency: 'EUR',
+        credit_debit: 'DBIT',
+        booking_date: '2027-03-03',
+        value_date: '2027-03-03',
+        description: 'Tesco Stores',
+        counterparty: null,
+        status: 'BOOK',
+      },
+      {
+        id: 'un-vercel',
+        account_uid: 'acc-un',
+        amount: -20,
+        currency: 'EUR',
+        credit_debit: 'DBIT',
+        booking_date: '2027-04-03',
+        value_date: '2027-04-03',
+        description: 'Vercel Inc',
+        counterparty: null,
+        status: 'BOOK',
+      },
+      {
+        id: 'un-alloc',
+        account_uid: 'acc-un',
+        amount: -138,
+        currency: 'EUR',
+        credit_debit: 'DBIT',
+        booking_date: '2027-03-04',
+        value_date: '2027-03-04',
+        description: 'Gym From RAFAEL',
+        counterparty: null,
+        status: 'BOOK',
+      },
+    ]);
+    applyDedupDecisions([
+      { id: 'un-tesco', counted: 0, dedup_group: null, unallocated: 1 },
+      { id: 'un-vercel', counted: 0, dedup_group: null, unallocated: 1 },
+      { id: 'un-alloc', counted: 1, dedup_group: null, unallocated: 0 },
+    ]);
+
+    const all = listUnallocated().map((r) => r.id).sort();
+    expect(all).toEqual(['un-tesco', 'un-vercel']);
+    expect(all).not.toContain('un-alloc');
+
+    // Month filter is on budget_month (= booking month for unallocated rows).
+    const march = listUnallocated({ month: '2027-03' }).map((r) => r.id);
+    expect(march).toEqual(['un-tesco']);
+  });
+
+  it('bankSpentAnomalies flags a still-positive category whose returns exceeded the review threshold (HIGH-B widening)', () => {
+    setJointAccountUids(['acc-anom']);
+    upsertTransactions([
+      {
+        id: 'anom-out',
+        account_uid: 'acc-anom',
+        amount: -200,
+        currency: 'EUR',
+        credit_debit: 'DBIT',
+        booking_date: '2027-05-05',
+        value_date: '2027-05-05',
+        description: 'Insurance',
+        counterparty: null,
+        status: 'BOOK',
+      },
+      {
+        id: 'anom-return',
+        account_uid: 'acc-anom',
+        amount: 190,
+        currency: 'EUR',
+        credit_debit: 'CRDT',
+        booking_date: '2027-05-06',
+        value_date: '2027-05-06',
+        description: 'Insurance refund',
+        counterparty: null,
+        status: 'BOOK',
+      },
+    ]);
+    setTransactionCategory('anom-out', 'cat-anom');
+    setTransactionCategory('anom-return', 'cat-anom');
+
+    // Net stays positive (200 − 190 = 10), so it is NOT clamped to 0...
+    expect(bankSpentByCategory(2027, 5)['cat-anom']).toBeCloseTo(10, 2);
+    // ...but the €190 of returns quietly reduced the total, so it's surfaced.
+    expect(bankSpentAnomalies(2027, 5)).toContain('cat-anom');
+  });
+
+  // ----- applyMonthAttributions: stale-category-clear path -----
+
+  it('applyMonthAttributions clears a stale category_id when the target month has no matching category id (noCat/categoryIsForOtherMonth), and resets counted/unallocated', () => {
+    // Category ids are per-month UUIDs (createNextMonth mints fresh ones even
+    // for a same-named category), so a category_id assigned under one month is
+    // provably wrong for another month — this is the caller-omits-categoryId
+    // path runAttribution takes when its by-name lookup for the target month
+    // misses (e.g. a category with no plan there).
+    initBudgetSchema();
+    seedBudgetIfEmpty(); // Aug/2026, incl. a "Gym" category
+    createNextMonth(); // Sep/2026 — same category names, but fresh per-month ids
+    const augGymId = getMonthByYM(2026, 8)!.categories.find((c) => c.name === 'Gym')!.id;
+
+    upsertTransactions([
+      {
+        id: 'tx-stale-cat',
+        account_uid: 'acc-stale',
+        amount: -138,
+        currency: 'EUR',
+        credit_debit: 'DBIT',
+        booking_date: '2026-08-05',
+        value_date: '2026-08-05',
+        description: 'Gym',
+        counterparty: null,
+        status: 'BOOK',
+      },
+    ]);
+    setTransactionCategory('tx-stale-cat', augGymId);
+
+    // Re-attribute to September without supplying a target categoryId — August's
+    // Gym id is provably wrong for September (September's own Gym has a
+    // different id), so this must clear it rather than leave it dangling.
+    applyMonthAttributions([{ id: 'tx-stale-cat', budget_month: '2026-09', move_reason: 'test move' }]);
+
+    const after = listTransactions().find((r) => r.id === 'tx-stale-cat')!;
+    expect(after.category_id).toBeNull();
+    expect(after.budget_month).toBe('2026-09');
+    expect(after.counted).toBe(0);
+    expect(after.unallocated).toBe(1);
+
+    // Reappears in the uncategorized review queue.
+    expect(listBankTransactions({ status: 'uncategorized' }).map((r) => r.id)).toContain('tx-stale-cat');
+  });
+
+  // ----- bank_category_rules -----
+
+  it('bank_category_rules exists after init and round-trips add (pattern normalized) / list / remove', () => {
+    // initBankSchema ran in beforeAll — the table must exist on it.
+    const tables = getDb()
+      .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='bank_category_rules'")
+      .all() as Array<{ name: string }>;
+    expect(tables.map((t) => t.name)).toContain('bank_category_rules');
+
+    const rule = addBankCategoryRule({ pattern: 'Clúid Housing Association', category_name: 'Rental' });
+    expect(rule.match_field).toBe('counterparty');
+    expect(rule.pattern).toBe('cluid housing association'); // stored PRE-NORMALIZED
+    expect(rule.category_name).toBe('Rental');
+
+    const listed = listBankCategoryRules();
+    expect(listed.some((r) => r.id === rule.id && r.pattern === 'cluid housing association')).toBe(true);
+
+    removeBankCategoryRule(rule.id);
+    expect(listBankCategoryRules().some((r) => r.id === rule.id)).toBe(false);
+  });
+
+  it('addBankCategoryRule rejects a pattern that normalizes to empty', () => {
+    expect(() => addBankCategoryRule({ pattern: 'To RAFAEL', category_name: 'Rental' })).toThrow();
+  });
+
+  it('addBankCategoryRule rejects a pattern that normalizes shorter than 3 chars', () => {
+    expect(() => addBankCategoryRule({ pattern: 'Zz', category_name: 'Rental' })).toThrow();
   });
 });

@@ -198,11 +198,18 @@ export async function createSession(code: string): Promise<EbSession> {
   const json = (await ebFetch('/sessions', {
     method: 'POST',
     body: JSON.stringify({ code }),
-  })) as { session_id?: string; accounts?: string[] };
+  })) as { session_id?: string; accounts?: Array<string | { uid?: string }> };
   if (!json.session_id) {
     throw new EnableBankingError('Enable Banking /sessions response missing session_id', 502);
   }
-  return { session_id: json.session_id, accounts: json.accounts ?? [] };
+  // POST /sessions returns `accounts` as full account OBJECTS (each carrying a
+  // `uid`), unlike GET /sessions/{id} which returns bare uid strings. Extract
+  // the uid so downstream /accounts/{uid}/transactions calls get a real UUID
+  // (passing the whole object stringifies to "[object...]" → EB 422 invalid UUID).
+  const accounts = (json.accounts ?? [])
+    .map((a) => (typeof a === 'string' ? a : a?.uid))
+    .filter((u): u is string => typeof u === 'string' && u.length > 0);
+  return { session_id: json.session_id, accounts };
 }
 
 export interface EbSessionStatus {

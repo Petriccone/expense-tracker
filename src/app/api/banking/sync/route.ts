@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireCronSecret } from '@/lib/api-auth';
 import { getTransactions, mapTransactionBatch, EnableBankingError } from '@/lib/enablebanking';
 import {
-  initBankSchema,
   getLatestSession,
   upsertTransactions,
   getLastSyncAt,
@@ -11,6 +10,8 @@ import {
   setRateLimitedUntil,
 } from '@/lib/bank-store';
 import { runCategorization } from '@/lib/categorize';
+import { runAttribution } from '@/lib/attribution';
+import { ensureBankReady } from '../_ready';
 
 // POST /api/banking/sync — machine/cron endpoint, gated by the shared
 // x-cron-secret (INTERNAL_API_SECRET, same guard as /api/gocardless/sync).
@@ -42,7 +43,7 @@ export async function POST(req: NextRequest) {
   if (denied) return denied;
 
   try {
-    initBankSchema();
+    ensureBankReady();
 
     const rateLimitedUntil = getRateLimitedUntil();
     if (rateLimitedUntil && Date.now() < Date.parse(rateLimitedUntil)) {
@@ -110,12 +111,25 @@ export async function POST(req: NextRequest) {
       console.error('[banking] post-sync categorization failed', err instanceof Error ? err.message : err);
     }
 
+    // Best-effort intelligence pass: the joint/internal allocation gate +
+    // plan-aware month attribution (joint-only signed-net model). Runs after
+    // categorization (it only counts categorized rows). Wrapped so a failure
+    // never fails an otherwise-good sync — the next run recomputes from scratch.
+    // `moves` will feed a later WhatsApp-notification wave.
+    let attributedMoves = 0;
+    try {
+      attributedMoves = runAttribution().length;
+    } catch (err) {
+      console.error('[banking] post-sync attribution failed', err instanceof Error ? err.message : err);
+    }
+
     return NextResponse.json({
       ok: true,
       accounts: session.account_uids.length,
       inserted,
       duplicates,
       categorized,
+      attributedMoves,
     });
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'unknown_error';

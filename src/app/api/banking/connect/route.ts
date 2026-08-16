@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'node:crypto';
 import { startAuth, getAspsps, REVOLUT_IE, type EbAspspRef } from '@/lib/enablebanking';
-import { initBankSchema, setPendingState } from '@/lib/bank-store';
+import { setPendingState } from '@/lib/bank-store';
+import { ensureBankReady } from '../_ready';
 
 // GET /api/banking/connect — mints a `state`, stores it server-side, starts
 // an Enable Banking consent for Revolut (IE), and redirects the browser to
@@ -34,7 +35,7 @@ async function resolveRevolutAspsp(): Promise<EbAspspRef> {
 
 export async function GET(req: NextRequest) {
   try {
-    initBankSchema();
+    ensureBankReady();
 
     const state = crypto.randomUUID();
     setPendingState(state);

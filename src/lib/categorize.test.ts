@@ -10,7 +10,12 @@ import os from 'node:os';
 import path from 'node:path';
 import { suggestCategory, runCategorization, findCategoryById, type LlmCategorizer } from './categorize';
 import { initBudgetSchema, seedBudgetIfEmpty } from './budget-store';
-import { initBankSchema, upsertTransactions, listBankTransactions } from './bank-store';
+import {
+  initBankSchema,
+  upsertTransactions,
+  listBankTransactions,
+  addBankCategoryRule,
+} from './bank-store';
 import type { BudgetCategory } from '@/types/budget';
 
 function makeCategory(id: string, name: string): BudgetCategory {
@@ -30,7 +35,12 @@ afterAll(() => {
   if (originalOpenAiKey !== undefined) process.env.OPENAI_API_KEY = originalOpenAiKey;
 });
 
-describe('suggestCategory — rules', () => {
+// The allocation-only model: there are NO merchant-keyword rules any more. A
+// merchant card charge (Tesco, Circle K, ...) is the couple SPENDING money they
+// already allocated with a labeled transfer, so its label matches no category
+// name and it stays uncategorized (attribution then marks it unallocated). It
+// must NOT count as Shop/Fuel — counting it would double the labeled allocation.
+describe('suggestCategory — merchant charges are NOT categorized (no keyword rules)', () => {
   const categories: BudgetCategory[] = [
     makeCategory('cat-shop', 'Shop'),
     makeCategory('cat-fuel', 'Fuel'),
@@ -38,42 +48,25 @@ describe('suggestCategory — rules', () => {
     makeCategory('cat-gym', 'Gym'),
   ];
 
-  it('matches Tesco -> Shop with high confidence', async () => {
+  it('a Tesco charge is NOT counted as Shop -> none (unallocated)', async () => {
     const r = await suggestCategory({ description: 'TESCO STORES 3021', counterparty: 'Tesco Ireland' }, categories);
-    expect(r).toEqual({ categoryId: 'cat-shop', confidence: 0.9, source: 'rule' });
-  });
-
-  it('matches accent-insensitively (Tésco -> Shop)', async () => {
-    const r = await suggestCategory({ description: 'Tésco Superstore', counterparty: null }, categories);
-    expect(r.categoryId).toBe('cat-shop');
-    expect(r.source).toBe('rule');
-  });
-
-  it('matches Dunnes/Lidl/Aldi/SuperValu -> Shop', async () => {
-    for (const merchant of ['Dunnes Stores', 'Lidl Ireland', 'Aldi Stores', 'SuperValu']) {
-      const r = await suggestCategory({ description: merchant, counterparty: null }, categories);
-      expect(r.categoryId).toBe('cat-shop');
-    }
-  });
-
-  it('matches Circle K -> Fuel', async () => {
-    const r = await suggestCategory({ description: 'Circle K Dublin', counterparty: null }, categories);
-    expect(r.categoryId).toBe('cat-fuel');
-  });
-
-  it('matches Netflix -> Netflix', async () => {
-    const r = await suggestCategory({ description: 'NETFLIX.COM', counterparty: null }, categories);
-    expect(r.categoryId).toBe('cat-netflix');
-  });
-
-  it('Revolut top-up is recognized but never assigned a category (self-transfer, not a spend)', async () => {
-    const r = await suggestCategory({ description: 'Revolut top-up', counterparty: 'Revolut' }, categories);
     expect(r).toEqual({ categoryId: null, confidence: 0, source: 'none' });
   });
 
-  it('a rule keyword matches but this month has no category by that name -> none (no LLM configured)', async () => {
-    const noShop = categories.filter((c) => c.name !== 'Shop');
-    const r = await suggestCategory({ description: 'Tesco Express', counterparty: null }, noShop);
+  it('other supermarket merchants (Dunnes/Lidl/Aldi/SuperValu) are not Shop -> none', async () => {
+    for (const merchant of ['Dunnes Stores', 'Lidl Ireland', 'Aldi Stores', 'SuperValu']) {
+      const r = await suggestCategory({ description: merchant, counterparty: null }, categories);
+      expect(r).toEqual({ categoryId: null, confidence: 0, source: 'none' });
+    }
+  });
+
+  it('a fuel merchant (Circle K) is not Fuel -> none', async () => {
+    const r = await suggestCategory({ description: 'Circle K Dublin', counterparty: null }, categories);
+    expect(r).toEqual({ categoryId: null, confidence: 0, source: 'none' });
+  });
+
+  it('a Revolut top-up (self-transfer) matches no category name -> none', async () => {
+    const r = await suggestCategory({ description: 'Revolut top-up', counterparty: 'Revolut' }, categories);
     expect(r).toEqual({ categoryId: null, confidence: 0, source: 'none' });
   });
 
@@ -82,8 +75,79 @@ describe('suggestCategory — rules', () => {
     expect(r).toEqual({ categoryId: null, confidence: 0, source: 'none' });
   });
 
-  it('no rule match and no LLM configured -> none', async () => {
+  it('an unknown merchant with no LLM configured -> none', async () => {
     const r = await suggestCategory({ description: 'Some Unknown Merchant XYZ', counterparty: null }, categories);
+    expect(r).toEqual({ categoryId: null, confidence: 0, source: 'none' });
+  });
+});
+
+// The couple's primary flow: labeled transfers whose description IS the budget
+// line ("MacBook To RAFAELA", "Credit card To RAFAELA", "Pay later El", ...).
+// The label is matched directly against THIS month's real category names.
+describe('suggestCategory — label -> category-name match', () => {
+  // Mirrors Rafa's real Aug month (see budget-store SEED_*): note the deliberate
+  // "Eletricity" spelling and the multi-word names.
+  const categories: BudgetCategory[] = [
+    makeCategory('cat-macbook', 'MacBook'),
+    makeCategory('cat-cc', 'Credit Card'),
+    makeCategory('cat-paylater', 'Pay Later'),
+    makeCategory('cat-gym', 'Gym'),
+    makeCategory('cat-elec', 'Eletricity'),
+    makeCategory('cat-youtube', 'Youtube'),
+    makeCategory('cat-netflix', 'Netflix'),
+    makeCategory('cat-shop', 'Shop'),
+  ];
+
+  it('matches "MacBook To RAFAELA" -> MacBook with high confidence', async () => {
+    const r = await suggestCategory({ description: 'MacBook To RAFAELA', counterparty: 'RAFAELA' }, categories);
+    expect(r).toEqual({ categoryId: 'cat-macbook', confidence: 0.95, source: 'label' });
+  });
+
+  it('strips the To/From <name> transfer marker (Credit card / Gym)', async () => {
+    const cc = await suggestCategory({ description: 'Credit card To RAFAELA', counterparty: null }, categories);
+    expect(cc.categoryId).toBe('cat-cc');
+    expect(cc.source).toBe('label');
+
+    const gym = await suggestCategory({ description: 'Gym From RAFAEL', counterparty: null }, categories);
+    expect(gym.categoryId).toBe('cat-gym');
+    expect(gym.source).toBe('label');
+  });
+
+  it('strips a trailing "El"/"Ela" person tag ("Pay later El To..." -> Pay Later)', async () => {
+    const r = await suggestCategory({ description: 'Pay later El To RAFAEL', counterparty: 'RAFAEL' }, categories);
+    expect(r.categoryId).toBe('cat-paylater');
+    expect(r.source).toBe('label');
+  });
+
+  it('matches a one-word label with no marker (Youtube -> Youtube)', async () => {
+    const r = await suggestCategory({ description: 'Youtube', counterparty: null }, categories);
+    expect(r.categoryId).toBe('cat-youtube');
+  });
+
+  it('fuzzy-matches a spelling variant ("Electricity To..." -> "Eletricity")', async () => {
+    const r = await suggestCategory({ description: 'Electricity To RAFAEL', counterparty: null }, categories);
+    expect(r.categoryId).toBe('cat-elec');
+    expect(r.source).toBe('label');
+  });
+
+  it('does NOT match a non-expense transfer ("Salary El To...") -> none', async () => {
+    const r = await suggestCategory({ description: 'Salary El To RAFAEL', counterparty: 'RAFAEL' }, categories);
+    expect(r).toEqual({ categoryId: null, confidence: 0, source: 'none' });
+  });
+
+  it('a real merchant charge matches no category name -> none (unallocated, not Shop)', async () => {
+    const r = await suggestCategory({ description: 'Tesco Stores 6913', counterparty: null }, categories);
+    expect(r).toEqual({ categoryId: null, confidence: 0, source: 'none' });
+  });
+
+  it('picks the LONGEST matching category name (a bare "Credit" -> Credit Card)', async () => {
+    const withCredit = [...categories, makeCategory('cat-credit', 'Credit')];
+    const r = await suggestCategory({ description: 'Credit card To RAFAELA', counterparty: null }, withCredit);
+    expect(r.categoryId).toBe('cat-cc');
+  });
+
+  it('no month/categories -> none (nothing to match against)', async () => {
+    const r = await suggestCategory({ description: 'MacBook To RAFAELA', counterparty: null }, []);
     expect(r).toEqual({ categoryId: null, confidence: 0, source: 'none' });
   });
 });
@@ -145,6 +209,68 @@ describe('suggestCategory — LLM fallback (mocked, no network)', () => {
   });
 });
 
+// Counterparty→category rules (bank_category_rules): the explicit, per-couple
+// exceptions to the allocation-only model. A rule maps ONE exact counterparty
+// (normalized: case/accent-insensitive) to a category NAME, and fires only
+// when the label match found nothing. Injected via deps.rules so these tests
+// stay pure (no DB) — runCategorization loads the real table (DB-backed test
+// at the bottom of this file).
+describe('suggestCategory — counterparty-rule fallback', () => {
+  const categories: BudgetCategory[] = [
+    makeCategory('cat-rental', 'Rental'),
+    makeCategory('cat-shop', 'Shop'),
+    makeCategory('cat-fuel', 'Fuel'),
+  ];
+  const cluidRule = [{ pattern: 'cluid housing association', category_name: 'Rental' }];
+
+  it('assigns a rule-matched counterparty when the label match fails', async () => {
+    const r = await suggestCategory(
+      { description: 'Monthly rent DD', counterparty: 'Clúid Housing Association' },
+      categories,
+      { rules: cluidRule },
+    );
+    expect(r).toEqual({ categoryId: 'cat-rental', confidence: 0.9, source: 'rule' });
+  });
+
+  it('label match WINS over a rule (label is the budget line; rules are fallback)', async () => {
+    // The description's label matches Fuel while the counterparty carries a
+    // Rental rule — the label must win.
+    const r = await suggestCategory(
+      { description: 'Fuel To RAFAELA', counterparty: 'Clúid Housing Association' },
+      categories,
+      { rules: cluidRule },
+    );
+    expect(r).toEqual({ categoryId: 'cat-fuel', confidence: 0.95, source: 'label' });
+  });
+
+  it('matches the stored normalized pattern regardless of case/accents', async () => {
+    const r = await suggestCategory(
+      { description: 'Rent', counterparty: 'CLÚID HOUSING ASSOCIATION' },
+      categories,
+      { rules: cluidRule },
+    );
+    expect(r).toEqual({ categoryId: 'cat-rental', confidence: 0.9, source: 'rule' });
+  });
+
+  it('an exact-equality rule does NOT catch a longer similarly-named counterparty', async () => {
+    const r = await suggestCategory(
+      { description: 'Rent', counterparty: 'Clúid Housing Association Gift Shop' },
+      categories,
+      { rules: cluidRule },
+    );
+    expect(r).toEqual({ categoryId: null, confidence: 0, source: 'none' });
+  });
+
+  it('a rule whose category name exists in no month category assigns nothing -> none', async () => {
+    const r = await suggestCategory(
+      { description: 'Rent', counterparty: 'Clúid Housing Association' },
+      [makeCategory('cat-shop', 'Shop')],
+      { rules: cluidRule },
+    );
+    expect(r).toEqual({ categoryId: null, confidence: 0, source: 'none' });
+  });
+});
+
 // DB-backed: runCategorization + findCategoryById need real budget-store
 // (categories) and bank-store (transactions) rows against the same SQLite
 // file. getDb() (src/lib/db.ts) memoizes its connection at module scope on
@@ -166,30 +292,33 @@ describe('runCategorization (DB-backed, real SQLite)', () => {
     fs.rmSync(tmpDir, { recursive: true, force: true });
   });
 
-  it('assigns rule-matched transactions and leaves the rest for review', async () => {
+  it('assigns labeled allocations and leaves merchant charges + unknowns for review', async () => {
     upsertTransactions([
+      // A labeled allocation — its label IS the budget line -> assigned by name.
+      {
+        id: 'run-cat-gym',
+        account_uid: 'acc-run',
+        amount: -138,
+        currency: 'EUR',
+        credit_debit: 'DBIT',
+        booking_date: '2026-08-04',
+        value_date: '2026-08-04',
+        description: 'Gym From RAFAEL',
+        counterparty: 'RAFAEL',
+        status: 'BOOK',
+      },
+      // A merchant card charge — matches no category name -> stays for review
+      // (attribution marks it unallocated); it must NOT count as Shop.
       {
         id: 'run-cat-tesco',
         account_uid: 'acc-run',
         amount: -42.5,
         currency: 'EUR',
         credit_debit: 'DBIT',
-        booking_date: '2026-08-04',
-        value_date: '2026-08-04',
-        description: 'Tesco Express',
-        counterparty: 'Tesco',
-        status: 'BOOK',
-      },
-      {
-        id: 'run-cat-netflix',
-        account_uid: 'acc-run',
-        amount: -17,
-        currency: 'EUR',
-        credit_debit: 'DBIT',
         booking_date: '2026-08-06',
         value_date: '2026-08-06',
-        description: 'NETFLIX.COM',
-        counterparty: null,
+        description: 'Tesco Express',
+        counterparty: 'Tesco',
         status: 'BOOK',
       },
       {
@@ -207,19 +336,70 @@ describe('runCategorization (DB-backed, real SQLite)', () => {
     ]);
 
     const result = await runCategorization({ year: 2026, month: 8 });
-    expect(result).toEqual({ assigned: 2, needsReview: 1 });
+    expect(result).toEqual({ assigned: 1, needsReview: 2 });
 
     const rows = listBankTransactions({ monthYear: '2026-08' });
+    const gym = rows.find((r) => r.id === 'run-cat-gym');
     const tesco = rows.find((r) => r.id === 'run-cat-tesco');
-    const netflix = rows.find((r) => r.id === 'run-cat-netflix');
     const unknown = rows.find((r) => r.id === 'run-cat-unknown');
 
-    expect(tesco?.category_id).toBeTruthy();
-    expect(netflix?.category_id).toBeTruthy();
+    expect(gym?.category_id).toBeTruthy();
+    expect(tesco?.category_id).toBeNull(); // merchant charge -> not categorized
     expect(unknown?.category_id).toBeNull();
 
-    expect(findCategoryById(tesco!.category_id!)?.name).toBe('Shop');
-    expect(findCategoryById(netflix!.category_id!)?.name).toBe('Netflix');
+    expect(findCategoryById(gym!.category_id!)?.name).toBe('Gym');
+  });
+
+  it('matches labeled transfers to that booking month\'s category by name; leaves non-expense transfers for review', async () => {
+    upsertTransactions([
+      {
+        id: 'run-lbl-macbook',
+        account_uid: 'acc-run',
+        amount: -92.23,
+        currency: 'EUR',
+        credit_debit: 'DBIT',
+        booking_date: '2026-08-10',
+        value_date: '2026-08-10',
+        description: 'MacBook To RAFAELA',
+        counterparty: 'RAFAELA',
+        status: 'BOOK',
+      },
+      {
+        id: 'run-lbl-cc',
+        account_uid: 'acc-run',
+        amount: -366.67,
+        currency: 'EUR',
+        credit_debit: 'DBIT',
+        booking_date: '2026-08-11',
+        value_date: '2026-08-11',
+        description: 'Credit card To RAFAELA',
+        counterparty: null,
+        status: 'BOOK',
+      },
+      {
+        id: 'run-lbl-salary',
+        account_uid: 'acc-run',
+        amount: 2942.31,
+        currency: 'EUR',
+        credit_debit: 'CRDT',
+        booking_date: '2026-08-12',
+        value_date: '2026-08-12',
+        description: 'Salary El To RAFAEL', // income, not an expense category -> stays for review
+        counterparty: 'RAFAEL',
+        status: 'BOOK',
+      },
+    ]);
+
+    await runCategorization({ year: 2026, month: 8 });
+
+    const rows = listBankTransactions({ monthYear: '2026-08' });
+    const macbook = rows.find((r) => r.id === 'run-lbl-macbook');
+    const cc = rows.find((r) => r.id === 'run-lbl-cc');
+    const salary = rows.find((r) => r.id === 'run-lbl-salary');
+
+    expect(findCategoryById(macbook!.category_id!)?.name).toBe('MacBook');
+    expect(findCategoryById(cc!.category_id!)?.name).toBe('Credit Card');
+    expect(salary?.category_id).toBeNull();
   });
 
   it('no budget month for the given year/month -> everything needs review', async () => {
@@ -239,5 +419,40 @@ describe('runCategorization (DB-backed, real SQLite)', () => {
     ]);
     const result = await runCategorization({ year: 2031, month: 1 });
     expect(result).toEqual({ assigned: 0, needsReview: 1 });
+  });
+
+  it('runCategorization assigns a stored counterparty rule when the label fails (Clúid → Rental)', async () => {
+    const rule = addBankCategoryRule({ pattern: 'Clúid Housing Association', category_name: 'Rental' });
+    expect(rule.pattern).toBe('cluid housing association'); // stored normalized
+
+    upsertTransactions([
+      {
+        id: 'run-rule-cluid',
+        account_uid: 'acc-run',
+        amount: -1397,
+        currency: 'EUR',
+        credit_debit: 'DBIT',
+        booking_date: '2026-08-03',
+        value_date: '2026-08-03',
+        description: 'Monthly rent DD', // matches no category name by label
+        counterparty: 'Clúid Housing Association',
+        status: 'BOOK',
+      },
+    ]);
+
+    const result = await runCategorization({ year: 2026, month: 8 });
+    expect(result.assigned).toBeGreaterThanOrEqual(1); // (earlier tests left other uncategorized rows)
+
+    const rows = listBankTransactions({ monthYear: '2026-08' });
+    const cluid = rows.find((r) => r.id === 'run-rule-cluid');
+    expect(cluid?.category_id).toBeTruthy();
+    expect(cluid?.confidence).toBeCloseTo(0.9, 2);
+    expect(findCategoryById(cluid!.category_id!)?.name).toBe('Rental');
+
+    // Re-run: the Clúid row is no longer uncategorized, so a sweep never
+    // re-assigns or duplicates (idempotent on the assigned row).
+    await runCategorization({ year: 2026, month: 8 });
+    const after = listBankTransactions({ monthYear: '2026-08' }).find((r) => r.id === 'run-rule-cluid');
+    expect(after?.category_id).toBe(cluid!.category_id);
   });
 });

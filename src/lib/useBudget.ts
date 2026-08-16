@@ -39,7 +39,13 @@ async function fetchJSON<T>(url: string, init?: RequestInit): Promise<T> {
     }
     throw new Error(message);
   }
-  return res.json() as Promise<T>;
+  // DELETE returns 204 (no body); reading .json() on an empty response throws
+  // "Unexpected end of JSON input". Tolerate empty/no-content responses.
+  if (res.status === 204 || res.headers.get('content-length') === '0') {
+    return undefined as T;
+  }
+  const text = await res.text();
+  return (text ? JSON.parse(text) : undefined) as T;
 }
 
 interface UseBudgetResult {

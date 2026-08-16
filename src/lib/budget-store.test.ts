@@ -14,6 +14,7 @@ import {
   initBudgetSchema,
   seedBudgetIfEmpty,
   createNextMonth,
+  createMonthFromTemplate,
   getCurrentMonth,
   getMonthByYM,
   listMonths,
@@ -180,6 +181,39 @@ describe('createNextMonth (DB-backed, real SQLite)', () => {
     expect(aug!.categories.length).toBeGreaterThan(0);
 
     expect(getMonthByYM(2099, 1)).toBeNull();
+  });
+
+  it('createMonthFromTemplate backfills an EARLIER month from a template (carries save, fresh UUIDs, spent 0)', () => {
+    // The backfill path the one-off script uses: seed a month BEFORE the
+    // earliest from the Aug template. createNextMonth can only go forward.
+    const aug = getMonthByYM(2026, 8);
+    expect(aug).not.toBeNull();
+
+    const may = createMonthFromTemplate(aug!.id, 2026, 5);
+    expect(may.year).toBe(2026);
+    expect(may.month).toBe(5);
+    // save is carried from the template (not reset to 0 like carry-forward).
+    expect(may.save).toBeCloseTo(aug!.save, 2);
+    expect(may.categories).toHaveLength(aug!.categories.length);
+    expect(may.incomes).toHaveLength(aug!.incomes.length);
+    expect(may.categories.every((c) => c.spent === 0)).toBe(true);
+
+    // Per-month category ids: the backfilled month gets its OWN UUIDs.
+    const augIds = new Set(aug!.categories.map((c) => c.id));
+    expect(may.categories.every((c) => !augIds.has(c.id))).toBe(true);
+
+    const augPlannedByName = new Map(aug!.categories.map((c) => [c.name, c.planned]));
+    for (const c of may.categories) {
+      expect(c.planned).toBeCloseTo(augPlannedByName.get(c.name)!, 2);
+    }
+    const augAmountByLabel = new Map(aug!.incomes.map((i) => [i.label, i.amount]));
+    for (const inc of may.incomes) {
+      expect(inc.amount).toBeCloseTo(augAmountByLabel.get(inc.label)!, 2);
+    }
+
+    // Idempotency guard: a second create for the same (year, month) throws, so
+    // the backfill script can catch it and skip an already-seeded month.
+    expect(() => createMonthFromTemplate(aug!.id, 2026, 5)).toThrow(/already exists/);
   });
 
   it('refuses a duplicate target month', () => {
