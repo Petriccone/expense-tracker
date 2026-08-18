@@ -1,0 +1,1037 @@
+{
+ "source": "Google Sheet 1O3-nzJBU2-VeMK_Tf23WexE9vXGxxyIu xlsx export 2026-08-18",
+ "savingsOpeningBalance": 1772.79,
+ "months": [
+  {
+   "year": 2026,
+   "month": 5,
+   "save": 1600.0,
+   "total_saving_sheet": 3372.79,
+   "incomes": [
+    {
+     "label": "Rafaela",
+     "amount": 3472.6
+    },
+    {
+     "label": "Rafael",
+     "amount": 2143.0
+    }
+   ],
+   "categories": [
+    {
+     "group": "fixed",
+     "name": "Insurance",
+     "planned": 219.0,
+     "spent": 219.0
+    },
+    {
+     "group": "fixed",
+     "name": "Deliveroo",
+     "planned": 8.99,
+     "spent": 8.99
+    },
+    {
+     "group": "fixed",
+     "name": "Ultra Plan",
+     "planned": 110.0,
+     "spent": 110.0
+    },
+    {
+     "group": "fixed",
+     "name": "Phone",
+     "planned": 70.75,
+     "spent": 70.75
+    },
+    {
+     "group": "fixed",
+     "name": "Shop",
+     "planned": 650.0,
+     "spent": 783.22
+    },
+    {
+     "group": "fixed",
+     "name": "Eletricity",
+     "planned": 87.51,
+     "spent": 87.51
+    },
+    {
+     "group": "fixed",
+     "name": "Youtube",
+     "planned": 25.99,
+     "spent": 25.99
+    },
+    {
+     "group": "fixed",
+     "name": "Loan",
+     "planned": 109.26,
+     "spent": 109.26
+    },
+    {
+     "group": "fixed",
+     "name": "Apple",
+     "planned": 9.99,
+     "spent": 9.99
+    },
+    {
+     "group": "fixed",
+     "name": "Amazon",
+     "planned": 6.99,
+     "spent": 6.99
+    },
+    {
+     "group": "fixed",
+     "name": "Spotify",
+     "planned": 11.99,
+     "spent": 11.99
+    },
+    {
+     "group": "fixed",
+     "name": "Wifi",
+     "planned": 22.99,
+     "spent": 22.99
+    },
+    {
+     "group": "fixed",
+     "name": "Leap Card",
+     "planned": 15.0,
+     "spent": 15.0
+    },
+    {
+     "group": "fixed",
+     "name": "AI",
+     "planned": 50.0,
+     "spent": 50.0
+    },
+    {
+     "group": "fixed",
+     "name": "Eyebrows",
+     "planned": 15.0,
+     "spent": 15.0
+    },
+    {
+     "group": "fixed",
+     "name": "Netflix",
+     "planned": 17.0,
+     "spent": 17.0
+    },
+    {
+     "group": "fixed",
+     "name": "Eye Lashes",
+     "planned": 0.0,
+     "spent": 0.0
+    },
+    {
+     "group": "fixed",
+     "name": "Hair Cut",
+     "planned": 35.0,
+     "spent": 35.0
+    },
+    {
+     "group": "fixed",
+     "name": "Nail",
+     "planned": 0.0,
+     "spent": 0.0
+    },
+    {
+     "group": "fixed",
+     "name": "Toll",
+     "planned": 4.0,
+     "spent": 4.0
+    },
+    {
+     "group": "fixed",
+     "name": "Fuel",
+     "planned": 150.0,
+     "spent": 150.0
+    },
+    {
+     "group": "fixed",
+     "name": "Gym",
+     "planned": 198.0,
+     "spent": 198.0
+    },
+    {
+     "group": "fixed",
+     "name": "Cleaner",
+     "planned": 50.0,
+     "spent": 50.0
+    },
+    {
+     "group": "fixed",
+     "name": "Rental",
+     "planned": 1397.0,
+     "spent": 1397.0
+    },
+    {
+     "group": "variable",
+     "name": "Pay Later",
+     "planned": 216.5,
+     "spent": 216.5
+    },
+    {
+     "group": "variable",
+     "name": "Credit Card",
+     "planned": 366.67,
+     "spent": 366.67
+    },
+    {
+     "group": "variable",
+     "name": "Car Wash",
+     "planned": 35.0,
+     "spent": 35.0
+    },
+    {
+     "group": "variable",
+     "name": "Hospital",
+     "planned": 100.0,
+     "spent": 100.0
+    },
+    {
+     "group": "variable",
+     "name": "GP",
+     "planned": 45.0,
+     "spent": 45.0
+    },
+    {
+     "group": "variable",
+     "name": "BCN Airbnb",
+     "planned": 591.0,
+     "spent": 591.0
+    },
+    {
+     "group": "variable",
+     "name": "MacBook",
+     "planned": 92.23,
+     "spent": 92.23
+    },
+    {
+     "group": "variable",
+     "name": "Anuncio Carro",
+     "planned": 24.0,
+     "spent": 24.0
+    },
+    {
+     "group": "variable",
+     "name": "GP + Exam",
+     "planned": 170.0,
+     "spent": 170.0
+    },
+    {
+     "group": "extra",
+     "name": "Home Store",
+     "planned": 31.65,
+     "spent": 31.65
+    },
+    {
+     "group": "extra",
+     "name": "?",
+     "planned": 24.0,
+     "spent": 24.0
+    },
+    {
+     "group": "extra",
+     "name": "?",
+     "planned": 15.0,
+     "spent": 15.0
+    },
+    {
+     "group": "extra",
+     "name": "Last Month",
+     "planned": 166.12,
+     "spent": 95.47
+    }
+   ],
+   "cash_income_excluded": 1790.0
+  },
+  {
+   "year": 2026,
+   "month": 6,
+   "save": 700.0,
+   "total_saving_sheet": 4072.79,
+   "incomes": [
+    {
+     "label": "Rafaela",
+     "amount": 2907.02
+    },
+    {
+     "label": "Rafael",
+     "amount": 2843.0
+    }
+   ],
+   "categories": [
+    {
+     "group": "fixed",
+     "name": "Insurance",
+     "planned": 0.0,
+     "spent": 0.0
+    },
+    {
+     "group": "fixed",
+     "name": "Deliveroo",
+     "planned": 8.99,
+     "spent": 8.99
+    },
+    {
+     "group": "fixed",
+     "name": "Ultra Plan",
+     "planned": 110.0,
+     "spent": 110.0
+    },
+    {
+     "group": "fixed",
+     "name": "Phone",
+     "planned": 70.75,
+     "spent": 70.75
+    },
+    {
+     "group": "fixed",
+     "name": "Shop",
+     "planned": 650.0,
+     "spent": 785.83
+    },
+    {
+     "group": "fixed",
+     "name": "Eletricity",
+     "planned": 100.0,
+     "spent": 93.5
+    },
+    {
+     "group": "fixed",
+     "name": "Youtube",
+     "planned": 25.99,
+     "spent": 25.99
+    },
+    {
+     "group": "fixed",
+     "name": "Loan",
+     "planned": 109.26,
+     "spent": 109.26
+    },
+    {
+     "group": "fixed",
+     "name": "Apple",
+     "planned": 9.99,
+     "spent": 9.99
+    },
+    {
+     "group": "fixed",
+     "name": "Amazon",
+     "planned": 6.99,
+     "spent": 6.99
+    },
+    {
+     "group": "fixed",
+     "name": "Spotify",
+     "planned": 11.99,
+     "spent": 12.99
+    },
+    {
+     "group": "fixed",
+     "name": "Wifi",
+     "planned": 22.99,
+     "spent": 22.99
+    },
+    {
+     "group": "fixed",
+     "name": "Leap Card",
+     "planned": 30.0,
+     "spent": 0.0
+    },
+    {
+     "group": "fixed",
+     "name": "Botfy",
+     "planned": 200.0,
+     "spent": 200.0
+    },
+    {
+     "group": "fixed",
+     "name": "Netflix",
+     "planned": 17.0,
+     "spent": 17.0
+    },
+    {
+     "group": "fixed",
+     "name": "Eyebrows",
+     "planned": 55.0,
+     "spent": 55.0
+    },
+    {
+     "group": "fixed",
+     "name": "Lashes",
+     "planned": 85.0,
+     "spent": 85.0
+    },
+    {
+     "group": "fixed",
+     "name": "Hair Cut",
+     "planned": 35.0,
+     "spent": 35.0
+    },
+    {
+     "group": "fixed",
+     "name": "Nail",
+     "planned": 75.0,
+     "spent": 75.0
+    },
+    {
+     "group": "fixed",
+     "name": "Toll",
+     "planned": 4.73,
+     "spent": 8.56
+    },
+    {
+     "group": "fixed",
+     "name": "Fuel",
+     "planned": 150.0,
+     "spent": 100.0
+    },
+    {
+     "group": "fixed",
+     "name": "Gym",
+     "planned": 198.0,
+     "spent": 198.0
+    },
+    {
+     "group": "fixed",
+     "name": "Cleaner",
+     "planned": 50.0,
+     "spent": 0.0
+    },
+    {
+     "group": "fixed",
+     "name": "Rental",
+     "planned": 1397.0,
+     "spent": 1397.0
+    },
+    {
+     "group": "variable",
+     "name": "Pay Later",
+     "planned": 195.85,
+     "spent": 195.85
+    },
+    {
+     "group": "variable",
+     "name": "Credit Card",
+     "planned": 366.67,
+     "spent": 366.67
+    },
+    {
+     "group": "variable",
+     "name": "Car Wash",
+     "planned": 50.0,
+     "spent": 0.0
+    },
+    {
+     "group": "variable",
+     "name": "MacBook",
+     "planned": 92.23,
+     "spent": 92.23
+    },
+    {
+     "group": "variable",
+     "name": "Anuncio Carro",
+     "planned": 24.0,
+     "spent": 0.0
+    },
+    {
+     "group": "extra",
+     "name": "Last Month",
+     "planned": 27.15,
+     "spent": 27.15
+    }
+   ],
+   "cash_income_excluded": null
+  },
+  {
+   "year": 2026,
+   "month": 7,
+   "save": 0.0,
+   "total_saving_sheet": 4072.79,
+   "incomes": [
+    {
+     "label": "Rafaela",
+     "amount": 2907.0
+    },
+    {
+     "label": "Rafael",
+     "amount": 2940.0
+    }
+   ],
+   "categories": [
+    {
+     "group": "fixed",
+     "name": "Insurance",
+     "planned": 377.17,
+     "spent": 0.0
+    },
+    {
+     "group": "fixed",
+     "name": "Ultra Plan",
+     "planned": 110.0,
+     "spent": 110.0
+    },
+    {
+     "group": "fixed",
+     "name": "Phone",
+     "planned": 70.75,
+     "spent": 70.75
+    },
+    {
+     "group": "fixed",
+     "name": "Shop",
+     "planned": 500.0,
+     "spent": 588.46
+    },
+    {
+     "group": "fixed",
+     "name": "Eletricity",
+     "planned": 100.0,
+     "spent": 100.0
+    },
+    {
+     "group": "fixed",
+     "name": "Youtube",
+     "planned": 25.99,
+     "spent": 24.99
+    },
+    {
+     "group": "fixed",
+     "name": "Loan",
+     "planned": 109.26,
+     "spent": 109.26
+    },
+    {
+     "group": "fixed",
+     "name": "Apple",
+     "planned": 9.99,
+     "spent": 9.99
+    },
+    {
+     "group": "fixed",
+     "name": "Amazon",
+     "planned": 6.99,
+     "spent": 6.99
+    },
+    {
+     "group": "fixed",
+     "name": "Spotify",
+     "planned": 18.99,
+     "spent": 18.99
+    },
+    {
+     "group": "fixed",
+     "name": "Wifi",
+     "planned": 22.99,
+     "spent": 22.99
+    },
+    {
+     "group": "fixed",
+     "name": "Leap Card",
+     "planned": 60.0,
+     "spent": 95.0
+    },
+    {
+     "group": "fixed",
+     "name": "Botfy",
+     "planned": 200.0,
+     "spent": 200.0
+    },
+    {
+     "group": "fixed",
+     "name": "Netflix",
+     "planned": 17.0,
+     "spent": 17.0
+    },
+    {
+     "group": "fixed",
+     "name": "Eyebrows",
+     "planned": 55.0,
+     "spent": 55.0
+    },
+    {
+     "group": "fixed",
+     "name": "Lashes",
+     "planned": 85.0,
+     "spent": 85.0
+    },
+    {
+     "group": "fixed",
+     "name": "Hair Cut",
+     "planned": 35.0,
+     "spent": 35.0
+    },
+    {
+     "group": "fixed",
+     "name": "Nail",
+     "planned": 75.0,
+     "spent": 75.0
+    },
+    {
+     "group": "fixed",
+     "name": "Toll",
+     "planned": 4.73,
+     "spent": 11.63
+    },
+    {
+     "group": "fixed",
+     "name": "Fuel",
+     "planned": 75.0,
+     "spent": 50.0
+    },
+    {
+     "group": "fixed",
+     "name": "Gym",
+     "planned": 198.0,
+     "spent": 198.0
+    },
+    {
+     "group": "fixed",
+     "name": "Cleaner",
+     "planned": 0.0,
+     "spent": 0.0
+    },
+    {
+     "group": "fixed",
+     "name": "Rental",
+     "planned": 1397.0,
+     "spent": 1397.0
+    },
+    {
+     "group": "variable",
+     "name": "Pay Later",
+     "planned": 182.31,
+     "spent": 182.31
+    },
+    {
+     "group": "variable",
+     "name": "Credit Card",
+     "planned": 366.67,
+     "spent": 366.67
+    },
+    {
+     "group": "variable",
+     "name": "Car Wash",
+     "planned": 0.0,
+     "spent": 17.0
+    },
+    {
+     "group": "variable",
+     "name": "MacBook",
+     "planned": 92.23,
+     "spent": 92.23
+    },
+    {
+     "group": "extra",
+     "name": "BCN",
+     "planned": 700.0,
+     "spent": 0.0
+    },
+    {
+     "group": "extra",
+     "name": "TAX",
+     "planned": 200.0,
+     "spent": 111.0
+    },
+    {
+     "group": "extra",
+     "name": "Theory Test",
+     "planned": 45.0,
+     "spent": 45.0
+    },
+    {
+     "group": "extra",
+     "name": "Eyesight Test",
+     "planned": 40.0,
+     "spent": 40.0
+    },
+    {
+     "group": "extra",
+     "name": "Learner Permit",
+     "planned": 0.0,
+     "spent": 45.0
+    },
+    {
+     "group": "extra",
+     "name": "Pills",
+     "planned": 0.0,
+     "spent": 15.57
+    },
+    {
+     "group": "extra",
+     "name": "dindin extra",
+     "planned": 0.0,
+     "spent": 100.0
+    }
+   ],
+   "cash_income_excluded": null
+  },
+  {
+   "year": 2026,
+   "month": 8,
+   "save": 700.0,
+   "total_saving_sheet": 4757.17,
+   "incomes": [
+    {
+     "label": "Rafaela",
+     "amount": 2855.83
+    },
+    {
+     "label": "Rafael",
+     "amount": 2942.31
+    }
+   ],
+   "categories": [
+    {
+     "group": "fixed",
+     "name": "Insurance 1/12",
+     "planned": 150.0,
+     "spent": 112.8
+    },
+    {
+     "group": "fixed",
+     "name": "Phone",
+     "planned": 70.75,
+     "spent": 20.0
+    },
+    {
+     "group": "fixed",
+     "name": "Shop",
+     "planned": 650.0,
+     "spent": 678.25
+    },
+    {
+     "group": "fixed",
+     "name": "Eletricity",
+     "planned": 100.0,
+     "spent": 100.0
+    },
+    {
+     "group": "fixed",
+     "name": "Youtube",
+     "planned": 25.99,
+     "spent": 0.0
+    },
+    {
+     "group": "fixed",
+     "name": "Loan",
+     "planned": 109.26,
+     "spent": 109.26
+    },
+    {
+     "group": "fixed",
+     "name": "Apple",
+     "planned": 9.99,
+     "spent": 9.99
+    },
+    {
+     "group": "fixed",
+     "name": "Amazon",
+     "planned": 6.99,
+     "spent": 0.0
+    },
+    {
+     "group": "fixed",
+     "name": "Spotify",
+     "planned": 18.99,
+     "spent": 0.0
+    },
+    {
+     "group": "fixed",
+     "name": "Wifi",
+     "planned": 22.99,
+     "spent": 22.99
+    },
+    {
+     "group": "fixed",
+     "name": "Leap Card",
+     "planned": 30.0,
+     "spent": 30.0
+    },
+    {
+     "group": "fixed",
+     "name": "Botfy",
+     "planned": 200.0,
+     "spent": 200.0
+    },
+    {
+     "group": "fixed",
+     "name": "Netflix",
+     "planned": 17.0,
+     "spent": 17.0
+    },
+    {
+     "group": "fixed",
+     "name": "Lashes",
+     "planned": 85.0,
+     "spent": 85.0
+    },
+    {
+     "group": "fixed",
+     "name": "Hair Cut",
+     "planned": 20.0,
+     "spent": 0.0
+    },
+    {
+     "group": "fixed",
+     "name": "Nail",
+     "planned": 80.0,
+     "spent": 80.0
+    },
+    {
+     "group": "fixed",
+     "name": "Toll",
+     "planned": 0.0,
+     "spent": 0.0
+    },
+    {
+     "group": "fixed",
+     "name": "Pills",
+     "planned": 16.0,
+     "spent": 0.0
+    },
+    {
+     "group": "fixed",
+     "name": "Fuel",
+     "planned": 150.0,
+     "spent": 50.0
+    },
+    {
+     "group": "fixed",
+     "name": "Gym",
+     "planned": 138.0,
+     "spent": 138.0
+    },
+    {
+     "group": "fixed",
+     "name": "Cleaner",
+     "planned": 50.0,
+     "spent": 0.0
+    },
+    {
+     "group": "fixed",
+     "name": "Rental",
+     "planned": 1397.0,
+     "spent": 1397.0
+    },
+    {
+     "group": "variable",
+     "name": "Pay Later",
+     "planned": 253.65,
+     "spent": 253.65
+    },
+    {
+     "group": "variable",
+     "name": "Credit Card",
+     "planned": 366.67,
+     "spent": 366.67
+    },
+    {
+     "group": "variable",
+     "name": "Car Wash",
+     "planned": 0.0,
+     "spent": 17.0
+    },
+    {
+     "group": "variable",
+     "name": "MacBook",
+     "planned": 92.23,
+     "spent": 92.23
+    },
+    {
+     "group": "extra",
+     "name": "BCN",
+     "planned": 14.2,
+     "spent": 14.2
+    },
+    {
+     "group": "extra",
+     "name": "Last Month",
+     "planned": 0.0,
+     "spent": 71.16
+    }
+   ],
+   "cash_income_excluded": null
+  },
+  {
+   "year": 2026,
+   "month": 9,
+   "save": 800.0,
+   "total_saving_sheet": 4857.17,
+   "incomes": [
+    {
+     "label": "Rafaela",
+     "amount": 2855.83
+    },
+    {
+     "label": "Rafael",
+     "amount": 3000.0
+    }
+   ],
+   "categories": [
+    {
+     "group": "fixed",
+     "name": "Insurance 2/12",
+     "planned": 113.0,
+     "spent": 0.0
+    },
+    {
+     "group": "fixed",
+     "name": "Phone",
+     "planned": 70.75,
+     "spent": 0.0
+    },
+    {
+     "group": "fixed",
+     "name": "Shop",
+     "planned": 650.0,
+     "spent": 0.0
+    },
+    {
+     "group": "fixed",
+     "name": "Eletricity",
+     "planned": 100.0,
+     "spent": 0.0
+    },
+    {
+     "group": "fixed",
+     "name": "Youtube",
+     "planned": 25.99,
+     "spent": 0.0
+    },
+    {
+     "group": "fixed",
+     "name": "Loan",
+     "planned": 109.26,
+     "spent": 0.0
+    },
+    {
+     "group": "fixed",
+     "name": "Apple",
+     "planned": 9.99,
+     "spent": 0.0
+    },
+    {
+     "group": "fixed",
+     "name": "Amazon",
+     "planned": 6.99,
+     "spent": 0.0
+    },
+    {
+     "group": "fixed",
+     "name": "Spotify",
+     "planned": 18.99,
+     "spent": 0.0
+    },
+    {
+     "group": "fixed",
+     "name": "Wifi",
+     "planned": 22.99,
+     "spent": 0.0
+    },
+    {
+     "group": "fixed",
+     "name": "Leap Card",
+     "planned": 20.0,
+     "spent": 0.0
+    },
+    {
+     "group": "fixed",
+     "name": "Botfy",
+     "planned": 0.0,
+     "spent": 0.0
+    },
+    {
+     "group": "fixed",
+     "name": "Netflix",
+     "planned": 17.0,
+     "spent": 0.0
+    },
+    {
+     "group": "fixed",
+     "name": "Lashes",
+     "planned": 85.0,
+     "spent": 0.0
+    },
+    {
+     "group": "fixed",
+     "name": "Hair Cut",
+     "planned": 20.0,
+     "spent": 0.0
+    },
+    {
+     "group": "fixed",
+     "name": "Nail",
+     "planned": 80.0,
+     "spent": 0.0
+    },
+    {
+     "group": "fixed",
+     "name": "Toll",
+     "planned": 0.0,
+     "spent": 0.0
+    },
+    {
+     "group": "fixed",
+     "name": "Pills",
+     "planned": 16.0,
+     "spent": 0.0
+    },
+    {
+     "group": "fixed",
+     "name": "Fuel",
+     "planned": 200.0,
+     "spent": 0.0
+    },
+    {
+     "group": "fixed",
+     "name": "Gym",
+     "planned": 138.0,
+     "spent": 0.0
+    },
+    {
+     "group": "fixed",
+     "name": "Cleaner",
+     "planned": 50.0,
+     "spent": 0.0
+    },
+    {
+     "group": "fixed",
+     "name": "Rental",
+     "planned": 1397.0,
+     "spent": 0.0
+    },
+    {
+     "group": "variable",
+     "name": "Pay Later",
+     "planned": 253.65,
+     "spent": 0.0
+    },
+    {
+     "group": "variable",
+     "name": "Credit Card",
+     "planned": 366.67,
+     "spent": 0.0
+    },
+    {
+     "group": "variable",
+     "name": "Car Wash",
+     "planned": 0.0,
+     "spent": 0.0
+    },
+    {
+     "group": "variable",
+     "name": "MacBook",
+     "planned": 92.23,
+     "spent": 0.0
+    },
+    {
+     "group": "extra",
+     "name": "Last Month",
+     "planned": 0.0,
+     "spent": 71.16
+    }
+   ],
+   "cash_income_excluded": null
+  }
+ ]
+}

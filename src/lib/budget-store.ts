@@ -295,11 +295,28 @@ export function getMonth(id: string): BudgetMonth | null {
 
 export function getCurrentMonth(): BudgetMonth | null {
   const db = ready();
-  const m = db
+  const now = new Date();
+  const curYear = now.getFullYear();
+  const curMonth = now.getMonth() + 1;
+
+  // Exact match for current real-world calendar month
+  const current = db
+    .prepare(`${MONTH_SELECT} WHERE year = ? AND month = ?`)
+    .get(curYear, curMonth) as MonthRow | undefined;
+  if (current) return hydrateMonth(db, current);
+
+  // Fallback: latest month <= current calendar date
+  const latestPast = db
+    .prepare(`${MONTH_SELECT} WHERE year < ? OR (year = ? AND month <= ?) ORDER BY year DESC, month DESC LIMIT 1`)
+    .get(curYear, curYear, curMonth) as MonthRow | undefined;
+  if (latestPast) return hydrateMonth(db, latestPast);
+
+  // Fallback: overall latest month
+  const latest = db
     .prepare(`${MONTH_SELECT} ORDER BY year DESC, month DESC LIMIT 1`)
     .get() as MonthRow | undefined;
-  if (!m) return null;
-  return hydrateMonth(db, m);
+  if (!latest) return null;
+  return hydrateMonth(db, latest);
 }
 
 // A single month by (year, month), fully hydrated — the schema's
