@@ -66,6 +66,21 @@ export function initBankSchema(): void {
       category_name TEXT NOT NULL,
       created_at    TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS bank_review_questions (
+      id                TEXT PRIMARY KEY,
+      tx_id             TEXT NOT NULL UNIQUE,
+      tx_date           TEXT,
+      tx_description    TEXT,
+      tx_amount         REAL,
+      asked_at          TEXT NOT NULL,
+      status            TEXT NOT NULL DEFAULT 'pending' CHECK(status IN ('pending','answered','expired')),
+      answered_by       TEXT NULL CHECK(answered_by IN ('rafa','rafaela')),
+      answered_at       TEXT NULL,
+      chosen_category_id TEXT NULL,
+      answer_text       TEXT NULL
+    );
+    CREATE INDEX IF NOT EXISTS idx_bank_review_status_asked ON bank_review_questions(status, asked_at);
   `);
 
   // Columns added after the original CREATE TABLE — a DB created before each
@@ -1104,4 +1119,157 @@ export function matchBankCategoryRule(
     if (r.pattern === normalized) return r;
   }
   return null;
+}
+
+// ----- review questions (wave 2e, intel layer) -----
+//
+// Per-transaction question rows posted to the couple's WhatsApp when the
+// auto-categorizer (LLM, label match, rule) couldn't confidently assign a
+// budget category: confidence < 0.9 OR category_id IS NULL AND the row is
+// unallocated. One row per tx (UNIQUE on tx_id) — answered / expired rows
+// short-circuit so re-running ask never spams a question that's already in
+// flight, and a stale pending row is revived (asked_at refreshed) so a
+// re-prompt can be sent on the next run.
+
+export interface ReviewQuestionRow {
+  id: string;
+  tx_id: string;
+  tx_date: string | null;
+  tx_description: string | null;
+  tx_amount: number | null;
+  asked_at: string;
+  status: 'pending' | 'answered' | 'expired';
+  answered_by: 'rafa' | 'rafaela' | null;
+  answered_at: string | null;
+  chosen_category_id: string | null;
+  answer_text: string | null;
+}
+
+const REVIEW_QUESTION_TTL_MS = 24 * 60 * 60 * 1000; // 24h
+
+const REVIEW_SELECT = `
+  SELECT id, tx_id, tx_date, tx_description, tx_amount, asked_at, status,
+         answered_by, answered_at, chosen_category_id, answer_text
+  FROM bank_review_questions
+`;
+
+// Result of an upsert into bank_review_questions for one tx_id. `null` means
+// there's already an ANSWERED row — the caller should NOT re-ask. `sent=true`
+// means the caller SHOULD send a WhatsApp message (new row inserted, OR an
+// expired row revived with a fresh asked_at); `sent=false` means an existing
+// pending row was reused and no new message is needed.
+export interface ReviewQuestionCreateResult {
+  row: ReviewQuestionRow;
+  sent: boolean;
+}
+
+export function createReviewQuestion(input: {
+  tx_id: string;
+  tx_date: string | null;
+  tx_description: string | null;
+  tx_amount: number | null;
+}): ReviewQuestionCreateResult | null {
+  const db = ready();
+  const existing = db.prepare(`${REVIEW_SELECT} WHERE tx_id = ?`).get(input.tx_id) as
+    | ReviewQuestionRow
+    | undefined;
+  const now = new Date().toISOString();
+
+  if (existing) {
+    if (existing.status === 'answered') return null;
+    if (existing.status === 'pending') {
+      return { row: existing, sent: false };
+    }
+    // expired -> revive with fresh asked_at, treat as a new prompt
+    db.prepare('UPDATE bank_review_questions SET asked_at = ?, status = ? WHERE id = ?').run(
+      now,
+      'pending',
+      existing.id,
+    );
+    const revived = db.prepare(`${REVIEW_SELECT} WHERE id = ?`).get(existing.id) as ReviewQuestionRow;
+    return { row: revived, sent: true };
+  }
+
+  const id = crypto.randomUUID();
+  db.prepare(
+    `INSERT INTO bank_review_questions
+       (id, tx_id, tx_date, tx_description, tx_amount, asked_at, status)
+     VALUES (?, ?, ?, ?, ?, ?, 'pending')`,
+  ).run(id, input.tx_id, input.tx_date, input.tx_description, input.tx_amount, now);
+  const row = db.prepare(`${REVIEW_SELECT} WHERE id = ?`).get(id) as ReviewQuestionRow;
+  return { row, sent: true };
+}
+
+export function getReviewQuestionById(id: string): ReviewQuestionRow | null {
+  const db = ready();
+  const r = db.prepare(`${REVIEW_SELECT} WHERE id = ?`).get(id) as ReviewQuestionRow | undefined;
+  return r ?? null;
+}
+
+export function listPendingReviewQuestions(limit: number): ReviewQuestionRow[] {
+  const db = ready();
+  return db
+    .prepare(`${REVIEW_SELECT} WHERE status = 'pending' ORDER BY asked_at ASC LIMIT ?`)
+    .all(limit) as unknown as ReviewQuestionRow[];
+}
+
+// Atomic first-writer-wins: a pending row's UPDATE only succeeds when its
+// status is still 'pending'. Returns true iff exactly one row was updated —
+// false means somebody else already claimed it (or it never was / isn't
+// pending anymore). The route layer maps false -> 409.
+export function claimReviewQuestion(
+  id: string,
+  by: 'rafa' | 'rafaela',
+  answerText: string | null,
+  categoryId: string | null,
+): boolean {
+  const db = ready();
+  const now = new Date().toISOString();
+  const res = db
+    .prepare(
+      `UPDATE bank_review_questions
+       SET status = 'answered', answered_by = ?, answered_at = ?,
+           chosen_category_id = ?, answer_text = ?
+       WHERE id = ? AND status = 'pending'`,
+    )
+    .run(by, now, categoryId, answerText, id);
+  return ((res as { changes?: number }).changes ?? 0) === 1;
+}
+
+// Sweep pending rows older than the TTL to 'expired' so the next ask can
+// revive-and-re-prompt instead of silently leaving them hanging. Returns the
+// number of rows expired (for logs / counters).
+export function expireStaleReviewQuestions(): number {
+  const db = ready();
+  const cutoff = new Date(Date.now() - REVIEW_QUESTION_TTL_MS).toISOString();
+  const res = db
+    .prepare(
+      `UPDATE bank_review_questions SET status = 'expired'
+       WHERE status = 'pending' AND asked_at < ?`,
+    )
+    .run(cutoff);
+  return ((res as { changes?: number }).changes ?? 0);
+}
+
+// Candidates for the WhatsApp ask sweep: unallocated rows where the
+// auto-categorizer either didn't pick a category (category_id IS NULL) or
+// picked one but with confidence below the auto-accept threshold (<0.9).
+// Scoped to the supplied 'YYYY-MM' list (current + previous 3). Ordered newest
+// booking_date first so the freshest ambiguity gets asked first; the caller
+// caps the result.
+export function listAskCandidates(monthKeys: string[], limit: number): BankTransactionRow[] {
+  const db = ready();
+  const conds: string[] = [
+    'unallocated = 1',
+    "((category_id IS NOT NULL AND (confidence IS NULL OR confidence < 0.9)) OR category_id IS NULL)",
+  ];
+  const params: unknown[] = [];
+  if (monthKeys.length > 0) {
+    conds.push(`(${monthKeys.map(() => 'booking_date LIKE ?').join(' OR ')})`);
+    for (const ym of monthKeys) params.push(`${ym}-%`);
+  }
+  params.push(limit);
+  return db
+    .prepare(`${TX_SELECT} WHERE ${conds.join(' AND ')} ORDER BY booking_date DESC, id DESC LIMIT ?`)
+    .all(...params) as unknown as BankTransactionRow[];
 }

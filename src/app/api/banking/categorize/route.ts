@@ -3,6 +3,7 @@ import { requireCronSecret } from '@/lib/api-auth';
 import { listBankTransactions } from '@/lib/bank-store';
 import { runCategorization } from '@/lib/categorize';
 import { runAttribution } from '@/lib/attribution';
+import { runAskReview } from '@/app/api/banking/review/ask/route';
 import { ensureBankReady } from '../_ready';
 
 // POST /api/banking/categorize — machine/cron endpoint (gated by the shared
@@ -58,6 +59,15 @@ export async function POST(req: NextRequest) {
       attributedMoves = runAttribution().length;
     } catch (err) {
       console.error('[banking] post-categorize attribution failed', err instanceof Error ? err.message : err);
+    }
+
+    // Best-effort WhatsApp ask sweep after attribution has had a chance to
+    // mark candidates unallocated. Non-fatal — a failure here never fails
+    // the categorize run.
+    try {
+      await runAskReview();
+    } catch (err) {
+      console.error('[banking] post-categorize ask sweep failed', err instanceof Error ? err.message : err);
     }
 
     return NextResponse.json({ ok: true, months: months.length, assigned, needsReview, attributedMoves });

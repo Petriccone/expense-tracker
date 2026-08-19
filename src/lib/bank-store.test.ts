@@ -34,6 +34,12 @@ import {
   addBankCategoryRule,
   listBankCategoryRules,
   removeBankCategoryRule,
+  createReviewQuestion,
+  getReviewQuestionById,
+  listPendingReviewQuestions,
+  claimReviewQuestion,
+  expireStaleReviewQuestions,
+  listAskCandidates,
   type BankTransactionInput,
 } from './bank-store';
 import { initBudgetSchema, seedBudgetIfEmpty, createNextMonth, getMonthByYM } from './budget-store';
@@ -636,5 +642,232 @@ describe('bank-store (DB-backed, real SQLite)', () => {
 
   it('addBankCategoryRule rejects a pattern that normalizes shorter than 3 chars', () => {
     expect(() => addBankCategoryRule({ pattern: 'Zz', category_name: 'Rental' })).toThrow();
+  });
+
+  // ----- wave 2e: review questions (WhatsApp ask/answer) -----
+
+  it('bank_review_questions schema is created by initBankSchema with the expected columns', () => {
+    const cols = getDb()
+      .prepare('PRAGMA table_info(bank_review_questions)')
+      .all() as Array<{ name: string; type: string; notnull: number }>;
+    const names = cols.map((c) => c.name);
+    expect(names).toEqual(
+      expect.arrayContaining([
+        'id',
+        'tx_id',
+        'tx_date',
+        'tx_description',
+        'tx_amount',
+        'asked_at',
+        'status',
+        'answered_by',
+        'answered_at',
+        'chosen_category_id',
+        'answer_text',
+      ]),
+    );
+    const statusCol = cols.find((c) => c.name === 'status')!;
+    // SQLite stores CHECK constraints outside PRAGMA table_info, but the
+    // column itself is NOT NULL with default 'pending'.
+    expect(statusCol.notnull).toBe(1);
+  });
+
+  it('createReviewQuestion: pending row is reused (no new message), answered row returns null, expired row is revived, missing row inserts', () => {
+    const base = {
+      tx_id: 'tx-rq-1',
+      tx_date: '2026-08-05',
+      tx_description: 'Tesco',
+      tx_amount: -42.5,
+    };
+
+    // 1. not-exists -> insert (sent=true)
+    const first = createReviewQuestion(base);
+    expect(first).not.toBeNull();
+    expect(first!.sent).toBe(true);
+    expect(first!.row.status).toBe('pending');
+    expect(first!.row.tx_id).toBe(base.tx_id);
+    const firstId = first!.row.id;
+
+    // 2. pending -> reuse, same id, no new message
+    const second = createReviewQuestion(base);
+    expect(second).not.toBeNull();
+    expect(second!.sent).toBe(false);
+    expect(second!.row.id).toBe(firstId);
+    expect(second!.row.status).toBe('pending');
+
+    // 3. claim it as answered -> next call returns null
+    expect(claimReviewQuestion(firstId, 'rafa', 'Shop', 'cat-shop-id')).toBe(true);
+    const third = createReviewQuestion(base);
+    expect(third).toBeNull();
+
+    // 4. force-expire then re-create -> revive with fresh asked_at, sent=true
+    //    (manipulate asked_at to be in the past so expireStaleReviewQuestions
+    //    picks it up — the row's status is still 'answered' until claim
+    //    resets it; for a clean "expired -> revive" case we need a row whose
+    //    status was set to 'expired' by the sweep.)
+    getDb()
+      .prepare("UPDATE bank_review_questions SET status = 'expired', answered_at = NULL WHERE id = ?")
+      .run(firstId);
+    const fourth = createReviewQuestion({ ...base, tx_id: 'tx-rq-1', tx_date: '2026-08-05' });
+    expect(fourth).not.toBeNull();
+    expect(fourth!.sent).toBe(true);
+    expect(fourth!.row.status).toBe('pending');
+    expect(fourth!.row.id).toBe(firstId);
+    expect(new Date(fourth!.row.asked_at).getTime()).toBeGreaterThanOrEqual(Date.now() - 2000);
+  });
+
+  it('claimReviewQuestion is atomic first-writer-wins — a second claimer returns false and the row keeps the first claim', () => {
+    createReviewQuestion({
+      tx_id: 'tx-rq-race',
+      tx_date: '2026-08-10',
+      tx_description: 'Netflix',
+      tx_amount: -12.99,
+    });
+    const row = listPendingReviewQuestions(100).find((r) => r.tx_id === 'tx-rq-race')!;
+
+    const first = claimReviewQuestion(row.id, 'rafa', 'Shop', 'cat-shop-id');
+    expect(first).toBe(true);
+
+    const second = claimReviewQuestion(row.id, 'rafaela', 'Other', 'cat-other-id');
+    expect(second).toBe(false);
+
+    const after = getReviewQuestionById(row.id)!;
+    expect(after.status).toBe('answered');
+    expect(after.answered_by).toBe('rafa');
+    expect(after.chosen_category_id).toBe('cat-shop-id');
+    expect(after.answer_text).toBe('Shop');
+  });
+
+  it('listPendingReviewQuestions orders by asked_at ASC and respects the limit', () => {
+    createReviewQuestion({ tx_id: 'tx-rq-ord-a', tx_date: '2026-08-01', tx_description: 'A', tx_amount: -1 });
+    // small gap so asked_at strictly increases
+    return new Promise<void>((resolve) => {
+      setTimeout(() => {
+        createReviewQuestion({ tx_id: 'tx-rq-ord-b', tx_date: '2026-08-02', tx_description: 'B', tx_amount: -2 });
+        setTimeout(() => {
+          createReviewQuestion({ tx_id: 'tx-rq-ord-c', tx_date: '2026-08-03', tx_description: 'C', tx_amount: -3 });
+          const all = listPendingReviewQuestions(100).filter((r) =>
+            ['tx-rq-ord-a', 'tx-rq-ord-b', 'tx-rq-ord-c'].includes(r.tx_id),
+          );
+          expect(all.map((r) => r.tx_id)).toEqual(['tx-rq-ord-a', 'tx-rq-ord-b', 'tx-rq-ord-c']);
+          expect(listPendingReviewQuestions(2).map((r) => r.tx_id).slice(0, 2)).toEqual(['tx-rq-ord-a', 'tx-rq-ord-b']);
+          resolve();
+        }, 5);
+      }, 5);
+    });
+  });
+
+  it('expireStaleReviewQuestions moves pending rows older than 24h to expired and leaves fresh ones alone', () => {
+    const db = getDb();
+    // Insert a stale pending row directly.
+    const stale = 'tx-rq-stale';
+    createReviewQuestion({ tx_id: stale, tx_date: '2026-07-01', tx_description: 'Old', tx_amount: -5 });
+    const oldDate = new Date(Date.now() - 25 * 60 * 60 * 1000).toISOString();
+    db.prepare('UPDATE bank_review_questions SET asked_at = ? WHERE tx_id = ?').run(oldDate, stale);
+    // Insert a fresh pending row.
+    createReviewQuestion({ tx_id: 'tx-rq-fresh', tx_date: '2026-08-10', tx_description: 'New', tx_amount: -7 });
+
+    const expired = expireStaleReviewQuestions();
+    expect(expired).toBeGreaterThanOrEqual(1);
+
+    expect(getReviewQuestionById(listPendingReviewQuestions(100).find((r) => r.tx_id === stale)!.id)).toBeUndefined(); // not pending anymore
+    const fresh = listPendingReviewQuestions(100).find((r) => r.tx_id === 'tx-rq-fresh');
+    expect(fresh).toBeDefined();
+    // The stale row is in 'expired' status — re-creating should revive it.
+    const revived = createReviewQuestion({ tx_id: stale, tx_date: '2026-07-01', tx_description: 'Old', tx_amount: -5 });
+    expect(revived).not.toBeNull();
+    expect(revived!.sent).toBe(true);
+    expect(revived!.row.status).toBe('pending');
+  });
+
+  it('listAskCandidates returns unallocated + (category_id IS NULL OR confidence < 0.9), scoped to the monthKeys, capped at limit', () => {
+    const joint = 'acc-ask-joint';
+    setJointAccountUids([joint]);
+    const ym = new Date().toISOString().slice(0, 7); // current month
+    const other = ym === '2026-08' ? '2026-09' : '2026-08';
+
+    upsertTransactions([
+      {
+        id: 'tx-ask-confident',
+        account_uid: joint,
+        amount: -10,
+        currency: 'EUR',
+        credit_debit: 'DBIT',
+        booking_date: `${ym}-05`,
+        value_date: `${ym}-05`,
+        description: 'Some Shop',
+        counterparty: null,
+        status: 'BOOK',
+      },
+      {
+        id: 'tx-ask-lowconf',
+        account_uid: joint,
+        amount: -20,
+        currency: 'EUR',
+        credit_debit: 'DBIT',
+        booking_date: `${ym}-06`,
+        value_date: `${ym}-06`,
+        description: 'Some Shop',
+        counterparty: null,
+        status: 'BOOK',
+      },
+      {
+        id: 'tx-ask-nullcat',
+        account_uid: joint,
+        amount: -30,
+        currency: 'EUR',
+        credit_debit: 'DBIT',
+        booking_date: `${ym}-07`,
+        value_date: `${ym}-07`,
+        description: 'Some Shop',
+        counterparty: null,
+        status: 'BOOK',
+      },
+      {
+        id: 'tx-ask-other-month',
+        account_uid: joint,
+        amount: -40,
+        currency: 'EUR',
+        credit_debit: 'DBIT',
+        booking_date: `${other}-05`,
+        value_date: `${other}-05`,
+        description: 'Some Shop',
+        counterparty: null,
+        status: 'BOOK',
+      },
+      {
+        id: 'tx-ask-allocated',
+        account_uid: joint,
+        amount: -50,
+        currency: 'EUR',
+        credit_debit: 'DBIT',
+        booking_date: `${ym}-08`,
+        value_date: `${ym}-08`,
+        description: 'Some Shop',
+        counterparty: null,
+        status: 'BOOK',
+      },
+    ]);
+    // Mark a few as unallocated via the dedup path so the flag sticks.
+    applyDedupDecisions([
+      { id: 'tx-ask-lowconf', counted: 0, dedup_group: null, unallocated: 1 },
+      { id: 'tx-ask-nullcat', counted: 0, dedup_group: null, unallocated: 1 },
+      { id: 'tx-ask-other-month', counted: 0, dedup_group: null, unallocated: 1 },
+      { id: 'tx-ask-allocated', counted: 1, dedup_group: null, unallocated: 0 },
+      { id: 'tx-ask-confident', counted: 0, dedup_group: null, unallocated: 1 },
+    ]);
+    setTransactionCategory('tx-ask-confident', 'cat-shop', 0.95); // >=0.9
+    setTransactionCategory('tx-ask-lowconf', 'cat-shop', 0.6); // <0.9
+
+    const candidates = listAskCandidates([ym], 10).map((r) => r.id).sort();
+    // tx-ask-confident is unallocated but confidence >=0.9 -> excluded
+    // tx-ask-lowconf is unallocated + confidence 0.6 -> included
+    // tx-ask-nullcat is unallocated + category_id NULL -> included
+    // tx-ask-other-month is outside the window -> excluded
+    // tx-ask-allocated is allocated (unallocated=0) -> excluded
+    expect(candidates).toEqual(['tx-ask-lowconf', 'tx-ask-nullcat']);
+
+    const all = listAskCandidates([ym, other], 100).map((r) => r.id).sort();
+    expect(all).toEqual(['tx-ask-lowconf', 'tx-ask-nullcat', 'tx-ask-other-month']);
   });
 });
