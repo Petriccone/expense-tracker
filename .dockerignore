@@ -14,6 +14,7 @@ coverage
 out
 dist
 build
+data
 tsconfig.tsbuildinfo
 README.md
 SPEC.md

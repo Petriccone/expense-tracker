@@ -3,7 +3,7 @@
 // Income block: salaries + extras, inline-editable, "+ renda".
 
 import { useState } from 'react';
-import { Landmark, Plus, Trash2, Wallet, X } from 'lucide-react';
+import { Landmark, PiggyBank, Plus, Trash2, Wallet, X } from 'lucide-react';
 import InlineMoneyEdit from './InlineMoneyEdit';
 import InlineTextEdit from './InlineTextEdit';
 import type { BudgetIncome, IncomeKind } from '@/types/budget';
@@ -11,12 +11,13 @@ import type { BudgetIncome, IncomeKind } from '@/types/budget';
 interface Props {
   incomes: BudgetIncome[];
   formatAmount: (n: number) => string;
+  accountBalance: number;
   onUpdateIncome: (id: string, patch: { label?: string; amount?: number }) => Promise<void>;
   onDeleteIncome: (id: string) => Promise<void>;
   onAddIncome: (input: { label: string; amount: number; kind: IncomeKind }) => Promise<void>;
 }
 
-export default function IncomeBlock({ incomes, formatAmount, onUpdateIncome, onDeleteIncome, onAddIncome }: Props) {
+export default function IncomeBlock({ incomes, formatAmount, accountBalance, onUpdateIncome, onDeleteIncome, onAddIncome }: Props) {
   const [adding, setAdding] = useState(false);
   const [label, setLabel] = useState('');
   const [amount, setAmount] = useState('');
@@ -172,6 +173,24 @@ export default function IncomeBlock({ incomes, formatAmount, onUpdateIncome, onD
           <Plus className="w-3.5 h-3.5" /> renda
         </button>
       )}
+
+      {/* Saldo em Conta — mesmo lugar da planilha (junto da Renda):
+          linha "Last Month" (saldo extra, editável no grupo Extras) +
+          o que ainda falta gastar do planejado. */}
+      <div className="divider-glow mt-4 mb-4" />
+      <div className="flex items-center gap-2">
+        <PiggyBank className="w-4 h-4" style={{ color: '#22d3ee', filter: 'drop-shadow(0 0 6px rgba(6, 182, 212, 0.4))' }} />
+        <div>
+          <p
+            className="text-xs uppercase tracking-wide"
+            style={{ color: 'var(--text-muted)' }}
+            title="Linha &quot;Last Month&quot; (saldo extra do mês passado) + o que ainda falta gastar do planejado"
+          >
+            Saldo em Conta
+          </p>
+          <p className="text-xl font-bold" style={{ color: '#22d3ee' }}>{formatAmount(accountBalance)}</p>
+        </div>
+      </div>
     </div>
   );
 }

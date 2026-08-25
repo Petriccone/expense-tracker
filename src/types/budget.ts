@@ -12,6 +12,7 @@ export interface BudgetCategory {
   name: string;
   planned: number;
   spent: number;
+  spentAdjustment?: number;
   sortOrder: number;
 }
 
@@ -42,6 +43,12 @@ export interface BudgetMonth {
   year: number;
   month: number;
   save: number;
+  // "Saldo em Conta": the sheet's carry row ("Last Month" category, typed at
+  // close) + (planejado − gasto exibido), where gasto exibido = manual +
+  // bank-attributed + adjustment and the carry row is excluded from both
+  // totals. Composed bank-aware by the API layer (account-balance.ts
+  // withAccountBalance) — budget-store's own value covers manual + adj only.
+  accountBalance: number;
   note?: string;
   categories: BudgetCategory[];
   incomes: BudgetIncome[];

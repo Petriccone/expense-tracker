@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentMonth } from '@/lib/budget-store';
+import { withAccountBalance } from '@/lib/account-balance';
 import { ensureBudgetReady } from '../_ready';
 import { budgetErrorResponse } from '../_errors';
 
@@ -16,7 +17,7 @@ export async function GET(_req: NextRequest) {
     if (!month) {
       return NextResponse.json({ error: 'no current month' }, { status: 404 });
     }
-    return NextResponse.json(month);
+    return NextResponse.json(withAccountBalance(month));
   } catch (err) {
     return budgetErrorResponse(err);
   }

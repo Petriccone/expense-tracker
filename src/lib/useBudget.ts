@@ -53,6 +53,7 @@ interface UseBudgetResult {
   months: BudgetMonthSummary[];
   settings: BudgetSettings | null;
   bankSpent: Record<string, number>;
+  bankSpentReady: boolean;
   loading: boolean;
   error: string | null;
   clearError: () => void;
@@ -65,7 +66,7 @@ interface UseBudgetResult {
   createNextMonth: () => Promise<void>;
   updateSave: (save: number) => Promise<void>;
   addCategory: (input: { group: BudgetGroup; name: string; planned: number }) => Promise<void>;
-  updateCategory: (id: string, patch: { name?: string; planned?: number; spent?: number }) => Promise<void>;
+  updateCategory: (id: string, patch: { name?: string; planned?: number; spent?: number; spentAdjustment?: number }) => Promise<void>;
   deleteCategory: (id: string) => Promise<void>;
   addIncome: (input: { label: string; amount: number; kind: IncomeKind }) => Promise<void>;
   updateIncome: (id: string, patch: { label?: string; amount?: number }) => Promise<void>;
@@ -81,6 +82,7 @@ export function useBudget(): UseBudgetResult {
   const [error, setError] = useState<string | null>(null);
   const [reloadTick, setReloadTick] = useState(0);
   const [bankSpent, setBankSpent] = useState<Record<string, number>>({});
+  const [bankSpentReady, setBankSpentReady] = useState(false);
 
   const clearError = useCallback(() => setError(null), []);
   const reload = useCallback(() => setReloadTick((n) => n + 1), []);
@@ -115,23 +117,32 @@ export function useBudget(): UseBudgetResult {
   }, [reloadTick]);
 
   // Bank-derived spend per category for the viewed month (wave 2b). Purely
-  // additive display data — defaults to {} on any error (route not yet
-  // deployed, bank not connected, etc.) so the budget page never crashes or
-  // changes behavior when there's no bank data.
+  // additive display data. A missing/failed snapshot must not be treated as
+  // zero while the user is editing a total, so Gasto editing stays disabled
+  // until the first valid response and the last valid snapshot is retained
+  // across transient failures.
   useEffect(() => {
     if (!month) {
       setBankSpent({});
+      setBankSpentReady(false);
       return;
     }
+    setBankSpentReady(false);
     let cancelled = false;
     (async () => {
       try {
         const data = await fetchJSON<Record<string, number>>(
           `/api/banking/spent?year=${month.year}&month=${month.month}`,
         );
-        if (!cancelled) setBankSpent(data ?? {});
+        if (!cancelled) {
+          setBankSpent(data ?? {});
+          setBankSpentReady(true);
+        }
       } catch {
-        if (!cancelled) setBankSpent({});
+        // Keep the last successful snapshot. The page disables Gasto editing
+        // until a fresh snapshot succeeds, avoiding a wrong correction based
+        // on a transiently empty bank result.
+        if (!cancelled) setBankSpentReady(false);
       }
     })();
     return () => {
@@ -241,7 +252,7 @@ export function useBudget(): UseBudgetResult {
   );
 
   const updateCategory = useCallback(
-    async (id: string, patch: { name?: string; planned?: number; spent?: number }) => {
+    async (id: string, patch: { name?: string; planned?: number; spent?: number; spentAdjustment?: number }) => {
       try {
         await fetchJSON(`/api/budget/categories/${encodeURIComponent(id)}`, {
           method: 'PATCH',
@@ -323,6 +334,7 @@ export function useBudget(): UseBudgetResult {
     months,
     settings,
     bankSpent,
+    bankSpentReady,
     loading,
     error,
     clearError,

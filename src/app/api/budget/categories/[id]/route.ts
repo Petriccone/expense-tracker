@@ -24,14 +24,16 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     if (typeof body !== 'object' || body === null) {
       return NextResponse.json({ error: 'invalid request body' }, { status: 400 });
     }
-    const { name, group, planned, spent } = body as Record<string, unknown>;
+    const { name, group, planned, spent, spentAdjustment } = body as Record<string, unknown>;
 
-    const category = updateCategory(id, {
+    const patch = {
       name: name as string | undefined,
       group: group as BudgetGroup | undefined,
       planned: planned as number | undefined,
       spent: spent as number | undefined,
-    });
+      spentAdjustment: spentAdjustment as number | undefined,
+    } satisfies Parameters<typeof updateCategory>[1];
+    const category = updateCategory(id, patch);
     return NextResponse.json(category);
   } catch (err) {
     return budgetErrorResponse(err);

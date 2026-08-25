@@ -11,6 +11,7 @@
 
 import crypto from 'node:crypto';
 import { getDb } from './db';
+import { computeSaldoEmConta } from './groupSpent';
 import type {
   BudgetGroup,
   IncomeKind,
@@ -106,6 +107,7 @@ export function initBudgetSchema(): void {
       name       TEXT NOT NULL,
       planned    REAL NOT NULL DEFAULT 0,
       spent      REAL NOT NULL DEFAULT 0,
+      spent_adjustment REAL NOT NULL DEFAULT 0,
       sort_order INTEGER NOT NULL DEFAULT 0
     );
     CREATE INDEX IF NOT EXISTS idx_budget_categories_month ON budget_categories(month_id);
@@ -125,6 +127,18 @@ export function initBudgetSchema(): void {
       value TEXT NOT NULL
     );
   `);
+  // 2026-08-20 note: an earlier "Saldo em Conta" build added a
+  // budget_months.extra_balance_opening column (ALTER + Aug backfill 71.16).
+  // That model was replaced within a day by the sheet-faithful one — the
+  // carry lives in the "Last Month" CATEGORY row (see computeSaldoEmConta in
+  // groupSpent.ts), not a month column. DBs that ran the interim build keep
+  // the column as an unused orphan; nothing reads or writes it.
+  const categoryCols = db
+    .prepare('PRAGMA table_info(budget_categories)')
+    .all() as Array<{ name: string }>;
+  if (!categoryCols.some((c) => c.name === 'spent_adjustment')) {
+    db.exec('ALTER TABLE budget_categories ADD COLUMN spent_adjustment REAL NOT NULL DEFAULT 0');
+  }
   _schemaReady = true;
 }
 
@@ -151,6 +165,7 @@ interface CategoryRow {
   name: string;
   planned: number;
   spent: number;
+  spent_adjustment: number;
   sort_order: number;
 }
 interface IncomeRow {
@@ -163,7 +178,7 @@ interface IncomeRow {
 }
 
 const CATEGORY_SELECT =
-  'SELECT id, month_id, "group" AS grp, name, planned, spent, sort_order FROM budget_categories';
+  'SELECT id, month_id, "group" AS grp, name, planned, spent, spent_adjustment, sort_order FROM budget_categories';
 const INCOME_SELECT =
   'SELECT id, month_id, label, amount, kind, sort_order FROM budget_incomes';
 const MONTH_SELECT =
@@ -177,6 +192,7 @@ function mapCategory(r: CategoryRow): BudgetCategory {
     name: r.name,
     planned: round2(r.planned),
     spent: round2(r.spent),
+    spentAdjustment: round2(r.spent_adjustment ?? 0),
     sortOrder: r.sort_order,
   };
 }
@@ -269,6 +285,11 @@ function hydrateMonth(db: ReturnType<typeof getDb>, m: MonthRow): BudgetMonth {
     year: m.year,
     month: m.month,
     save: round2(m.save),
+    // Manual + adjustment only — a store-level fallback. The API layer
+    // overwrites this with the bank-aware value via withAccountBalance()
+    // (account-balance.ts); budget-store can't see bank spend itself
+    // (module cycle: bank-store imports this module for getMonthByYM).
+    accountBalance: computeSaldoEmConta(categories, {}),
     note: m.note ?? undefined,
     categories,
     incomes,
@@ -349,7 +370,7 @@ function copyTemplateContents(
     .prepare(`${CATEGORY_SELECT} WHERE month_id = ? ORDER BY "group" ASC, sort_order ASC`)
     .all(templateMonthId) as unknown as CategoryRow[];
   const catStmt = db.prepare(
-    'INSERT INTO budget_categories (id, month_id, "group", name, planned, spent, sort_order) VALUES (?, ?, ?, ?, ?, 0, ?)',
+    'INSERT INTO budget_categories (id, month_id, "group", name, planned, spent, spent_adjustment, sort_order) VALUES (?, ?, ?, ?, ?, 0, 0, ?)',
   );
   for (const c of cats) {
     catStmt.run(crypto.randomUUID(), targetMonthId, c.grp, c.name, c.planned, c.sort_order);
@@ -400,6 +421,7 @@ export function createMonthFromTemplate(
   }
 
   const save = round2(opts.save ?? template.save);
+
   const newId = crypto.randomUUID();
   db.exec('BEGIN');
   try {
@@ -432,7 +454,9 @@ export function createNextMonth(): BudgetMonth {
   }
 
   // Carry-forward starts the new month at save = 0 (the running "Total Saving"
-  // is cumulative — a fresh month hasn't saved yet).
+  // is cumulative — a fresh month hasn't saved yet). The "Last Month" saldo
+  // carry row is copied like any category with spent reset to 0 — the couple
+  // types the closing saldo into it at month close, exactly like the sheet.
   return createMonthFromTemplate(latest.id, year, month, { save: 0 });
 }
 
@@ -457,7 +481,9 @@ export function updateMonth(
     note = patch.note;
   }
 
-  db.prepare('UPDATE budget_months SET save = ?, note = ? WHERE id = ?').run(save, note, id);
+  db.prepare(
+    'UPDATE budget_months SET save = ?, note = ? WHERE id = ?',
+  ).run(save, note, id);
   const m = db.prepare(`${MONTH_SELECT} WHERE id = ?`).get(id) as MonthRow;
   return hydrateMonth(db, m);
 }
@@ -496,7 +522,13 @@ export function addCategory(
 
 export function updateCategory(
   id: string,
-  patch: { name?: string; group?: BudgetGroup; planned?: number; spent?: number },
+  patch: {
+    name?: string;
+    group?: BudgetGroup;
+    planned?: number;
+    spent?: number;
+    spentAdjustment?: number;
+  },
 ): BudgetCategory {
   const db = ready();
   const existing = db.prepare(`${CATEGORY_SELECT} WHERE id = ?`).get(id) as
@@ -525,10 +557,15 @@ export function updateCategory(
     assertFiniteNonNegative(patch.spent, 'spent');
     spent = patch.spent;
   }
+  let spentAdjustment = existing.spent_adjustment ?? 0;
+  if (patch.spentAdjustment !== undefined) {
+    assertFinite(patch.spentAdjustment, 'spentAdjustment');
+    spentAdjustment = round2(patch.spentAdjustment);
+  }
 
   db.prepare(
-    'UPDATE budget_categories SET name = ?, "group" = ?, planned = ?, spent = ? WHERE id = ?',
-  ).run(name, group, planned, spent, id);
+    'UPDATE budget_categories SET name = ?, "group" = ?, planned = ?, spent = ?, spent_adjustment = ? WHERE id = ?',
+  ).run(name, group, planned, spent, spentAdjustment, id);
 
   const r = db.prepare(`${CATEGORY_SELECT} WHERE id = ?`).get(id) as CategoryRow;
   return mapCategory(r);
@@ -692,7 +729,7 @@ const SEED_VARIABLE: Array<[string, number]> = [
   ['Car Wash', 0.0],
   ['MacBook', 92.23],
 ];
-const SEED_EXTRA: Array<[string, number]> = [['BCN', 14.2]];
+const SEED_EXTRA: Array<[string, number]> = [['BCN', 14.2], ['Last Month', 0.0]];
 const SEED_INCOMES: Array<[string, number, IncomeKind]> = [
   ['Rafael', 2942.31, 'salary'],
   ['Rafaela', 2855.83, 'salary'],

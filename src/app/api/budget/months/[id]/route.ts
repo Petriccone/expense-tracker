@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getMonth, updateMonth } from '@/lib/budget-store';
+import { withAccountBalance } from '@/lib/account-balance';
 import { ensureBudgetReady } from '../../_ready';
 import { budgetErrorResponse } from '../../_errors';
 
@@ -17,7 +18,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     if (!month) {
       return NextResponse.json({ error: `month ${id} not found` }, { status: 404 });
     }
-    return NextResponse.json(month);
+    return NextResponse.json(withAccountBalance(month));
   } catch (err) {
     return budgetErrorResponse(err);
   }
@@ -48,7 +49,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       save: save as number | undefined,
       note: note as string | null | undefined,
     });
-    return NextResponse.json(month);
+    return NextResponse.json(withAccountBalance(month));
   } catch (err) {
     return budgetErrorResponse(err);
   }

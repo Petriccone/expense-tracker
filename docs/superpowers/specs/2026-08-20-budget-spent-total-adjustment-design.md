@@ -31,6 +31,7 @@ portion.
 | PATCH keeps `spent` as the manual field and accepts `spentAdjustment` separately. | `[derived]` preserves the existing API and WhatsApp `set_spent` contract |
 | Raw bank transactions are not deleted, reclassified, or mutated by budget editing. | `[derived]` user requested correction in `/budget`; audit/reclassification remains available in `/banco` |
 | The breakdown shows manual, bank, and adjustment amounts when bank data or an adjustment exists. | `[derived]` makes a corrected total explainable |
+| Gasto editing stays disabled until a valid bank-spend snapshot is loaded for the viewed month; a transient failure retains the last valid snapshot. | `[derived]` prevents calculating a correction from an accidental empty bank response |
 | A database migration adds `spent_adjustment REAL NOT NULL DEFAULT 0` to existing `budget_categories`. | `[derived]` production uses a persistent SQLite volume and must upgrade without reseeding or data loss |
 
 ## Design
@@ -67,7 +68,9 @@ example, entering `0` sends `spentAdjustment: -123.96` and the next render
 shows `€0.00` while retaining `banco €123.96` in the breakdown.
 
 The group header uses the same total formula as each row. Planned, income, and
-month-save editors keep their existing behavior.
+month-save editors keep their existing behavior. The bank-spend fetch exposes a
+readiness flag; only the Gasto editor uses it, so a transient bank failure
+cannot turn an empty response into a saved correction.
 
 ## Error and edge behavior
 
@@ -76,6 +79,8 @@ month-save editors keep their existing behavior.
   computed bank amount.
 - A later bank-sync change is reflected through the same formula; the stored
   adjustment remains explicit until the user edits the total again.
+- A bank-spend request that is still loading or fails leaves Gasto editing
+  disabled and retains the last successful bank snapshot.
 - A failed PATCH leaves the editor open and surfaces the existing page-level
   error banner.
 

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { listMonths, createNextMonth } from '@/lib/budget-store';
+import { withAccountBalance } from '@/lib/account-balance';
 import { ensureBudgetReady } from '../_ready';
 import { budgetErrorResponse } from '../_errors';
 
@@ -32,8 +33,10 @@ export async function POST(req: NextRequest) {
     }
 
     ensureBudgetReady();
+    // The "Last Month" saldo carry row is copied with spent reset to 0 — the
+    // couple types the closing saldo into it at month close, like the sheet.
     const month = createNextMonth();
-    return NextResponse.json(month);
+    return NextResponse.json(withAccountBalance(month));
   } catch (err) {
     return budgetErrorResponse(err);
   }

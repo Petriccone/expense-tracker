@@ -15,7 +15,12 @@ import { Plus, Trash2, X } from 'lucide-react';
 import InlineMoneyEdit from './InlineMoneyEdit';
 import InlineTextEdit from './InlineTextEdit';
 import { categoryVisual } from '@/lib/categoryIcons';
-import { groupSpentSum } from '@/lib/groupSpent';
+import {
+  categorySpentAdjustment,
+  categorySpentTotal,
+  groupSpentSum,
+  spentAdjustmentForTotal,
+} from '@/lib/groupSpent';
 import type { BudgetCategory, BudgetGroup } from '@/types/budget';
 
 interface Props {
@@ -23,11 +28,12 @@ interface Props {
   label: string;
   categories: BudgetCategory[];
   // Bank-derived spend per category id for the viewed month (wave 2b),
-  // {} when the bank isn't connected — gasto/restante fall back to the
-  // manual-only values exactly like before.
+  // {} when the bank isn't connected — gasto/restante use the manual amount
+  // plus any persisted adjustment.
   bankSpent: Record<string, number>;
+  bankSpentReady: boolean;
   formatAmount: (n: number) => string;
-  onUpdateCategory: (id: string, patch: { name?: string; planned?: number; spent?: number }) => Promise<void>;
+  onUpdateCategory: (id: string, patch: { name?: string; planned?: number; spent?: number; spentAdjustment?: number }) => Promise<void>;
   onDeleteCategory: (id: string) => Promise<void>;
   onAddCategory: (input: { group: BudgetGroup; name: string; planned: number }) => Promise<void>;
 }
@@ -42,6 +48,7 @@ function CategoryRow({
   category,
   group,
   bankSpent,
+  bankSpentReady,
   formatAmount,
   onUpdateCategory,
   onDeleteCategory,
@@ -49,11 +56,13 @@ function CategoryRow({
   category: BudgetCategory;
   group: BudgetGroup;
   bankSpent: number;
+  bankSpentReady: boolean;
   formatAmount: (n: number) => string;
   onUpdateCategory: Props['onUpdateCategory'];
   onDeleteCategory: Props['onDeleteCategory'];
 }) {
-  const gasto = category.spent + bankSpent;
+  const gasto = categorySpentTotal(category, bankSpent);
+  const spentAdjustment = categorySpentAdjustment(category);
   const remaining = category.planned - gasto;
   const pct = category.planned > 0 ? (gasto / category.planned) * 100 : gasto > 0 ? 100 : 0;
   const barColor = progressColor(pct);
@@ -130,9 +139,11 @@ function CategoryRow({
         <div className="flex items-center gap-1.5">
           <span style={{ color: 'var(--text-muted)' }}>Gasto</span>
           <InlineMoneyEdit
-            value={category.spent}
-            displayValue={gasto}
-            onSave={(spent) => onUpdateCategory(category.id, { spent })}
+            value={gasto}
+            disabled={!bankSpentReady}
+            onSave={(desiredTotal) => onUpdateCategory(category.id, {
+              spentAdjustment: spentAdjustmentForTotal(desiredTotal, category.spent, bankSpent),
+            })}
             formatAmount={formatAmount}
             valueClassName="text-xs"
             valueStyle={{ color: gasto > category.planned ? '#f87171' : 'var(--text-secondary)' }}
@@ -140,10 +151,10 @@ function CategoryRow({
         </div>
       </div>
 
-      {/* Line 4: manual/banco breakdown, only when the bank contributed */}
-      {bankSpent > 0 && (
+      {/* Line 4: manual/banco/ajuste breakdown when computed or corrected spend exists */}
+      {(bankSpent !== 0 || spentAdjustment !== 0) && (
         <p className="mt-1 text-[11px]" style={{ color: 'var(--text-muted)' }}>
-          manual {formatAmount(category.spent)} · banco {formatAmount(bankSpent)}
+          manual {formatAmount(category.spent)} · banco {formatAmount(bankSpent)} · ajuste {formatAmount(spentAdjustment)}
         </p>
       )}
     </div>
@@ -155,6 +166,7 @@ export default function CategoryGroupCard({
   label,
   categories,
   bankSpent,
+  bankSpentReady,
   formatAmount,
   onUpdateCategory,
   onDeleteCategory,
@@ -165,8 +177,8 @@ export default function CategoryGroupCard({
   const [newPlanned, setNewPlanned] = useState('');
 
   const plannedSum = categories.reduce((s, c) => s + c.planned, 0);
-  // Must match each row's own gasto = spent + bankSpent, or the card header
-  // total silently disagrees with what the rows show (wave 2b fix).
+  // Must match each row's own displayed gasto, or the card header silently
+  // disagrees with what the rows show.
   const spentSum = groupSpentSum(categories, bankSpent);
 
   const submitAdd = async () => {
@@ -202,6 +214,7 @@ export default function CategoryGroupCard({
               category={cat}
               group={group}
               bankSpent={bankSpent[cat.id] ?? 0}
+              bankSpentReady={bankSpentReady}
               formatAmount={formatAmount}
               onUpdateCategory={onUpdateCategory}
               onDeleteCategory={onDeleteCategory}
