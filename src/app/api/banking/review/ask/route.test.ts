@@ -11,7 +11,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { NextRequest } from 'next/server';
 import { POST } from './route';
-import { initBudgetSchema, seedBudgetIfEmpty, createNextMonth, getCurrentMonth } from '@/lib/budget-store';
+import { initBudgetSchema, seedBudgetIfEmpty, createNextMonth, getCurrentMonth, getMonthByYM } from '@/lib/budget-store';
 import {
   initBankSchema,
   upsertTransactions,
@@ -74,6 +74,10 @@ describe('POST /api/banking/review/ask — DB-backed, mocked bridges', () => {
       const m = getCurrentMonth()!;
       return `${m.year}-${String(m.month).padStart(2, '0')}`;
     })();
+    // seedBudgetIfEmpty mints per-month UUID category ids — use the real one so
+    // setTransactionCategory's guard accepts it.
+    const month = getMonthByYM(Number(ym.slice(0, 4)), Number(ym.slice(5, 7)));
+    const shopCatId = month?.categories.find((c) => c.name === 'Shop')?.id ?? 'cat-shop';
     upsertTransactions([
       {
         id: 'tx-conf',
@@ -83,7 +87,7 @@ describe('POST /api/banking/review/ask — DB-backed, mocked bridges', () => {
         credit_debit: 'DBIT',
         booking_date: `${ym}-05`,
         value_date: `${ym}-05`,
-        description: 'Some Shop',
+        description: 'Some Shop To RAFAEL DOS SANTOS',
         counterparty: null,
         status: 'BOOK',
       },
@@ -95,7 +99,7 @@ describe('POST /api/banking/review/ask — DB-backed, mocked bridges', () => {
         credit_debit: 'DBIT',
         booking_date: `${ym}-06`,
         value_date: `${ym}-06`,
-        description: 'Some Shop',
+        description: 'Some Shop To RAFAEL DOS SANTOS',
         counterparty: null,
         status: 'BOOK',
       },
@@ -107,7 +111,7 @@ describe('POST /api/banking/review/ask — DB-backed, mocked bridges', () => {
         credit_debit: 'DBIT',
         booking_date: `${ym}-07`,
         value_date: `${ym}-07`,
-        description: 'Some Shop',
+        description: 'Some Shop To RAFAEL DOS SANTOS',
         counterparty: null,
         status: 'BOOK',
       },
@@ -117,8 +121,8 @@ describe('POST /api/banking/review/ask — DB-backed, mocked bridges', () => {
       { id: 'tx-low', counted: 0, dedup_group: null, unallocated: 1 },
       { id: 'tx-null', counted: 0, dedup_group: null, unallocated: 1 },
     ]);
-    setTransactionCategory('tx-conf', 'cat-shop', 0.95);
-    setTransactionCategory('tx-low', 'cat-shop', 0.6);
+    setTransactionCategory('tx-conf', shopCatId, 0.95);
+    setTransactionCategory('tx-low', shopCatId, 0.6);
 
     const res = await postAsk();
     expect(res.status).toBe(200);
@@ -150,7 +154,7 @@ describe('POST /api/banking/review/ask — DB-backed, mocked bridges', () => {
         credit_debit: 'DBIT',
         booking_date: `${ym}-${dd}`,
         value_date: `${ym}-${dd}`,
-        description: 'Some Shop',
+        description: 'Label To Friend',
         counterparty: null,
         status: 'BOOK',
       });
@@ -180,7 +184,7 @@ describe('POST /api/banking/review/ask — DB-backed, mocked bridges', () => {
         credit_debit: 'DBIT',
         booking_date: `${ym}-03`,
         value_date: `${ym}-03`,
-        description: 'Tesco Stores',
+        description: 'Rent Top Up To LANDLORD',
         counterparty: null,
         status: 'BOOK',
       },
@@ -195,11 +199,11 @@ describe('POST /api/banking/review/ask — DB-backed, mocked bridges', () => {
     const questionId = getReviewQuestionById(listPendingReviewQuestions(1)[0].id)!.id;
 
     for (const m of messages) {
-      expect(m).toContain(`(id: ${questionId})`);
-      expect(m).toContain('Tesco Stores');
+      expect(m).toContain(`ref: ${questionId.slice(0, 8)}`);
+      expect(m).toContain('Rent Top Up To LANDLORD');
       expect(m).toContain('-€139.00');
-      // At least one in-scope category name from seedBudgetIfEmpty must appear.
-      expect(m).toMatch(/Categorias: .+/);
+      // Numbered options: at least one in-scope category from seedBudgetIfEmpty.
+      expect(m).toMatch(/Em qual categoria[\s\S]+1️⃣ /);
     }
   });
 
@@ -217,7 +221,7 @@ describe('POST /api/banking/review/ask — DB-backed, mocked bridges', () => {
         credit_debit: 'DBIT',
         booking_date: `${ym}-04`,
         value_date: `${ym}-04`,
-        description: 'Cafe',
+        description: 'Cafe To FRIEND',
         counterparty: null,
         status: 'BOOK',
       },
@@ -255,7 +259,7 @@ describe('POST /api/banking/review/ask — DB-backed, mocked bridges', () => {
         credit_debit: 'DBIT',
         booking_date: `${ym}-09`,
         value_date: `${ym}-09`,
-        description: 'Cafe',
+        description: 'Cafe To FRIEND',
         counterparty: null,
         status: 'BOOK',
       },
@@ -292,7 +296,7 @@ describe('POST /api/banking/review/ask — DB-backed, mocked bridges', () => {
         credit_debit: 'DBIT',
         booking_date: `${ym}-15`,
         value_date: `${ym}-15`,
-        description: 'Unmatched Vendor',
+        description: 'Unknown Transfer To SOMEONE',
         counterparty: null,
         status: 'BOOK',
       },
@@ -319,5 +323,35 @@ describe('POST /api/banking/review/ask — DB-backed, mocked bridges', () => {
 
     const pending = listPendingReviewQuestions(100);
     expect(pending.some((q) => q.tx_id === 'tx-hook')).toBe(true);
+  });
+
+  it('merchant charges are never asked — they are not budget events', async () => {
+    const ym = (() => {
+      const m = getCurrentMonth()!;
+      return `${m.year}-${String(m.month).padStart(2, '0')}`;
+    })();
+    upsertTransactions([
+      {
+        id: 'tx-tesco',
+        account_uid: 'acc-ask',
+        amount: -83.66,
+        currency: 'EUR',
+        credit_debit: 'DBIT',
+        booking_date: `${ym}-08`,
+        value_date: `${ym}-08`,
+        description: 'Tesco Stores 3644',
+        counterparty: null,
+        status: 'BOOK',
+      },
+    ]);
+    applyDedupDecisions([{ id: 'tx-tesco', counted: 0, dedup_group: null, unallocated: 1 }]);
+
+    const res = await postAsk();
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.created).toBe(0);
+    expect(body.sent).toBe(0);
+    expect(body.skipped).toBe(1);
+    expect(listPendingReviewQuestions(100)).toHaveLength(0);
   });
 });

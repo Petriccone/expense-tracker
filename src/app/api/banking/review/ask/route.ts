@@ -4,6 +4,7 @@ import {
   createReviewQuestion,
   expireStaleReviewQuestions,
   listAskCandidates,
+  listPendingReviewQuestions,
   type BankTransactionRow,
 } from '@/lib/bank-store';
 import { getMonthByYM } from '@/lib/budget-store';
@@ -70,9 +71,17 @@ async function sendToBridge(
   message: string,
 ): Promise<boolean> {
   try {
+    // The WhatsApp bridges bind loopback-only by default; the app reaches the
+    // opt-in docker0 listener, which requires the shared token.
+    const headers: Record<string, string> = {
+      'content-type': 'application/json',
+      Host: new URL(url).host,
+    };
+    const token = process.env.REVIEW_BRIDGE_TOKEN;
+    if (token) headers['x-bridge-token'] = token;
     const res = await fetch(`${url}/send`, {
       method: 'POST',
-      headers: { 'content-type': 'application/json' },
+      headers,
       body: JSON.stringify({ chatId, message }),
       signal: AbortSignal.timeout(BRIDGE_TIMEOUT_MS),
     });
@@ -95,16 +104,50 @@ async function sendToBridge(
   }
 }
 
+// Categories shown as numbered reply options. Cap keeps the message
+// glanceable — if a month genuinely has more lines than this the user can
+// still reply with the exact name.
+const ASK_OPTION_CAP = 12;
+
+export function askOptionsFor(categoryNames: string[]): string[] {
+  return categoryNames.slice(0, ASK_OPTION_CAP);
+}
+
 export function buildAskMessage(
   tx: Pick<BankTransactionRow, 'description' | 'amount' | 'booking_date'>,
   questionId: string,
   categoryNames: string[],
 ): string {
-  return (
-    `🤔 Lançamento: '${tx.description}' (${formatAmount(tx.amount)}) no dia ${formatDayMonth(tx.booking_date)}.\n` +
-    `Em qual categoria do orçamento? Responde com o nome exato. Categorias: ${categoryNames.join(', ')}\n` +
-    `(id: ${questionId})`
-  );
+  const options = askOptionsFor(categoryNames);
+  const lines: string[] = [
+    '💸 *Gasto da conjunta pra lançar*',
+    '',
+    `*${formatAmount(tx.amount)}* · ${formatDayMonth(tx.booking_date)}`,
+    `_${tx.description}_`,
+    '',
+    'Em qual categoria? Responde com o *número*:',
+  ];
+  options.forEach((name, i) => {
+    const emoji = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'][i] ?? `${i + 1}.`;
+    lines.push(`${emoji} ${name}`);
+  });
+  if (categoryNames.length > options.length) {
+    lines.push('… ou responde com o nome exato de outra categoria.');
+  }
+  lines.push('', `_ref: ${questionId.slice(0, 8)}_`);
+  return lines.join('\n');
+}
+
+// The couple's budget counts only LABELED transfers out of the joint account
+// (the label IS the budget line). Merchant card charges (Tesco, OpenAI, …)
+// are spending already-allocated money — they must never become questions.
+// A joint outflow transfer carries the ASPSP's "… To <name>" shape; merchant
+// descriptions don't. This filter keeps the ask sweep quiet by design: it
+// asks ONLY about transfers the auto-categorizer couldn't confidently place.
+const TRANSFER_DESCRIPTION_RE = /\bto\s+\S/i;
+
+export function isAskableTransfer(tx: Pick<BankTransactionRow, 'description' | 'amount'>): boolean {
+  return tx.amount < 0 && TRANSFER_DESCRIPTION_RE.test(tx.description);
 }
 
 export async function runAskReview(): Promise<AskReviewCounters> {
@@ -123,11 +166,18 @@ export async function runAskReview(): Promise<AskReviewCounters> {
     return counters;
   }
 
-  const categoryNames = Array.from(
-    new Set(budgetMonths.flatMap((m) => m.categories.map((c) => c.name))),
-  ).sort();
+  const categoriesByYm = new Map(budgetMonths.map((m) => [`${m.year}-${String(m.month).padStart(2, '0')}`, m.categories.map((c) => c.name).sort()]));
 
-  const candidates = listAskCandidates(monthKeys, ASK_CAP);
+  const candidates = listAskCandidates(monthKeys, ASK_CAP).filter((tx) => {
+    if (!isAskableTransfer(tx)) {
+      // Merchant charge / inflow / unlabeled noise: not a budget event. Skip
+      // WITHOUT creating a question row so it can be asked later if it
+      // somehow becomes relevant — but mostly it just stays out of the way.
+      counters.skipped++;
+      return false;
+    }
+    return true;
+  });
   if (candidates.length === 0) {
     return counters;
   }
@@ -152,7 +202,9 @@ export async function runAskReview(): Promise<AskReviewCounters> {
       continue;
     }
     counters.created++;
-    const message = buildAskMessage(tx, result.row.id, categoryNames);
+    const ym = (tx.booking_date ?? '').slice(0, 7);
+    const monthCategoryNames = categoriesByYm.get(ym) ?? [];
+    const message = buildAskMessage(tx, result.row.id, monthCategoryNames);
     const targets: Array<{ url: string; chatId: string }> = [
       { url: rafaUrl, chatId: RAFA_CHAT_ID },
       { url: rafaelaUrl, chatId: RAFAELA_CHAT_ID },
@@ -192,6 +244,36 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function GET(_req: NextRequest) {
-  return NextResponse.json({ ok: false, error: 'method_not_allowed' }, { status: 405 });
+// GET /api/banking/review/ask — list pending questions (x-cron-secret).
+// The agent reads this when someone replies to an ask message on WhatsApp:
+// it maps the reply (option number or category name) to the question id and
+// the month's category ids, then calls POST /api/banking/review/answer.
+export async function GET(req: NextRequest) {
+  const denied = requireCronSecret(req);
+  if (denied) return denied;
+
+  try {
+    ensureBankReady();
+    const pending = listPendingReviewQuestions(50);
+    const enriched = pending.map((q) => {
+      const ym = (q.tx_date ?? '').slice(0, 7);
+      const [y, m] = ym.split('-').map(Number);
+      const month = Number.isFinite(y) && Number.isFinite(m) ? getMonthByYM(y, m) : null;
+      return {
+        id: q.id,
+        ref: q.id.slice(0, 8),
+        asked_at: q.asked_at,
+        tx: {
+          description: q.tx_description,
+          amount: q.tx_amount,
+          date: q.tx_date,
+        },
+        options: askOptionsFor((month?.categories ?? []).map((c) => c.name).sort()),
+      };
+    });
+    return NextResponse.json({ ok: true, count: enriched.length, questions: enriched });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'unknown_error';
+    return NextResponse.json({ ok: false, error: msg }, { status: 500 });
+  }
 }
