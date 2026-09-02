@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getMonthByYM } from '@/lib/budget-store';
+import { withAccountBalance } from '@/lib/account-balance';
 import { ensureBudgetReady } from '../_ready';
 import { budgetErrorResponse } from '../_errors';
 
@@ -34,7 +35,7 @@ export async function GET(req: NextRequest) {
         { status: 404 },
       );
     }
-    return NextResponse.json(found);
+    return NextResponse.json(withAccountBalance(found));
   } catch (err) {
     return budgetErrorResponse(err);
   }

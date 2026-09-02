@@ -8,10 +8,10 @@ import { Check, Edit2, X } from 'lucide-react';
 
 interface InlineMoneyEditProps {
   value: number;
-  // Optional read-only override for the closed (non-editing) state — e.g.
-  // showing a manual+bank combined total while still editing/saving just the
-  // manual `value`. Defaults to `value` when omitted.
+  // Optional read-only display override kept for legacy callers. The budget
+  // spent editor passes the displayed total as `value` for both states.
   displayValue?: number;
+  disabled?: boolean;
   onSave: (value: number) => Promise<void> | void;
   formatAmount: (n: number) => string;
   valueClassName?: string;
@@ -21,6 +21,7 @@ interface InlineMoneyEditProps {
 export default function InlineMoneyEdit({
   value,
   displayValue,
+  disabled = false,
   onSave,
   formatAmount,
   valueClassName,
@@ -105,8 +106,10 @@ export default function InlineMoneyEdit({
     <button
       type="button"
       onClick={startEdit}
+      disabled={disabled}
+      title={disabled ? 'Aguardando os dados bancários' : undefined}
       className={`group/edit inline-flex items-center gap-1 ${valueClassName ?? ''}`}
-      style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, ...valueStyle }}
+      style={{ background: 'transparent', border: 'none', cursor: disabled ? 'not-allowed' : 'pointer', padding: 0, opacity: disabled ? 0.6 : undefined, ...valueStyle }}
     >
       <span>{formatAmount(displayValue ?? value)}</span>
       <Edit2

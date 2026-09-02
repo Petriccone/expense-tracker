@@ -738,23 +738,21 @@ describe('bank-store (DB-backed, real SQLite)', () => {
     expect(after.answer_text).toBe('Shop');
   });
 
-  it('listPendingReviewQuestions orders by asked_at ASC and respects the limit', () => {
+  it('listPendingReviewQuestions orders by asked_at ASC and respects the limit', async () => {
+    // Isolate from earlier tests' leftover pending rows so the limit assert
+    // sees exactly the three rows this test creates.
+    getDb().exec('DELETE FROM bank_review_questions');
     createReviewQuestion({ tx_id: 'tx-rq-ord-a', tx_date: '2026-08-01', tx_description: 'A', tx_amount: -1 });
     // small gap so asked_at strictly increases
-    return new Promise<void>((resolve) => {
-      setTimeout(() => {
-        createReviewQuestion({ tx_id: 'tx-rq-ord-b', tx_date: '2026-08-02', tx_description: 'B', tx_amount: -2 });
-        setTimeout(() => {
-          createReviewQuestion({ tx_id: 'tx-rq-ord-c', tx_date: '2026-08-03', tx_description: 'C', tx_amount: -3 });
-          const all = listPendingReviewQuestions(100).filter((r) =>
-            ['tx-rq-ord-a', 'tx-rq-ord-b', 'tx-rq-ord-c'].includes(r.tx_id),
-          );
-          expect(all.map((r) => r.tx_id)).toEqual(['tx-rq-ord-a', 'tx-rq-ord-b', 'tx-rq-ord-c']);
-          expect(listPendingReviewQuestions(2).map((r) => r.tx_id).slice(0, 2)).toEqual(['tx-rq-ord-a', 'tx-rq-ord-b']);
-          resolve();
-        }, 5);
-      }, 5);
-    });
+    await new Promise((r) => setTimeout(r, 5));
+    createReviewQuestion({ tx_id: 'tx-rq-ord-b', tx_date: '2026-08-02', tx_description: 'B', tx_amount: -2 });
+    await new Promise((r) => setTimeout(r, 5));
+    createReviewQuestion({ tx_id: 'tx-rq-ord-c', tx_date: '2026-08-03', tx_description: 'C', tx_amount: -3 });
+    const all = listPendingReviewQuestions(100).filter((r) =>
+      ['tx-rq-ord-a', 'tx-rq-ord-b', 'tx-rq-ord-c'].includes(r.tx_id),
+    );
+    expect(all.map((r) => r.tx_id)).toEqual(['tx-rq-ord-a', 'tx-rq-ord-b', 'tx-rq-ord-c']);
+    expect(listPendingReviewQuestions(2).map((r) => r.tx_id)).toEqual(['tx-rq-ord-a', 'tx-rq-ord-b']);
   });
 
   it('expireStaleReviewQuestions moves pending rows older than 24h to expired and leaves fresh ones alone', () => {
@@ -767,10 +765,15 @@ describe('bank-store (DB-backed, real SQLite)', () => {
     // Insert a fresh pending row.
     createReviewQuestion({ tx_id: 'tx-rq-fresh', tx_date: '2026-08-10', tx_description: 'New', tx_amount: -7 });
 
+    const staleRow = listPendingReviewQuestions(100).find((r) => r.tx_id === stale)!;
+    const staleId = staleRow.id;
+
     const expired = expireStaleReviewQuestions();
     expect(expired).toBeGreaterThanOrEqual(1);
 
-    expect(getReviewQuestionById(listPendingReviewQuestions(100).find((r) => r.tx_id === stale)!.id)).toBeUndefined(); // not pending anymore
+    // The stale row left the pending list (now 'expired').
+    expect(getReviewQuestionById(staleId)!.status).toBe('expired');
+    expect(listPendingReviewQuestions(100).find((r) => r.tx_id === stale)).toBeUndefined();
     const fresh = listPendingReviewQuestions(100).find((r) => r.tx_id === 'tx-rq-fresh');
     expect(fresh).toBeDefined();
     // The stale row is in 'expired' status — re-creating should revive it.
@@ -781,10 +784,17 @@ describe('bank-store (DB-backed, real SQLite)', () => {
   });
 
   it('listAskCandidates returns unallocated + (category_id IS NULL OR confidence < 0.9), scoped to the monthKeys, capped at limit', () => {
+    // Isolate: earlier tests leave unallocated rows (e.g. tx-stale-cat) booked
+    // in the current month that would legitimately show up as candidates.
+    getDb().exec('DELETE FROM bank_transactions');
     const joint = 'acc-ask-joint';
     setJointAccountUids([joint]);
     const ym = new Date().toISOString().slice(0, 7); // current month
     const other = ym === '2026-08' ? '2026-09' : '2026-08';
+    // Earlier tests seed Aug/2026 with per-month UUID category ids — use a real
+    // id when the current month exists so setTransactionCategory's guard passes.
+    const month = getMonthByYM(Number(ym.slice(0, 4)), Number(ym.slice(5, 7)));
+    const shopCatId = month?.categories.find((c) => c.name === 'Shop')?.id ?? 'cat-shop';
 
     upsertTransactions([
       {
@@ -856,8 +866,8 @@ describe('bank-store (DB-backed, real SQLite)', () => {
       { id: 'tx-ask-allocated', counted: 1, dedup_group: null, unallocated: 0 },
       { id: 'tx-ask-confident', counted: 0, dedup_group: null, unallocated: 1 },
     ]);
-    setTransactionCategory('tx-ask-confident', 'cat-shop', 0.95); // >=0.9
-    setTransactionCategory('tx-ask-lowconf', 'cat-shop', 0.6); // <0.9
+    setTransactionCategory('tx-ask-confident', shopCatId, 0.95); // >=0.9
+    setTransactionCategory('tx-ask-lowconf', shopCatId, 0.6); // <0.9
 
     const candidates = listAskCandidates([ym], 10).map((r) => r.id).sort();
     // tx-ask-confident is unallocated but confidence >=0.9 -> excluded

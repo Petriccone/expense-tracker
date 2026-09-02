@@ -71,8 +71,13 @@ describe('POST /api/banking/review/answer (DB-backed, real SQLite)', () => {
         credit_debit: 'DBIT',
         booking_date: opts.txBookingDate,
         value_date: opts.txBookingDate,
-        description: 'Tesco',
-        counterparty: null,
+        // A LABELED INTERNAL transfer ("Shop To Rafael" + the counterparty's full
+        // holder name) — the joint-only model only counts a categorized row as
+        // spend when it is internal (or rule-matched). An external charge like
+        // "Tesco" never counts, so the post-claim attribution re-run would zero
+        // it out and bankSpentByCategory would not reflect the assign.
+        description: 'Shop To Rafael',
+        counterparty: 'Rafael Petriccone',
         status: 'BOOK',
       },
     ]);
@@ -80,7 +85,7 @@ describe('POST /api/banking/review/answer (DB-backed, real SQLite)', () => {
     const r = createReviewQuestion({
       tx_id: txId,
       tx_date: opts.txBookingDate,
-      tx_description: 'Tesco',
+      tx_description: 'Shop To Rafael',
       tx_amount: -42.0,
     });
     if (!r) throw new Error('seed: could not create pending question');

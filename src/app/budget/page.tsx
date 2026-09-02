@@ -25,6 +25,7 @@ export default function BudgetPage() {
     month,
     settings,
     bankSpent,
+    bankSpentReady,
     loading,
     error,
     clearError,
@@ -138,6 +139,7 @@ export default function BudgetPage() {
             label={label}
             categories={categoriesByGroup(key)}
             bankSpent={bankSpent}
+            bankSpentReady={bankSpentReady}
             formatAmount={formatAmount}
             onUpdateCategory={updateCategory}
             onDeleteCategory={deleteCategory}
@@ -150,6 +152,7 @@ export default function BudgetPage() {
       <IncomeBlock
         incomes={month.incomes}
         formatAmount={formatAmount}
+        accountBalance={month.accountBalance}
         onUpdateIncome={updateIncome}
         onDeleteIncome={deleteIncome}
         onAddIncome={addIncome}
