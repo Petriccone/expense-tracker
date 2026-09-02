@@ -152,6 +152,14 @@ export function isAskableTransfer(tx: Pick<BankTransactionRow, 'description' | '
 
 export async function runAskReview(): Promise<AskReviewCounters> {
   const counters: AskReviewCounters = { created: 0, sent: 0, skipped: 0, failures: 0, expired: 0 };
+
+  // Kill switch: REVIEW_ASK_ENABLED=false disables the whole WhatsApp ask
+  // sweep (both this route and the post-categorize hook) without undeploying
+  // anything. Pending question rows are untouched — replies still resolve.
+  if (process.env.REVIEW_ASK_ENABLED === 'false') {
+    return counters;
+  }
+
   counters.expired = expireStaleReviewQuestions();
 
   const monthKeys = getMonthKeys();
